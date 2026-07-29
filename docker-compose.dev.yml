@@ -1,0 +1,21 @@
+services:
+  db:
+    image: imresamu/postgis:17-3.5
+    container_name: titula-rr-db-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cardoso
+      POSTGRES_PASSWORD: iteraima
+      POSTGRES_DB: titularr
+    ports:
+      - '5432:5432'
+    volumes:
+      - titula-rr-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cardoso']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  titula-rr-db-data:

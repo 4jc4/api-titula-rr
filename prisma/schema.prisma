@@ -1,0 +1,117 @@
+// =============================================================================
+// TITULA RR — Schema Prisma: módulo de Autenticação
+// -----------------------------------------------------------------------------
+// Banco: PostgreSQL + PostGIS (schema limpo, sem introspecção do legado).
+// Convenção: domínio em português (Papel), infra técnica em inglês.
+//
+// MODELO DE AUTENTICAÇÃO
+//   - Identidade e papéis vêm do Active Directory (login por sAMAccountName).
+//   - A senha de usuário NUNCA é armazenada aqui (bind LDAP valida no AD).
+//   - Exceção: contas LOCAL de emergência (break-glass), com hash argon2,
+//     usadas apenas quando o controlador de domínio (DC) está fora do ar.
+//     Invariante (CHECK no banco, via migração manual — ver passo no guia):
+//       (origem = 'LOCAL') = ("passwordHash" IS NOT NULL)
+//     Contas LOCAL não passam pela reverificação de AD.
+//
+// SESSÃO OPACA (única credencial — não há JWT nem refresh token)
+//   No login: gera-se token aleatório de 256 bits (randomBytes), grava-se
+//   apenas SHA-256(token) como Session.id e devolve-se o token em cookie
+//   httpOnly + Secure + SameSite=Strict. A cada request, o guard busca a
+//   Session pelo hash: existir, não expirada e não revogada = autenticado.
+//   Revogação vale IMEDIATAMENTE (a validação é sempre contra o banco —
+//   não existe janela de access token).
+//
+// PREMISSAS DE SEGURANÇA (números que definem o modelo)
+//   - IDLE_TTL (ex.: 8h): janela deslizante de inatividade. O guard renova
+//     expiresAt quando restar menos que RENEW_THRESHOLD (ex.: 50%) do TTL,
+//     para não escrever no banco a cada request.
+//   - ABSOLUTE_TTL (ex.: 7 dias): teto desde o login (absoluteExpiresAt);
+//     nunca renovado — nenhuma sessão vive para sempre.
+//   - AD_RECHECK_INTERVAL (ex.: 15 min): no guard, se (now - adVerifiedAt)
+//     exceder o intervalo, reverifica no AD se a conta segue ativa e
+//     re-sincroniza papéis.
+//   - AD_FAIL_OPEN_TTL (ex.: 4h): se o DC estiver fora na reverificação,
+//     a conta segue válida enquanto (now - adVerifiedAt) < teto; depois,
+//     nega e alarma. Sessões ativas sobrevivem à queda do DC até o teto —
+//     degradação graciosa.
+//
+//   Revogação é SOFT (revokedAt + motivo) para auditoria. Job agendado
+//   (@nestjs/schedule) apaga sessões expiradas/revogadas antigas — o índice
+//   em expiresAt existe para isso.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -- Papéis (domínio) ---------------------------------------------------------
+// Fonte do union type `Papel` da matriz de permissões em código
+// (Record<Papel, Permissao[]> com `satisfies` — o banco sabe QUEM tem qual
+// papel; o que cada papel PODE fica no código).
+// Grupos AD "TITULA_<PAPEL>" mapeiam para estes códigos. Papéis são
+// mutuamente exclusivos por regra de negócio (1 por pessoa); o array no User
+// é folga estrutural — múltiplos grupos no AD geram warn, não bloqueio.
+enum Papel {
+  atendimento
+  financeiro
+  titulacao
+  informatica
+  planejamento
+  governanca
+  presidencia
+  colaborador
+  gestor
+  administrador
+}
+
+enum OrigemConta {
+  AD    // conta do Active Directory (o caso normal)
+  LOCAL // conta local de emergência (break-glass) — nunca vem do AD
+}
+
+enum MotivoRevogacao {
+  logout
+  admin
+  conta_desativada
+}
+
+model User {
+  id           String      @id @default(uuid(7))
+  username     String      @unique // sAMAccountName do AD — âncora da conta
+  name         String // displayName, re-sincronizado a cada login
+  email        String? // mail do AD, pode estar vazio
+  cpf          String?     @unique // employeeID do AD (quando preenchido) — auditoria legal + vínculo com e-CPF (ICP-Brasil). Nulo em contas LOCAL. Dado sensível (LGPD): não expor em log/API sem necessidade.
+  papeis       Papel[] // sincronizado dos grupos TITULA_* no login e na reverificação
+  origem       OrigemConta @default(AD)
+  passwordHash String? // SÓ para origem LOCAL (argon2); AD = sempre null
+  adVerifiedAt DateTime? // última verificação bem-sucedida no AD — relógio do recheck e do fail-open
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id                String           @id // SHA-256 do token opaco — o token em si nunca é persistido
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime         @default(now())
+  expiresAt         DateTime // janela deslizante — renovada pelo guard (IDLE_TTL)
+  absoluteExpiresAt DateTime // teto desde o login — nunca renovado
+  revokedAt         DateTime? // logout, admin ou conta desativada
+  motivo            MotivoRevogacao? // por que foi revogada (auditoria)
+  ip                String?
+  userAgent         String?
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
