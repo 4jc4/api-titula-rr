@@ -87,10 +87,11 @@ export class SessionService {
   async revokeAllForUser(
     userId: string,
     motivo: MotivoRevogacao,
-  ): Promise<void> {
-    await this.prisma.session.updateMany({
+  ): Promise<number> {
+    const result = await this.prisma.session.updateMany({
       where: { userId, revokedAt: null },
       data: { revokedAt: new Date(), motivo },
     });
+    return result.count;
   }
 }
