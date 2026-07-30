@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { randomUUID } from 'node:crypto';
+import { ProblemDetailsFilter } from './common/problem-details.filter.js';
 import type { Env } from './config/env.js';
 import { validateEnv } from './config/env.js';
 import { AdminModule } from './modules/admin/admin.module.js';
@@ -60,6 +61,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     // Serialização das respostas anotadas com @ZodResponse/@ZodSerializerDto
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
+    // Formato único de erro (RFC 7807) para TODA exceção da aplicação
+    { provide: APP_FILTER, useClass: ProblemDetailsFilter },
   ],
 })
 export class AppModule {}
