@@ -30,6 +30,16 @@ const FAKE_USERS: Record<
       papeis: [Papel.titulacao],
     },
   },
+
+  'dev.admin': {
+    password: 'dev',
+    identity: {
+      name: 'Admin de Dev',
+      email: null,
+      cpf: null,
+      papeis: [Papel.administrador],
+    },
+  },
   // Simula quem existe no AD mas não está em nenhum grupo do sistema:
   // o login deve NEGAR (sem papel, sem acesso).
   'dev.semgrupo': {

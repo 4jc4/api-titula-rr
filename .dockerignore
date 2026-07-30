@@ -7,3 +7,6 @@ coverage
 !.env.example
 .eslintcache
 *.log
+cookies.txt
+bg.txt
+*.cookies

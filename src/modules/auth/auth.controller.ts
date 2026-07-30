@@ -59,7 +59,7 @@ export class AuthController {
   }
 
   @Get('me')
-  @ZodResponse({ type: PublicUserDto })
+  @ZodResponse({ status: 200, type: PublicUserDto })
   me(@CurrentUser() user: PublicUser) {
     return user;
   }

@@ -10,7 +10,7 @@ export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get()
-  @ZodResponse({ type: HealthStatusDto })
+  @ZodResponse({ status: 200, type: HealthStatusDto })
   async getHealth() {
     return this.healthService.getStatus();
   }
