@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { LoggerModule } from 'nestjs-pino';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
+import { randomUUID } from 'node:crypto';
+import type { Env } from './config/env.js';
 import { validateEnv } from './config/env.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -13,6 +16,38 @@ import { PrismaModule } from './prisma/prisma.module.js';
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
+    }),
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) => {
+        const isProd = config.get('NODE_ENV', { infer: true }) === 'production';
+        return {
+          pinoHttp: {
+            level: isProd ? 'info' : 'debug',
+            // Em dev, log legível; em produção, JSON puro (para o futuro
+            // agregador — Zabbix/Loki/etc. — consumir)
+            transport: isProd
+              ? undefined
+              : { target: 'pino-pretty', options: { singleLine: true } },
+            // Um id por request — aparece em todo log e nos Problem Details
+            genReqId: () => randomUUID(),
+            // SEGURANÇA: o cookie carrega o token de sessão; header de auth
+            // e set-cookie idem. Log com token = credencial vazada em disco.
+            redact: {
+              paths: [
+                'req.headers.cookie',
+                'req.headers.authorization',
+                'res.headers["set-cookie"]',
+              ],
+              censor: '[REDACTED]',
+            },
+            // /health é chamado por monitoramento — não poluir o log
+            autoLogging: {
+              ignore: (req) => req.url === '/health',
+            },
+          },
+        };
+      },
     }),
     PrismaModule,
     AuthModule,
