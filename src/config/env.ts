@@ -15,10 +15,18 @@ export const envSchema = z
     AD_BASE_DN: z.string().optional(),
     AD_UPN_SUFFIX: z.string().optional(),
     AD_CA_PATH: z.string().optional(), // raiz da CA corporativa
+    AD_BIND_DN: z.string().optional(), // svc-titula@intranet... (conta de serviço do recheck)
+    AD_BIND_PASSWORD: z.string().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.AUTH_VALIDATOR === 'ad') {
-      for (const campo of ['AD_URL', 'AD_BASE_DN', 'AD_UPN_SUFFIX'] as const) {
+      for (const campo of [
+        'AD_URL',
+        'AD_BASE_DN',
+        'AD_UPN_SUFFIX',
+        'AD_BIND_DN',
+        'AD_BIND_PASSWORD',
+      ] as const) {
         if (!env[campo]) {
           ctx.addIssue({
             code: 'custom',
