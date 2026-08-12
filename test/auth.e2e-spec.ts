@@ -1,12 +1,20 @@
 import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import cookieParser from 'cookie-parser';
 import type { Server } from 'node:http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
+import { configureApp } from '../src/configure-app.js';
 import type { PublicUser } from '../src/modules/auth/user-public.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
+
+// -- rotas -------------------------------------------------------------------
+// Centralizadas: quando a v2 existir, só estas constantes mudam.
+// HEALTH é VERSION_NEUTRAL de propósito — monitoramento, healthcheck do
+// container e orquestração não podem quebrar quando a API lançar uma versão
+// nova.
+const API = '/api/v1';
+const HEALTH = '/api/health';
 
 // -- tipos das respostas -----------------------------------------------------
 // supertest devolve `res.body` como `any`; tipar na leitura evita o unsafe
@@ -53,7 +61,7 @@ describe('Auth (e2e)', () => {
   let server: Server;
 
   const login = (username: string, password = 'dev') =>
-    request(server).post('/auth/login').send({ username, password });
+    request(server).post(`${API}/auth/login`).send({ username, password });
 
   beforeAll(async () => {
     const mod = await Test.createTestingModule({
@@ -61,7 +69,14 @@ describe('Auth (e2e)', () => {
     }).compile();
 
     app = mod.createNestApplication();
-    app.use(cookieParser());
+
+    // MESMA configuração do bootstrap de produção (prefixo, versionamento,
+    // cookie-parser, trust proxy). Não repetir essas chamadas aqui: se o
+    // e2e configurasse por conta própria, uma divergência no main.ts
+    // passaria despercebida — foi o que aconteceu em 12/08/2026, com os
+    // testes verdes e a aplicação real subindo sem prefixo.
+    configureApp(app);
+
     await app.init();
 
     // getHttpServer() é `any`: tipar aqui, uma vez, resolve o resto do arquivo
@@ -75,16 +90,38 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
+  // -- versionamento ---------------------------------------------------------
+  // Estes três testes travam a decisão de projeto: o health fica FORA do
+  // versionamento, o resto da API fica DENTRO, e nada responde sem prefixo.
+
+  it('serve o health sem versão (VERSION_NEUTRAL)', async () => {
+    const res = await request(server).get(HEALTH);
+
+    expect(res.status).toBe(200);
+    expect(corpo<HealthBody>(res).database).toBe('connected');
+  });
+
+  it('não expõe o health sob a versão', async () => {
+    await request(server).get(`${API}/health`).expect(404);
+  });
+
+  it('não responde nos paths antigos, sem prefixo', async () => {
+    await request(server).get('/auth/me').expect(404);
+    await request(server).get('/health').expect(404);
+  });
+
   // -- login -----------------------------------------------------------------
 
   it('rejeita body inválido com 400 problem+json', async () => {
     const res = await request(server)
-      .post('/auth/login')
+      .post(`${API}/auth/login`)
       .send({ username: 'dev.gestor' }); // sem password
 
     expect(res.status).toBe(400);
     expect(res.headers['content-type']).toContain('application/problem+json');
     expect(corpo<ProblemDetails>(res).errors?.[0]?.path).toEqual(['password']);
+    // o `instance` do RFC 7807 reflete a rota versionada
+    expect(corpo<ProblemDetails>(res).instance).toBe(`${API}/auth/login`);
   });
 
   it('rejeita credencial inválida com 401', async () => {
@@ -114,17 +151,20 @@ describe('Auth (e2e)', () => {
     const cookie = (res.headers['set-cookie'] as unknown as string[])[0];
     expect(cookie).toContain('HttpOnly');
     expect(cookie).toContain('SameSite=Strict');
+    // Path=/ e NÃO /api/v1: a sessão vale para o host inteiro, inclusive
+    // para o frontend Next servido na mesma origem.
+    expect(cookie).toContain('Path=/');
   });
 
   // -- guard ------------------------------------------------------------------
 
   it('nega rota protegida sem cookie', async () => {
-    const res = await request(server).get('/auth/me');
+    const res = await request(server).get(`${API}/auth/me`);
     expect(res.status).toBe(401);
   });
 
-  it('libera /health sem cookie (rota @Public)', async () => {
-    const res = await request(server).get('/health');
+  it('libera o health sem cookie (rota @Public)', async () => {
+    const res = await request(server).get(HEALTH);
 
     expect(res.status).toBe(200);
     expect(corpo<HealthBody>(res).database).toBe('connected');
@@ -132,7 +172,9 @@ describe('Auth (e2e)', () => {
 
   it('devolve o usuário corrente com a sessão válida', async () => {
     const cookie = cookieDe(await login('dev.gestor'));
-    const res = await request(server).get('/auth/me').set('Cookie', cookie);
+    const res = await request(server)
+      .get(`${API}/auth/me`)
+      .set('Cookie', cookie);
 
     expect(res.status).toBe(200);
     expect(corpo<PublicUser>(res).username).toBe('dev.gestor');
@@ -143,7 +185,7 @@ describe('Auth (e2e)', () => {
   it('nega com 403 quem não tem a permissão exigida', async () => {
     const cookie = cookieDe(await login('dev.titulacao'));
     const res = await request(server)
-      .get('/admin/usuarios')
+      .get(`${API}/admin/usuarios`)
       .set('Cookie', cookie);
 
     expect(res.status).toBe(403);
@@ -152,7 +194,7 @@ describe('Auth (e2e)', () => {
   it('libera quem tem a permissão na matriz', async () => {
     const cookie = cookieDe(await login('dev.gestor'));
     const res = await request(server)
-      .get('/admin/usuarios')
+      .get(`${API}/admin/usuarios`)
       .set('Cookie', cookie);
 
     expect(res.status).toBe(200);
@@ -160,12 +202,22 @@ describe('Auth (e2e)', () => {
   });
 
   it('separa permissões dentro do mesmo papel autenticado', async () => {
-    const gestor = cookieDe(await login('dev.gestor'));
+    // ATENÇÃO AO PATH NESTE TESTE. Ele prova que o PermissionGuard barra
+    // ANTES do handler: com um id inexistente, 403 = "o guard negou";
+    // 404 = "o guard deixou passar e o service não achou".
+    // Se o path estiver errado (rota inexistente), o Nest TAMBÉM devolve
+    // 404 — e a falha pareceria regressão na ordem dos guards, quando é só
+    // typo. Daí a asserção de sanidade abaixo e o uso da constante API.
+    const alvo = `${API}/admin/usuarios/id-inexistente/revogar-sessoes`;
+
+    // sanidade: a ROTA existe. Com credencial de admin (que TEM a
+    // permissão), o 404 vem do service — não de rota inexistente.
+    const admin = cookieDe(await login('dev.admin'));
+    await request(server).post(alvo).set('Cookie', admin).expect(404);
 
     // gestor tem usuario:listar, mas NÃO tem sessao:revogar
-    const res = await request(server)
-      .post('/admin/usuarios/qualquer-id/revogar-sessoes')
-      .set('Cookie', gestor);
+    const gestor = cookieDe(await login('dev.gestor'));
+    const res = await request(server).post(alvo).set('Cookie', gestor);
 
     expect(res.status).toBe(403); // 403 antes do 404: o guard barra primeiro
   });
@@ -176,11 +228,14 @@ describe('Auth (e2e)', () => {
     const cookie = cookieDe(await login('dev.gestor'));
 
     await request(server)
-      .post('/auth/logout')
+      .post(`${API}/auth/logout`)
       .set('Cookie', cookie)
       .expect(204);
 
-    await request(server).get('/auth/me').set('Cookie', cookie).expect(401);
+    await request(server)
+      .get(`${API}/auth/me`)
+      .set('Cookie', cookie)
+      .expect(401);
   });
 
   it('admin derruba as sessões de outro usuário no request seguinte', async () => {
@@ -190,16 +245,22 @@ describe('Auth (e2e)', () => {
     const admin = cookieDe(await login('dev.admin'));
 
     // alvo está dentro
-    await request(server).get('/auth/me').set('Cookie', cookieAlvo).expect(200);
+    await request(server)
+      .get(`${API}/auth/me`)
+      .set('Cookie', cookieAlvo)
+      .expect(200);
 
     const res = await request(server)
-      .post(`/admin/usuarios/${alvoId}/revogar-sessoes`)
+      .post(`${API}/admin/usuarios/${alvoId}/revogar-sessoes`)
       .set('Cookie', admin);
 
     expect(res.status).toBe(200);
     expect(corpo<RevogacaoBody>(res).revogadas).toBeGreaterThanOrEqual(1);
 
     // ...e cai NO REQUEST SEGUINTE (sem janela de token)
-    await request(server).get('/auth/me').set('Cookie', cookieAlvo).expect(401);
+    await request(server)
+      .get(`${API}/auth/me`)
+      .set('Cookie', cookieAlvo)
+      .expect(401);
   });
 });
