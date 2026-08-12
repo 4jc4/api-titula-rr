@@ -44,7 +44,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
             },
             // /health é chamado por monitoramento — não poluir o log
             autoLogging: {
-              ignore: (req) => req.url === '/health',
+              ignore: (req) => req.url?.startsWith('/api/health') ?? false,
             },
           },
         };
