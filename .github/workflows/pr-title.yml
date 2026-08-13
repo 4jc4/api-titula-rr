@@ -1,0 +1,26 @@
+name: PR Title
+
+# .husky/pre-commit não valida a mensagem do commit de propósito (ver
+# commitlint.config.mjs): Conventional Commits é exigido só no TÍTULO do PR,
+# aqui.
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  lint-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # --ignore-scripts: só precisamos do commitlint instalado, sem rodar
+      # o postinstall (prisma generate) — mais rápido, e sem precisar de
+      # DATABASE_URL nem que seja dummy.
+      - run: npm ci --ignore-scripts
+      - name: Valida o título do PR (Conventional Commits)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | npx commitlint
