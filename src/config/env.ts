@@ -45,8 +45,22 @@ export const envSchema = z
 
 export type Env = z.infer<typeof envSchema>;
 
+// Pura — só interpreta, não decide o que fazer com o resultado. Existe
+// separada de validateEnv() por um motivo específico: process.exit() dentro
+// da mesma função tornaria impossível testar a regra do superRefine (ex.:
+// AUTH_VALIDATOR=ad sem AD_BIND_PASSWORD) sem matar o processo do Jest.
+export function parseEnv(
+  config: Record<string, unknown>,
+): z.ZodSafeParseResult<Env> {
+  return envSchema.safeParse(config);
+}
+
+// Efeito colateral — chamada uma vez, no bootstrap (ConfigModule.forRoot).
+// console.error, não o logger pino do projeto: aqui o ConfigService ainda
+// não existe, e o LoggerModule depende dele para se configurar — logar via
+// pino neste ponto é ovo-e-galinha.
 export function validateEnv(config: Record<string, unknown>): Env {
-  const result = envSchema.safeParse(config);
+  const result = parseEnv(config);
   if (!result.success) {
     console.error('❌ Variáveis de ambiente inválidas:');
     console.error(result.error.format());
