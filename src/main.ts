@@ -10,7 +10,8 @@ import { configureApp } from './configure-app.js';
 async function bootstrap() {
   // bufferLogs: nada é perdido entre o create e o useLogger
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
   // Prefixo, versionamento, cookie-parser e trust proxy — os mesmos que o
   // e2e usa (ver configure-app.ts). Precisa vir ANTES do createDocument.
@@ -36,5 +37,21 @@ async function bootstrap() {
 
   const config = app.get(ConfigService<Env, true>);
   await app.listen(config.get('PORT', { infer: true }));
+
+  // Desligamento gracioso, registrado à mão em vez de app.enableShutdownHooks():
+  // o helper do Nest liga os sinais a um app.close() que corre em paralelo com
+  // o flush do pino, e pode encerrar o processo antes do último log sair
+  // (nestjs/nest#15978). Chamando app.close() nós mesmos, o log de shutdown
+  // sai ANTES do PrismaService.onModuleDestroy() rodar (Prisma se desconecta
+  // aqui), e só então o processo termina.
+  for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+    process.once(signal, () => {
+      void (async () => {
+        logger.log(`recebido ${signal}, encerrando graciosamente...`);
+        await app.close();
+        process.exit(0);
+      })();
+    });
+  }
 }
 void bootstrap();
