@@ -79,3 +79,81 @@ jobs:
       - run: npm ci
       - run: npx prisma migrate deploy
       - run: npm run test:e2e
+
+  docker-image:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: imresamu/postgis:17-3.5
+        env:
+          POSTGRES_USER: cardoso
+          POSTGRES_PASSWORD: iteraima
+          POSTGRES_DB: titularr_docker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cardoso"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://cardoso:iteraima@localhost:5432/titularr_docker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # As migrações rodam FORA do container, com o prisma CLI direto —
+      # é assim que o docker-compose.yml de produção também faz
+      # (`migrate deploy` antes do `up`).
+      - run: npm ci
+      - run: npx prisma migrate deploy
+
+      - name: Builda a imagem de produção
+        run: docker build -t titula-rr-api:ci .
+
+      # O ponto real deste job: builda a imagem de produção de verdade e
+      # sobe o container — não só `nest build` local. Se o CMD do Dockerfile
+      # (dist/src/main.js) alguma hora deixar de bater com a saída real do
+      # build, é AQUI que quebra, não em produção.
+      #
+      # NODE_ENV fica em 'production' (o valor que já vem da imagem): com
+      # NODE_ENV=test o logger tentaria carregar pino-pretty, que é
+      # devDependency e não existe mais na imagem depois do
+      # `npm prune --omit=dev` do Dockerfile.
+      #
+      # AUTH_VALIDATOR=ad com config falsa (mas válida) porque a app RECUSA
+      # subir em produção com o validator fake — e dc.example.invalid é um
+      # domínio reservado (RFC 2606): falha a resolução DNS na hora, sem
+      # esperar o connectTimeout de 5s do AdDirectoryChecker.
+      - name: Sobe o container e confere /api/health
+        run: |
+          docker run -d --name titula-rr-api-ci \
+            --network host \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e AUTH_VALIDATOR=ad \
+            -e AD_URL=ldaps://dc.example.invalid \
+            -e AD_BASE_DN=DC=example,DC=invalid \
+            -e AD_UPN_SUFFIX=example.invalid \
+            -e AD_BIND_DN=svc-ci@example.invalid \
+            -e AD_BIND_PASSWORD=dummy \
+            titula-rr-api:ci
+
+          ok=""
+          for _ in $(seq 1 20); do
+            if curl -fsS http://localhost:3000/api/health > /dev/null; then
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+
+          echo "== logs do container =="
+          docker logs titula-rr-api-ci
+
+          [ -n "$ok" ] || { echo "::error::container não respondeu em /api/health"; exit 1; }
+
+      - name: Limpa o container
+        if: always()
+        run: docker rm -f titula-rr-api-ci || true

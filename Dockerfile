@@ -55,6 +55,8 @@ COPY --from=builder /app/certs            ./certs
 USER node
 EXPOSE 3000
 
-# Confira o caminho real com `ls dist/` depois do build: com prisma.config.ts
-# na raiz a saída costuma ser dist/src/main.js; se for dist/main.js, ajuste.
+# dist/src/main.js: com prisma.config.ts na raiz, é onde o `nest build`
+# coloca a saída. O job docker-image do CI builda esta imagem e sobe o
+# container de verdade a cada PR — se esse caminho mudar, quebra lá, não
+# em produção.
 CMD ["node", "dist/src/main.js"]
