@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { randomUUID } from 'node:crypto';
+import { AppThrottlerGuard } from './common/app-throttler.guard.js';
 import { ProblemDetailsFilter } from './common/problem-details.filter.js';
 import type { Env } from './config/env.js';
 import { validateEnv } from './config/env.js';
@@ -50,6 +52,9 @@ import { PrismaModule } from './prisma/prisma.module.js';
         };
       },
     }),
+    // Teto GERAL da API (proteção de última linha); rotas sensíveis (ex.:
+    // /auth/login) apertam ainda mais com @Throttle no próprio handler.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }]),
     PrismaModule,
     AuthModule,
     AdminModule,
@@ -63,6 +68,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
     // Formato único de erro (RFC 7807) para TODA exceção da aplicação
     { provide: APP_FILTER, useClass: ProblemDetailsFilter },
+    // Rate limiting global — desligado em NODE_ENV=test (ver o guard)
+    { provide: APP_GUARD, useClass: AppThrottlerGuard },
   ],
 })
 export class AppModule {}
