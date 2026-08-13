@@ -9,6 +9,11 @@ export const envSchema = z
       .default('development'),
     PORT: z.coerce.number().int().positive().default(3000),
     DATABASE_URL: z.url(),
+    // Origens extras liberadas para CORS, separadas por vírgula. Ausente =
+    // CORS desligado (hoje o navegador só fala com o Nginx, que roteia API e
+    // Next na mesma origem). Existe para quando isso mudar sem precisar
+    // mexer em código — ex.: dev local com o Next numa porta diferente.
+    CORS_ORIGIN: z.string().optional(),
     // Fonte remota de identidade: fake (dev sem AD) ou ad (LDAPS real)
     AUTH_VALIDATOR: z.enum(['fake', 'ad']).default('fake'),
     AD_URL: z.url().optional(), // ldaps://FQDN — nunca IP (LDAPS valida o nome)

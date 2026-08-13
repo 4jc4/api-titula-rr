@@ -110,6 +110,23 @@ describe('Auth (e2e)', () => {
     await request(server).get('/health').expect(404);
   });
 
+  // -- headers (helmet/CORS) --------------------------------------------------
+
+  it('aplica os headers de segurança do helmet e some com X-Powered-By', async () => {
+    const res = await request(server).get(HEALTH);
+
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-powered-by']).toBeUndefined();
+  });
+
+  it('não envia headers de CORS sem CORS_ORIGIN no ambiente', async () => {
+    const res = await request(server)
+      .get(HEALTH)
+      .set('Origin', 'http://evil.example');
+
+    expect(res.headers['access-control-allow-origin']).toBeUndefined();
+  });
+
   // -- login -----------------------------------------------------------------
 
   it('rejeita body inválido com 400 problem+json', async () => {
