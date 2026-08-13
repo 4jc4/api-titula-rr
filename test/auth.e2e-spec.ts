@@ -44,6 +44,13 @@ interface RevogacaoBody {
   revogadas: number;
 }
 
+interface PaginaUsuariosBody {
+  items: PublicUser[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 function corpo<T>(res: request.Response): T {
   return res.body as T;
 }
@@ -215,7 +222,27 @@ describe('Auth (e2e)', () => {
       .set('Cookie', cookie);
 
     expect(res.status).toBe(200);
-    expect(Array.isArray(corpo<PublicUser[]>(res))).toBe(true);
+    const body = corpo<PaginaUsuariosBody>(res);
+    expect(Array.isArray(body.items)).toBe(true);
+    // page/pageSize default (1/20) quando a query vem vazia
+    expect(body.page).toBe(1);
+    expect(body.pageSize).toBe(20);
+    expect(body.total).toBeGreaterThanOrEqual(body.items.length);
+  });
+
+  it('respeita page/pageSize na paginação de /admin/usuarios', async () => {
+    // Neste ponto da suíte já existem >=2 usuários provisionados
+    // (dev.gestor, dev.titulacao) — pageSize=1 tem que cortar mesmo assim.
+    const cookie = cookieDe(await login('dev.gestor'));
+    const res = await request(server)
+      .get(`${API}/admin/usuarios?page=1&pageSize=1`)
+      .set('Cookie', cookie);
+
+    expect(res.status).toBe(200);
+    const body = corpo<PaginaUsuariosBody>(res);
+    expect(body.items).toHaveLength(1);
+    expect(body.pageSize).toBe(1);
+    expect(body.total).toBeGreaterThan(1);
   });
 
   it('separa permissões dentro do mesmo papel autenticado', async () => {
