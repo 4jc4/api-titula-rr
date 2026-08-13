@@ -11,6 +11,9 @@ export default tseslint.config(
       'commitlint.config.mjs',
       'jest.config.mjs',
       'jest-e2e.config.mjs',
+      'dist/**',
+      'coverage/**',
+      'src/generated/**', // código gerado pelo Prisma
     ],
   },
   eslint.configs.recommended,
