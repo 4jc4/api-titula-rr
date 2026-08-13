@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# DATABASE_URL dummy: prisma.config.ts exige a variável ao carregar, mesmo
+# em comandos que não conectam em banco nenhum (ex.: `prisma generate`, que
+# roda no postinstall de todo `npm ci`). Mesmo truque do Dockerfile.
+env:
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Sem --fix aqui: o lint local (lint-staged) já corrige o que dá pra
+      # corrigir sozinho antes do commit; no CI só interessa se sobrou algo.
+      - run: npx eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Mesma imagem do docker-compose.dev.yml: as migrações fazem
+        # CREATE EXTENSION IF NOT EXISTS postgis, um Postgres comum não serve.
+        image: imresamu/postgis:17-3.5
+        env:
+          POSTGRES_USER: cardoso
+          POSTGRES_PASSWORD: iteraima
+          POSTGRES_DB: titularr_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cardoso"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    # Sobrescreve o dummy do topo do arquivo: aqui o banco existe de verdade
+    # (usado pelo `prisma migrate deploy` abaixo).
+    env:
+      DATABASE_URL: postgresql://cardoso:iteraima@localhost:5432/titularr_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run test:e2e
