@@ -10,3 +10,12 @@ coverage
 cookies.txt
 bg.txt
 *.cookies
+src/generated
+.github
+.vscode
+.husky
+test
+*.md
+Dockerfile
+.dockerignore
+docker-compose*.yml

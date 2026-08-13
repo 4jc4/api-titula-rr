@@ -1,0 +1,56 @@
+# ============================================================================
+# PRODUÇÃO — api-titula-rr no app server 20.50.2.223
+# Em desenvolvimento use o docker-compose.dev.yml (Postgres local).
+#
+#   docker compose build
+#   docker compose run --rm api npx prisma migrate deploy    <- ANTES do up
+#   docker compose up -d
+# ============================================================================
+name: titula-rr-api
+
+services:
+  api:
+    build: .
+    image: titula-rr-api:local
+    container_name: titula-rr-api
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - '3000:3000'
+    # O DNS do domínio devolve IPv6 6to4 para o EINSTEIN e o container não
+    # tem IPv6 — o LDAPS falharia. O FQDN é obrigatório (o certificado valida
+    # o nome), então fixamos a resolução aqui.
+    extra_hosts:
+      - 'EINSTEIN.intranet.iteraima.rr.gov.br:20.50.2.253'
+    healthcheck:
+      # /api/health é VERSION_NEUTRAL — não muda quando a API lançar a v2
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+    networks:
+      - titula-rr-net
+
+# Sem serviço de banco: o Postgres vive no LXC 20.50.2.224.
+#
+# Rede EXTERNA, criada uma vez fora do compose:
+#   docker network create titula-rr-net
+# Compartilhada com o frontend. Hoje API e web não conversam entre si (o
+# navegador fala com o Nginx, que fala com cada um), mas se um dia o Next
+# buscar dados em server component, alcança a API por
+# http://titula-rr-api:3000/api/v1/... sem reorganizar nada.
+networks:
+  titula-rr-net:
+    external: true
