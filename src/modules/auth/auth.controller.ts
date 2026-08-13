@@ -9,6 +9,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { ZodResponse } from 'nestjs-zod';
 import type { Env } from '../../config/env.js';
@@ -31,6 +32,10 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  // Mais apertado que o teto global (30/min): cada tentativa faz um bind
+  // LDAP com a senha informada — sem isso, o endpoint é vetor de bloqueio
+  // de conta no AD por terceiro, não só de brute-force local.
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   // @ZodResponse: UMA anotação sincroniza o tipo TS, a serialização em runtime
   // (corta campos fora do schema) e o OpenAPI que o orval consome.
   @ZodResponse({ status: 200, type: PublicUserDto })
