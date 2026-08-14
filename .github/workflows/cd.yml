@@ -1,0 +1,49 @@
+name: CD
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: titula-rr-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy production
+    runs-on:
+      - self-hosted
+      - titula-rr-prod
+
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate deployment environment
+        run: |
+          set -euo pipefail
+
+          echo "===== RUNNER ====="
+          whoami
+          hostname
+
+          echo
+          echo "===== DEPLOY DIRECTORY ====="
+          test -d /opt/titula-rr/api
+          test -f /opt/titula-rr/api/docker-compose.yml
+          test -f /opt/titula-rr/api/.env
+
+          echo
+          echo "===== DOCKER ====="
+          docker version --format '{{.Server.Version}}'
+          docker compose version
+
+          echo
+          echo "===== CURRENT CONTAINER ====="
+          docker ps \
+            --filter name=titula-rr-api \
+            --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+
+          echo
+          echo "Environment validated successfully."
