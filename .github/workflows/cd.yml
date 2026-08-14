@@ -54,7 +54,10 @@ jobs:
 
           echo "===== SYNC APPLICATION ====="
 
-          rsync -avc --delete \
+          rsync -rvc --delete \
+            --no-owner \
+            --no-group \
+            --no-perms \
             --exclude='.env' \
             --exclude='.git/' \
             --exclude='node_modules/' \
