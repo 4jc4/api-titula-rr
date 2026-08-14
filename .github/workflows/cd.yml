@@ -47,3 +47,16 @@ jobs:
 
           echo
           echo "Environment validated successfully."
+
+      - name: Preview deployment sync
+        run: |
+          set -euo pipefail
+
+          echo "===== RSYNC DRY-RUN ====="
+
+          rsync -avnc --delete \
+            --exclude='.env' \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='dist/' \
+            ./ /opt/titula-rr/api/
