@@ -48,15 +48,55 @@ jobs:
           echo
           echo "Environment validated successfully."
 
-      - name: Preview deployment sync
+      - name: Sync application files
         run: |
           set -euo pipefail
 
-          echo "===== RSYNC DRY-RUN ====="
+          echo "===== SYNC APPLICATION ====="
 
-          rsync -avnc --delete \
+          rsync -avc --delete \
             --exclude='.env' \
             --exclude='.git/' \
             --exclude='node_modules/' \
             --exclude='dist/' \
             ./ /opt/titula-rr/api/
+
+      - name: Build and deploy
+        working-directory: /opt/titula-rr/api
+        run: |
+          set -euo pipefail
+
+          echo "===== BUILD ====="
+          docker compose build api
+
+          echo
+          echo "===== DEPLOY ====="
+          docker compose up -d --no-deps api
+
+          echo
+          echo "===== STATUS ====="
+          docker compose ps
+
+      - name: Health check
+        run: |
+          set -euo pipefail
+
+          echo "===== HEALTH CHECK ====="
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS \
+              http://127.0.0.1:3000/api/health \
+              >/tmp/titula-health.json; then
+              cat /tmp/titula-health.json
+              echo
+              echo "API is healthy."
+              exit 0
+            fi
+
+            echo "Attempt ${attempt}/30 failed; waiting..."
+            sleep 2
+          done
+
+          echo "API failed health check."
+          docker logs --tail 100 titula-rr-api
+          exit 1
