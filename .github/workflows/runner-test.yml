@@ -1,0 +1,32 @@
+name: Test self-hosted runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-runner:
+    runs-on:
+      - self-hosted
+      - titula-rr-prod
+
+    steps:
+      - name: Informações do host
+        run: |
+          echo "===== USER ====="
+          whoami
+
+          echo
+          echo "===== HOST ====="
+          hostname
+
+          echo
+          echo "===== PWD ====="
+          pwd
+
+          echo
+          echo "===== DOCKER ====="
+          docker ps
+
+          echo
+          echo "===== DOCKER COMPOSE ====="
+          docker compose version
