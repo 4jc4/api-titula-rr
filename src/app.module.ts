@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -25,6 +25,12 @@ import { PrismaModule } from './prisma/prisma.module.js';
       useFactory: (config: ConfigService<Env, true>) => {
         const isProd = config.get('NODE_ENV', { infer: true }) === 'production';
         return {
+          // Sem isso, o default do nestjs-pino é forRoutes: ['*'] — com
+          // Express 5 (path-to-regexp v8), o '*' cru não é mais suportado e
+          // dispara um WARN de "Unsupported route path" (auto-convertido,
+          // mas barulhento) toda vez que a app sobe. '*path' já nasce no
+          // formato novo (wildcard nomeado) e cobre as mesmas rotas.
+          forRoutes: [{ path: '*path', method: RequestMethod.ALL }],
           pinoHttp: {
             level: isProd ? 'info' : 'debug',
             // Em dev, log legível; em produção, JSON puro (para o futuro
