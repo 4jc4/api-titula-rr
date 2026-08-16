@@ -59,3 +59,9 @@ src/generated
 cookies.txt
 bg.txt
 *.cookies
+
+# Claude Code — settings.json (se um dia existir) é compartilhado/versionado;
+# settings.local.json é pessoal, acumula a allowlist de permissões de cada
+# sessão (comandos exatos, às vezes com dado sensível embutido) e nunca deve
+# ir pro repositório.
+.claude/settings.local.json
