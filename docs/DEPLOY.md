@@ -75,12 +75,10 @@ Confirme cada item antes do primeiro deploy. Pular um destes não quebra o
 
 ## 3. Deploy
 
-> O CD automático cobre 3.1 e 3.4 a cada push aprovado no `main`
-> (`docker compose build`, `up -d`, health check com rollback) — **mas não
-> 3.2**. O `cd.yml` não roda `prisma migrate deploy`; ver a pendência
-> registrada no fim deste documento. Até isso ser resolvido, um push com
-> migração pendente exige rodar 3.2 à mão, no servidor, antes (ou logo
-> depois) do CD subir a imagem nova.
+> O CD automático cobre 3.1 a 3.4 a cada push aprovado no `main` — build,
+> migração (sempre antes do `up`, mesma regra desta seção) e deploy, com
+> health check e rollback. Só precisa rodar esta seção à mão fora desse
+> fluxo — primeiro deploy, ou depuração direto no servidor.
 
 ### 3.1 Build
 
@@ -210,15 +208,9 @@ que precise ser desfeita é uma migração nova escrita à mão, não um
 
 Registradas aqui para não se perderem, não porque são urgentes.
 
-- [ ] **`cd.yml` não roda `prisma migrate deploy`.** Achado escrevendo este
-      runbook (16/08/2026): o deploy automático builda e sobe a imagem nova,
-      mas nunca migra o banco — diferente do runbook manual (seção 3.2),
-      onde migrar **sempre** vem antes do `up`. Hoje isso é inofensivo porque
-      nenhuma migração ficou pendente nos últimos deploys, mas o próximo PR
-      que adicionar uma migração real vai subir código novo contra schema
-      velho. Corrigir adicionando um passo `docker compose run --rm api npx
-    prisma migrate deploy` em [`cd.yml`](../.github/workflows/cd.yml),
-      entre "Build and deploy" e "Health check".
+- [x] ~~`cd.yml` não roda `prisma migrate deploy`~~ — corrigido em 16/08/2026:
+      o deploy automático agora migra entre o build e o `up`, na mesma ordem
+      do runbook manual (seção 3.2).
 
 - [ ] **Nginx (`20.50.2.213`) duplica headers de segurança que o `helmet()`
       da API já envia.** Confirmado com `curl -i` direto em produção em

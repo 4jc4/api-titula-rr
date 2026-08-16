@@ -115,7 +115,7 @@ jobs:
             echo "Nenhuma imagem local anterior — primeiro deploy, sem ponto de rollback."
           fi
 
-      - name: Build and deploy
+      - name: Build
         working-directory: /opt/titula-rr/api
         run: |
           set -euo pipefail
@@ -123,7 +123,23 @@ jobs:
           echo "===== BUILD ====="
           docker compose build api
 
-          echo
+      # SEMPRE antes do up (mesma regra do deploy manual, docs/DEPLOY.md
+      # seção 3.2) — o container antigo continua no ar enquanto isto roda,
+      # então uma migração que falhe aqui não derruba produção: o job só
+      # para, sem acionar o rollback (health_check nem chega a rodar).
+      - name: Migrate database
+        working-directory: /opt/titula-rr/api
+        run: |
+          set -euo pipefail
+
+          echo "===== MIGRATE ====="
+          docker compose run --rm api npx prisma migrate deploy
+
+      - name: Deploy
+        working-directory: /opt/titula-rr/api
+        run: |
+          set -euo pipefail
+
           echo "===== DEPLOY ====="
           docker compose up -d --no-deps api
 
