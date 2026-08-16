@@ -87,16 +87,27 @@ jobs:
             --exclude='dist/' \
             ./ /opt/titula-rr/api/
 
-      - name: Snapshot current image (rollback point)
+      - name: Snapshot current image (rollback points)
         working-directory: /opt/titula-rr/api
         run: |
           set -euo pipefail
 
           echo "===== SNAPSHOT ====="
 
+          # Duas gerações de histórico, não uma: desloca o :rollback de hoje
+          # para :rollback-2 ANTES de gravar a imagem atual como o novo
+          # :rollback. Cobre dois deploys ruins em sequência — o rollback
+          # automático abaixo só usa :rollback (1º nível); :rollback-2 é o
+          # escape manual documentado em docs/DEPLOY.md (seção 5).
+          if docker image inspect titula-rr-api:rollback >/dev/null 2>&1; then
+            docker tag titula-rr-api:rollback titula-rr-api:rollback-2
+            echo "Rollback anterior preservado como titula-rr-api:rollback-2."
+          fi
+
           # Guarda a imagem que está rodando AGORA sob outra tag, antes do
           # build de baixo sobrescrever titula-rr-api:local. Se o health
-          # check falhar mais adiante, é para esta tag que o rollback volta.
+          # check falhar mais adiante, é para esta tag que o rollback
+          # automático volta.
           if docker image inspect titula-rr-api:local >/dev/null 2>&1; then
             docker tag titula-rr-api:local titula-rr-api:rollback
             echo "Imagem atual salva como titula-rr-api:rollback."
