@@ -16,7 +16,9 @@ lerna-debug.log*
 .DS_Store
 
 # Tests
-/coverage
+# sem barra na frente: o jest.config.mjs usa rootDir: 'src', então
+# `npm run test:cov` escreve em src/coverage, não na raiz.
+coverage
 /.nyc_output
 
 # IDEs and editors
