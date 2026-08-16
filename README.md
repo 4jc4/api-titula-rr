@@ -1,98 +1,131 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# api-titula-rr
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend do **Titula RR**, sistema de regularização fundiária do governo do
+Estado de Roraima. NestJS 11 (TypeScript, ESM) + Prisma 7 sobre
+PostgreSQL/PostGIS, rodando inteiramente dentro da intranet do governo — sem
+nuvem pública. A identidade dos usuários vem do Active Directory
+corporativo; runner de CI/CD, banco e host de produção estão todos na mesma
+rede privada.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Guia completo de arquitetura (fluxo de autenticação, RBAC, contrato HTTP,
+convenções): [`CLAUDE.md`](./CLAUDE.md). Runbook de deploy manual, rollback
+e checklist de secrets: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **NestJS 11** (TypeScript, ESM) + **Prisma 7** (`@prisma/adapter-pg`) sobre
+  **PostgreSQL 17 + PostGIS**
+- **nestjs-zod**: Zod como fonte única do contrato HTTP — valida entrada,
+  serializa saída e gera o OpenAPI (`/api/docs`) que o front consome via
+  [orval](https://orval.dev)
+- **ldapts**: bind LDAPS contra o Active Directory (login e reverificação
+  periódica)
+- **nestjs-pino**: log estruturado, com redação automática de
+  cookie/token/`set-cookie`
+- Sessão opaca em cookie `httpOnly` (sem JWT) — validada contra o Postgres a
+  cada request; ver `SessionGuard`/`SessionService` em `CLAUDE.md`
 
-## Project setup
+## Requisitos
 
-```bash
-$ npm install
-```
+- Node.js **>= 24** (`engines` no `package.json`, `engine-strict=true` no
+  `.npmrc`)
+- Docker + Docker Compose (Postgres+PostGIS local)
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+## Configuração
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
+Preencha pelo menos `DATABASE_URL`. Com `AUTH_VALIDATOR=fake` (padrão), o
+login não toca o Active Directory — usa usuários fixos definidos em
+`src/modules/auth/validators/fake-ad.validator.ts` (`dev.gestor`,
+`dev.titulacao`, `dev.admin`, `dev.semgrupo`, todos com senha `dev`). Para
+apontar para um AD real, defina `AUTH_VALIDATOR=ad` e as variáveis
+`AD_*` — ver comentários no próprio `.env.example`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Em produção, o boot **recusa subir** com `AUTH_VALIDATOR` diferente de `ad`
+(trava no factory do `AuthModule`) — não tem como uma config esquecida subir
+com autenticação falsa.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Rodando localmente
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose -f docker-compose.dev.yml up -d   # Postgres+PostGIS em :5432
+npm install
+npx prisma migrate deploy                        # aplica as migrations existentes
+npm run start:dev                                 # watch mode, http://localhost:3000/api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Documentação interativa (Swagger): `http://localhost:3000/api/docs`.
 
-## Resources
+## Comandos
 
-Check out a few resources that may come in handy when working with NestJS:
+| Comando                                          | O que faz                                                      |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| `npm run start:dev`                              | API em watch mode                                              |
+| `npm run start:debug`                            | watch mode + inspector                                         |
+| `npm run build`                                  | `nest build` → `dist/`                                         |
+| `npm run lint`                                   | eslint `--fix` em `src`/`apps`/`libs`/`test`                   |
+| `npm run format`                                 | prettier em `src`/`test`                                       |
+| `npm test`                                       | testes unitários (`*.spec.ts`, colocados junto do código)      |
+| `npm run test:watch` / `test:cov` / `test:debug` | variações do unitário                                          |
+| `npm run test:e2e`                               | testes e2e (`test/*.e2e-spec.ts`) contra Postgres+PostGIS real |
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Banco de dados (Prisma)
 
-## Support
+Migrations são **manuais** neste projeto — nunca `prisma db push`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npx prisma migrate dev --name <nome>     # nova migration, em dev
+npx prisma migrate deploy                # aplica em CI/CD/produção
+```
 
-## Stay in touch
+`prisma.config.ts` exige `DATABASE_URL` mesmo para comandos que não tocam
+banco nenhum (ex.: `prisma generate`, que roda no `postinstall`) — exporte
+um valor qualquer se for rodar comandos Prisma isolados.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Seed da conta break-glass (local/argon2, fora do AD — porta de entrada se o
+AD estiver fora do ar):
 
-## License
+```bash
+DATABASE_URL=... BREAK_GLASS_USER=... BREAK_GLASS_PASSWORD=... npx tsx prisma/seed.ts
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Docker (imagem de produção)
+
+```bash
+docker build -t titula-rr-api:local .
+```
+
+Build multi-stage; a mesma imagem é buildada no CI (`docker-image` job),
+que sobe um container real e confere `/api/health` — um `CMD` quebrado no
+Dockerfile quebra ali, não em produção.
+
+## Testes e2e
+
+Contra Postgres+PostGIS real, não mocks. O script já exporta
+`NODE_ENV=test`, `AUTH_VALIDATOR=fake` e um `DATABASE_URL` local apontando
+para `titularr_test` (banco diferente do de dev, `titularr`) — suba o
+`docker-compose.dev.yml` e aplique as migrations nesse banco antes:
+
+```bash
+DATABASE_URL=postgresql://cardoso:iteraima@localhost:5432/titularr_test npx prisma migrate deploy
+npm run test:e2e
+```
+
+## CI/CD
+
+- **CI** (`.github/workflows/ci.yml`): lint, typecheck+build, testes
+  unitários, e2e (Postgres+PostGIS real em service container) e
+  `docker-image` (builda a imagem de produção e bate `/api/health` num
+  container real) — em todo push/PR para `main`.
+- **CD** (`.github/workflows/cd.yml`): dispara automaticamente quando o CI
+  passa em `main`, num runner self-hosted dentro da intranet (é o único que
+  alcança o Postgres de produção e o AD via LDAPS). `prisma migrate deploy`
+  roda antes do `up`; health check com rollback automático (2 gerações)
+  se falhar. Detalhes completos: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
+
+Commit sempre em branch — nunca direto em `main`. PRs são squash-merged (o
+título do PR vira a mensagem do commit, validado por Conventional Commits
+em `pr-title.yml`).
