@@ -1,6 +1,7 @@
 import { Module, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
@@ -61,6 +62,9 @@ import { PrismaModule } from './prisma/prisma.module.js';
     // Teto GERAL da API (proteção de última linha); rotas sensíveis (ex.:
     // /auth/login) apertam ainda mais com @Throttle no próprio handler.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }]),
+    // Habilita @Cron em qualquer provider da app — hoje só o
+    // SessionCleanupService (AuthModule) usa.
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     AdminModule,

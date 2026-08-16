@@ -55,6 +55,7 @@ type FindUniqueFn = (args: {
 }) => Promise<(Session & { user: User }) | null>;
 type UpdateFn = (args: unknown) => Promise<Session>;
 type UpdateManyFn = (args: unknown) => Promise<{ count: number }>;
+type DeleteManyFn = (args: unknown) => Promise<{ count: number }>;
 
 describe('SessionService', () => {
   let service: SessionService;
@@ -62,19 +63,23 @@ describe('SessionService', () => {
   let findUnique: jest.Mock<FindUniqueFn>;
   let update: jest.Mock<UpdateFn>;
   let updateMany: jest.Mock<UpdateManyFn>;
+  let deleteMany: jest.Mock<DeleteManyFn>;
 
   beforeEach(async () => {
     create = jest.fn<CreateFn>().mockResolvedValue(fakeSession());
     findUnique = jest.fn<FindUniqueFn>();
     update = jest.fn<UpdateFn>().mockResolvedValue(fakeSession());
     updateMany = jest.fn<UpdateManyFn>().mockResolvedValue({ count: 1 });
+    deleteMany = jest.fn<DeleteManyFn>().mockResolvedValue({ count: 0 });
 
     const mod = await Test.createTestingModule({
       providers: [
         SessionService,
         {
           provide: PrismaService,
-          useValue: { session: { create, findUnique, update, updateMany } },
+          useValue: {
+            session: { create, findUnique, update, updateMany, deleteMany },
+          },
         },
       ],
     }).compile();
@@ -259,6 +264,40 @@ describe('SessionService', () => {
         where: { userId: 'user-1', revokedAt: null },
         data: { revokedAt: expect.any(Date), motivo: MotivoRevogacao.admin },
       });
+    });
+  });
+
+  // -- limpeza (job agendado) -------------------------------------------------
+
+  describe('deleteDeadOlderThan', () => {
+    it('apaga sessões com expiresAt OU revokedAt antes do corte de retenção', async () => {
+      const retencaoMs = 30 * 24 * 60 * 60 * 1000;
+      const antes = Date.now();
+
+      await service.deleteDeadOlderThan(retencaoMs);
+
+      const args = deleteMany.mock.calls[0]?.[0] as {
+        where: {
+          OR: [{ expiresAt: { lt: Date } }, { revokedAt: { lt: Date } }];
+        };
+      };
+      const [porExpiracao, porRevogacao] = args.where.OR;
+      // o corte é `agora - retencaoMs`, igual para os dois ramos do OR
+      expect(porExpiracao.expiresAt.lt.getTime()).toBeCloseTo(
+        antes - retencaoMs,
+        -2,
+      );
+      expect(porRevogacao.revokedAt.lt.getTime()).toBe(
+        porExpiracao.expiresAt.lt.getTime(),
+      );
+    });
+
+    it('devolve a contagem de linhas apagadas', async () => {
+      deleteMany.mockResolvedValue({ count: 7 });
+
+      const n = await service.deleteDeadOlderThan(1_000);
+
+      expect(n).toBe(7);
     });
   });
 });
