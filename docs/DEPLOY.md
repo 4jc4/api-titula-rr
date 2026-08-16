@@ -1,12 +1,21 @@
-# Runbook de deploy manual
+# Runbook de deploy
 
 Checklist para subir o `api-titula-rr` no app server (`20.50.2.223`), contra o
-Postgres do LXC (`20.50.2.224`). Sem CD automatizado — todo passo aqui é
-manual, nesta ordem.
+Postgres do LXC (`20.50.2.224`).
+
+> **CD automático desde 16/08/2026.** Todo push aprovado pelo CI no `main`
+> dispara sozinho o deploy em produção
+> ([`cd.yml`](../.github/workflows/cd.yml), gatilho `workflow_run`), com
+> rollback automático se o health check pós-deploy falhar (seção 5). Este
+> runbook manual continua valendo para: a configuração inicial de um servidor
+> novo (seção 1), o seed da conta break-glass (seção 3.3, que o CD não roda),
+> um deploy fora do fluxo normal (`workflow_dispatch` no `cd.yml`, ou os
+> passos abaixo à mão), e rollback além do que a automação cobre (seção 5).
 
 A seção 1 é infraestrutura de uma vez só (ou quando algo muda). A seção 2 é
 config/segredos — conferir a cada deploy, mesmo que raramente mude. A seção 3
-é a sequência que roda **todo deploy**, sem exceção.
+é a sequência de deploy manual — o que o `cd.yml` automatiza a cada push no
+`main`, útil de conhecer mesmo assim para rodar à mão quando precisar.
 
 ---
 
@@ -65,6 +74,13 @@ Confirme cada item antes do primeiro deploy. Pular um destes não quebra o
 ---
 
 ## 3. Deploy
+
+> O CD automático cobre 3.1 e 3.4 a cada push aprovado no `main`
+> (`docker compose build`, `up -d`, health check com rollback) — **mas não
+> 3.2**. O `cd.yml` não roda `prisma migrate deploy`; ver a pendência
+> registrada no fim deste documento. Até isso ser resolvido, um push com
+> migração pendente exige rodar 3.2 à mão, no servidor, antes (ou logo
+> depois) do CD subir a imagem nova.
 
 ### 3.1 Build
 
@@ -154,6 +170,29 @@ curl -i -c /tmp/bg.txt -X POST https://<host>/api/v1/auth/login \
 
 ## 5. Rollback
 
+**Automático (1 nível):** se o health check do `cd.yml` falhar logo após um
+deploy, o próprio CD reverte sozinho — retagueia `titula-rr-api:rollback`
+(snapshot tirado da imagem em produção, antes do build) de volta para
+`:local`, sobe o container de novo e reconfere o health check. Não precisa
+fazer nada; o job só fica marcado como falho para avisar que a versão nova
+não foi ao ar.
+
+**Manual, 2º nível:** o CD mantém duas gerações — `:rollback` (a imagem
+imediatamente anterior) e `:rollback-2` (a anterior a essa). Se o rollback
+automático também não subir saudável, ou se dois deploys ruins tiverem se
+sucedido antes de alguém notar, dá pra voltar mais um nível à mão, direto no
+app server:
+
+```sh
+cd /opt/titula-rr/api
+docker tag titula-rr-api:rollback-2 titula-rr-api:local
+docker compose up -d --no-deps api
+curl -s http://127.0.0.1:3000/api/health | jq
+```
+
+**Manual, além de 2 níveis:** a partir daí não tem mais tag guardada — volta
+pelo git mesmo:
+
 ```sh
 docker compose down
 git checkout <commit-anterior>
@@ -164,6 +203,44 @@ docker compose up -d
 Migrações do Prisma não têm `down` automático neste projeto — uma migração
 que precise ser desfeita é uma migração nova escrita à mão, não um
 `prisma migrate reset` em produção (isso apaga o banco).
+
+---
+
+## 6. Pendências conhecidas
+
+Registradas aqui para não se perderem, não porque são urgentes.
+
+- [ ] **`cd.yml` não roda `prisma migrate deploy`.** Achado escrevendo este
+      runbook (16/08/2026): o deploy automático builda e sobe a imagem nova,
+      mas nunca migra o banco — diferente do runbook manual (seção 3.2),
+      onde migrar **sempre** vem antes do `up`. Hoje isso é inofensivo porque
+      nenhuma migração ficou pendente nos últimos deploys, mas o próximo PR
+      que adicionar uma migração real vai subir código novo contra schema
+      velho. Corrigir adicionando um passo `docker compose run --rm api npx
+    prisma migrate deploy` em [`cd.yml`](../.github/workflows/cd.yml),
+      entre "Build and deploy" e "Health check".
+
+- [ ] **Nginx (`20.50.2.213`) duplica headers de segurança que o `helmet()`
+      da API já envia.** Confirmado com `curl -i` direto em produção em
+      16/08/2026 — a resposta trazia, cada um **duas vezes**:
+
+  | Header                      | Valor do Helmet (API)                 | Valor do Nginx                                                |
+  | --------------------------- | ------------------------------------- | ------------------------------------------------------------- |
+  | `x-frame-options`           | `SAMEORIGIN`                          | `SAMEORIGIN` (igual, redundante)                              |
+  | `x-content-type-options`    | `nosniff`                             | `nosniff` (igual, redundante)                                 |
+  | `referrer-policy`           | `no-referrer`                         | `strict-origin-when-cross-origin` (**diferente**)             |
+  | `strict-transport-security` | `max-age=31536000; includeSubDomains` | `max-age=15768000` (**diferente, e sem `includeSubDomains`**) |
+
+  As duas últimas linhas são o motivo para tratar isto como bug, não só
+  redundância: com o mesmo header repetido com valores diferentes, qual
+  valor o navegador aplica é inconsistente entre eles — na prática, o Nginx
+  está silenciosamente enfraquecendo o HSTS que a API pede (6 meses em vez
+  de 1 ano, sem `includeSubDomains`) e trocando a política de referrer.
+  Quando houver acesso a `20.50.2.213`: achar e remover, do vhost da API,
+  as diretivas `add_header X-Frame-Options`, `add_header
+X-Content-Type-Options`, `add_header Referrer-Policy` e `add_header
+Strict-Transport-Security` (ou equivalentes) — deixar o `helmet()` ser a
+  única fonte desses headers.
 
 ---
 
