@@ -94,4 +94,20 @@ export class SessionService {
     });
     return result.count;
   }
+
+  // Apaga sessões mortas (expiradas OU revogadas) há mais que `retencaoMs`.
+  // "Expirada" usa expiresAt, não absoluteExpiresAt: expiresAt nunca passa
+  // do teto absoluto (o clamp fica em validate()), então é sempre o prazo
+  // mais restritivo — cobrir só ele já cobre os dois TTLs.
+  // Chamado pelo SessionCleanupService (@Cron); existe como método próprio
+  // do service, não inline no cron job, para poder ser testado sem relógio.
+  async deleteDeadOlderThan(retencaoMs: number): Promise<number> {
+    const corte = new Date(Date.now() - retencaoMs);
+    const result = await this.prisma.session.deleteMany({
+      where: {
+        OR: [{ expiresAt: { lt: corte } }, { revokedAt: { lt: corte } }],
+      },
+    });
+    return result.count;
+  }
 }

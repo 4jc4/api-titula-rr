@@ -8,6 +8,7 @@ import { AuthService } from './auth.service.js';
 import { CREDENTIAL_VALIDATOR } from './credential-validator.js';
 import { DIRECTORY_CHECKER } from './directory-checker.js';
 import { PermissionGuard } from './permission.guard.js';
+import { SessionCleanupService } from './session-cleanup.service.js';
 import { SessionGuard } from './session.guard.js';
 import { SessionService } from './session.service.js';
 import { AdDirectoryChecker } from './validators/ad-directory.checker.js';
@@ -21,6 +22,7 @@ import { LocalValidator } from './validators/local.validator.js';
   providers: [
     AuthService,
     SessionService,
+    SessionCleanupService,
     AdRecheckService,
     LocalValidator,
     FakeAdValidator,
