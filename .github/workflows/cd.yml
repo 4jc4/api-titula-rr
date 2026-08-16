@@ -1,7 +1,20 @@
 name: CD
 
+# Dispara sozinho quando o CI (workflow "CI", ver ci.yml) termina com sucesso
+# no main — nada de esperar alguém clicar em "Run workflow". workflow_dispatch
+# continua disponível para redeploy manual (ex.: reaplicar o mesmo commit sem
+# esperar um push novo).
+#
+# O filtro "conclusion == 'success'" NÃO dá pra fazer aqui em cima: o gatilho
+# "on.workflow_run" só filtra por workflow/branches, dispara também quando o
+# CI falha ou é cancelado. Por isso o job abaixo confere a conclusão na
+# condição `if`.
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 concurrency:
   group: titula-rr-production
@@ -10,6 +23,9 @@ concurrency:
 jobs:
   deploy:
     name: Deploy production
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on:
       - self-hosted
       - titula-rr-prod
@@ -18,7 +34,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          # No gatilho workflow_run, github.sha é o HEAD do main NO MOMENTO
+          # EM QUE O CD RODA — pode já ter avançado desde o commit que o CI
+          # aprovou. head_sha é o commit específico que passou no CI; é ele
+          # que vai pra produção. Em workflow_dispatch, workflow_run.head_sha
+          # não existe e cai no default (github.sha).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Validate deployment environment
         run: |
@@ -64,6 +87,23 @@ jobs:
             --exclude='dist/' \
             ./ /opt/titula-rr/api/
 
+      - name: Snapshot current image (rollback point)
+        working-directory: /opt/titula-rr/api
+        run: |
+          set -euo pipefail
+
+          echo "===== SNAPSHOT ====="
+
+          # Guarda a imagem que está rodando AGORA sob outra tag, antes do
+          # build de baixo sobrescrever titula-rr-api:local. Se o health
+          # check falhar mais adiante, é para esta tag que o rollback volta.
+          if docker image inspect titula-rr-api:local >/dev/null 2>&1; then
+            docker tag titula-rr-api:local titula-rr-api:rollback
+            echo "Imagem atual salva como titula-rr-api:rollback."
+          else
+            echo "Nenhuma imagem local anterior — primeiro deploy, sem ponto de rollback."
+          fi
+
       - name: Build and deploy
         working-directory: /opt/titula-rr/api
         run: |
@@ -81,6 +121,7 @@ jobs:
           docker compose ps
 
       - name: Health check
+        id: health_check
         run: |
           set -euo pipefail
 
@@ -103,3 +144,43 @@ jobs:
           echo "API failed health check."
           docker logs --tail 100 titula-rr-api
           exit 1
+
+      # Só roda quando quem falhou foi o health check (não build/sync/etc,
+      # onde a versão anterior nunca chegou a sair do ar). O job continua
+      # marcado como falho mesmo com rollback bem-sucedido — a versão nova
+      # NÃO foi para produção, e isso precisa aparecer no status do CD.
+      - name: Rollback on health check failure
+        if: failure() && steps.health_check.outcome == 'failure'
+        working-directory: /opt/titula-rr/api
+        run: |
+          set -euo pipefail
+
+          echo "===== ROLLBACK ====="
+
+          if ! docker image inspect titula-rr-api:rollback >/dev/null 2>&1; then
+            echo "::error::sem imagem de rollback (primeiro deploy) — nada para restaurar; intervenção manual necessária."
+            exit 1
+          fi
+
+          docker tag titula-rr-api:rollback titula-rr-api:local
+          docker compose up -d --no-deps api
+
+          ok=""
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/health >/tmp/titula-rollback-health.json; then
+              cat /tmp/titula-rollback-health.json
+              echo
+              ok=1
+              break
+            fi
+            echo "Rollback attempt ${attempt}/30 failed; waiting..."
+            sleep 2
+          done
+
+          if [ -n "$ok" ]; then
+            echo "::warning::deploy falhou no health check — rollback para a versão anterior concluído com sucesso."
+          else
+            echo "::error::rollback também falhou no health check — produção pode estar fora do ar, intervenção manual necessária."
+            docker logs --tail 100 titula-rr-api
+            exit 1
+          fi
