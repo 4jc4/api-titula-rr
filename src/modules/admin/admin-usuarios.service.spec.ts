@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import {
+  MotivoRevogacao,
   OrigemConta,
   Papel,
   type User,
@@ -89,5 +91,63 @@ describe('AdminUsuariosService.listar', () => {
       expect(item).not.toHaveProperty('passwordHash');
       expect(item).not.toHaveProperty('cpf');
     }
+  });
+});
+
+type FindUniqueFn = (args: { where: { id: string } }) => Promise<User | null>;
+type RevokeAllForUserFn = (
+  userId: string,
+  motivo: MotivoRevogacao,
+) => Promise<number>;
+
+describe('AdminUsuariosService.revogarSessoes', () => {
+  let service: AdminUsuariosService;
+  let findUnique: jest.Mock<FindUniqueFn>;
+  let revokeAllForUser: jest.Mock<RevokeAllForUserFn>;
+
+  beforeEach(async () => {
+    findUnique = jest.fn<FindUniqueFn>();
+    revokeAllForUser = jest.fn<RevokeAllForUserFn>();
+
+    const mod = await Test.createTestingModule({
+      providers: [
+        AdminUsuariosService,
+        { provide: PrismaService, useValue: { user: { findUnique } } },
+        { provide: SessionService, useValue: { revokeAllForUser } },
+      ],
+    }).compile();
+
+    service = mod.get(AdminUsuariosService);
+  });
+
+  it('lança 404 quando o usuário-alvo não existe', async () => {
+    findUnique.mockResolvedValue(null);
+
+    await expect(service.revogarSessoes('id-inexistente')).rejects.toThrow(
+      NotFoundException,
+    );
+    expect(revokeAllForUser).not.toHaveBeenCalled();
+  });
+
+  it('revoga com o motivo "admin" e devolve a contagem de sessões afetadas', async () => {
+    findUnique.mockResolvedValue(fakeUser({ id: 'user-1' }));
+    revokeAllForUser.mockResolvedValue(3);
+
+    const r = await service.revogarSessoes('user-1');
+
+    expect(revokeAllForUser).toHaveBeenCalledWith(
+      'user-1',
+      MotivoRevogacao.admin,
+    );
+    expect(r).toEqual({ revogadas: 3 });
+  });
+
+  it('devolve revogadas=0 quando o usuário existe mas não tinha sessão ativa', async () => {
+    findUnique.mockResolvedValue(fakeUser({ id: 'user-1' }));
+    revokeAllForUser.mockResolvedValue(0);
+
+    const r = await service.revogarSessoes('user-1');
+
+    expect(r).toEqual({ revogadas: 0 });
   });
 });
