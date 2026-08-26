@@ -60,11 +60,9 @@ enum Papel {
   atendimento
   financeiro
   titulacao
-  informatica
   planejamento
   governanca
   presidencia
-  colaborador
   gestor
   administrador
 }
@@ -114,4 +112,937 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+
+// =============================================================================
+// DOMÍNIO — Núcleo processual da Instrução Normativa nº 002/2026 (ITERAIMA)
+// -----------------------------------------------------------------------------
+// Convenção idêntica à do bloco de autenticação acima: colunas em camelCase
+// (sem @map de campo), tabelas em plural via @@map, enums em PascalCase.
+//
+// `users` x `pessoas` NÃO são a mesma coisa e não devem ser fundidos:
+//   - `users`  = quem OPERA o sistema (identidade do AD, sessão, papel)
+//   - `pessoas` = quem É PARTE no processo (qualificação, endereço, declarações)
+// Um servidor que também requer regularização existe nas duas, com o mesmo CPF.
+// Fundi-las amarraria o ciclo de vida de uma conta de rede ao de um requerente,
+// e requerente não tem conta de rede.
+//
+// O Prisma não expressa EXCLUDE constraints, índices parciais, CHECKs compostos,
+// funções nem tipos PostGIS operáveis — tudo isso está na migração
+// 20260825231512_in002_nucleo_processual, escrita à mão como a do break-glass.
+//
+// Colunas de servidor responsável (`juntadoPorId`, `servidorRecebId`,
+// `criadoPorId`, `chefiaAprovouId`, `usuarioId`, `emitidoPorId`,
+// `confirmadoPorId`) estão como String sem relação com `User` de propósito:
+// virar FK exige acrescentar sete relações inversas no model User, o que é
+// decisão à parte. Ver docs/reconciliacao-api-existente.md, item 2.4.
+// =============================================================================
+
+// ---------------------------------------------------------------------
+// Enums — domínio estável, versionado por commit (metade "código" da
+// decisão mista). O que muda por lei ou errata está em tabela, adiante.
+// ---------------------------------------------------------------------
+
+enum TipoPessoa {
+  FISICA
+  JURIDICA
+}
+
+enum CondicaoNacionalidade {
+  BRASILEIRO_NATO
+  BRASILEIRO_NATURALIZADO
+  ESTRANGEIRO
+}
+
+enum EstadoCivil {
+  SOLTEIRO
+  CASADO
+  UNIAO_ESTAVEL
+  DIVORCIADO
+  SEPARADO
+  VIUVO
+}
+
+enum TipoEndereco {
+  RESIDENCIAL
+  CORRESPONDENCIA
+}
+
+enum CanalProtocolo {
+  PORTAL_CIDADAO
+  PRESENCIAL
+}
+
+enum TipoRequerimento {
+  INICIAL
+  ADITIVO
+}
+
+enum SituacaoProcesso {
+  EM_TRAMITE
+  SOBRESTADO
+  EM_CONFLITO
+  ARQUIVADO
+  INDEFERIDO
+  CONCLUIDO
+}
+
+/// Posição no fluxograma do Anexo X. Ortogonal a SituacaoProcesso:
+/// `fase` diz ONDE está, `situacao` diz COMO está.
+enum FaseProcesso {
+  PROTOCOLO
+  ADMISSIBILIDADE
+  ANALISE_SOBREPOSICAO
+  PARECER_DSF
+  AUTORIZACAO_GEORREFERENCIAMENTO
+  ANALISE_JURIDICA
+  DECISAO_PRESIDENCIA
+  APURACAO_VTN
+  PAGAMENTO
+  EMISSAO_INSTRUMENTO
+  ASSINATURA_PUBLICACAO
+  POS_TITULACAO
+  ENCERRADO
+}
+
+/// ADVOGADO é categoria própria, não um procurador comum: o Art. 6º §5º
+/// aceita procuração ad judicia com cópia da OAB (dispensando a escritura
+/// pública do §4º), o Art. 7º pu lhe dá peticionamento intercorrente e o
+/// Art. 55 §1º IV o legitima a requerer desarquivamento.
+enum PapelParte {
+  PROCURADOR
+  ADVOGADO
+  TRANSMITENTE
+  INVENTARIANTE
+  RESPONSAVEL_TECNICO
+  CONFRONTANTE
+}
+
+enum RumoConfrontacao {
+  NORTE
+  SUL
+  LESTE
+  OESTE
+}
+
+enum TipoCoberturaVegetal {
+  CERRADO
+  FLORESTA
+}
+
+enum TipoEletrificacao {
+  PUBLICA
+  PRIVADA
+  INEXISTENTE
+}
+
+enum TipoAcessoRodoviario {
+  FEDERAL
+  ESTADUAL
+  MUNICIPAL
+  VARIANTE
+  CAMINHO
+}
+
+enum ObrigatoriedadeDoc {
+  OBRIGATORIO
+  CONDICIONAL
+  FACULTATIVO
+}
+
+enum FormaAutenticacao {
+  CARTORIO
+  CONFERE_COM_ORIGINAL
+  ASSINATURA_DIGITAL_ICP
+  DISPENSADA
+}
+
+/// Sem ACAO_JUDICIAL: o Art. 15 §5º prevê relacionar ações judiciais, mas
+/// `ProcessoRelacionamento` liga dois processos INTERNOS e uma ação é
+/// externa — o valor seria inutilizável. Suporte real exige entidade
+/// própria (número CNJ, vara, comarca); entra com o Cap. VII.
+enum MotivoRelacionamento {
+  DUPLICIDADE
+  SOBREPOSICAO
+  CADEIA_POSSESSORIA
+  FRACIONAMENTO_IRREGULAR
+  CONTIGUIDADE_INDICIO_OCUPACAO
+  OCUPACAO_CONSOLIDADA_SENSOR
+}
+
+enum TipoComunicacao {
+  NOTIFICACAO
+  INTIMACAO
+}
+
+enum MeioComunicacao {
+  APLICATIVO_MENSAGENS
+  EMAIL
+  PESSOAL
+  POSTAL_AR
+  EDITAL
+}
+
+enum ResultadoTentativa {
+  ENTREGUE_CONFIRMADO
+  ENVIADO_SEM_CONFIRMACAO
+  FRUSTRADA
+  RECUSADA
+}
+
+enum ChaveParametro {
+  MARCO_TEMPORAL_OCUPACAO
+  VALIDADE_PARECER_SOBREPOSICAO_MESES
+  VALIDADE_LAUDO_VISTORIA_MESES
+  VALIDADE_AUTORIZACAO_GEORREF_MESES
+  PRAZO_CONFIRMACAO_INTIMACAO_DIAS_UTEIS
+  PRAZO_MANDATO_MESES
+}
+
+/// Art. 57: o valor pago não é restituído em caso de indeferimento —
+/// PAGO nunca volta para EMITIDO. Cancelamento é situação própria.
+enum SituacaoDebito {
+  EMITIDO
+  PAGO
+  CANCELADO
+}
+
+enum AbrangenciaFeriado {
+  NACIONAL
+  ESTADUAL
+  MUNICIPAL
+}
+
+/// Só o que NÃO tem tabela própria. Juntada, tramitação, comunicação,
+/// relacionamento e arquivamento já gravam data e autor nas suas tabelas —
+/// repetir aqui é escrituração dupla, e duas fontes divergem.
+enum TipoEventoProcesso {
+  MUDANCA_FASE
+  MUDANCA_SITUACAO
+  DECISAO
+  DESPACHO
+  OBSERVACAO
+}
+
+// ---------------------------------------------------------------------
+// Referência territorial
+// ---------------------------------------------------------------------
+
+model Municipio {
+  id         Int    @id @default(autoincrement())
+  codigoIbge String @unique @db.Char(7)
+  nome       String @db.VarChar(120)
+  uf         String @default("RR") @db.Char(2)
+
+  modulosFiscais ModuloFiscalMunicipio[]
+  glebas         Gleba[]
+  imoveis        Imovel[]
+  enderecos      Endereco[]
+  feriados       Feriado[]
+
+  @@map("municipios")
+}
+
+/// Sem calendário não há prazo em dia útil — e o Art. 71 §1º conta 5 dias
+/// úteis. Os móveis (Carnaval, Sexta-feira Santa, Corpus Christi) não são
+/// semeados ano a ano: `gerar_feriados_moveis(ano)` os deriva de
+/// `pascoa(ano)`, ambas funções criadas na migração.
+model Feriado {
+  id               Int                @id @default(autoincrement())
+  data             DateTime           @db.Date
+  nome             String             @db.VarChar(180)
+  abrangencia      AbrangenciaFeriado
+  uf               String?            @db.Char(2)
+  municipioId      Int?
+  fundamentoLegal  String? @db.VarChar(255)
+
+  municipio Municipio? @relation(fields: [municipioId], references: [id], onDelete: Cascade)
+
+  @@index([data])
+  @@map("feriados")
+}
+
+/// O módulo fiscal é fixado pelo INCRA por município e muda por norma
+/// federal. Como os Arts. 10-12 escalonam todo o rito por ele e o Art. 51
+/// manda verificar a lei à época, ele é versionado por vigência.
+/// EXCLUDE `ex_mfm_sem_sobreposicao` impede vigências sobrepostas.
+model ModuloFiscalMunicipio {
+  id              Int       @id @default(autoincrement())
+  municipioId     Int
+  hectares        Decimal   @db.Decimal(10, 4)
+  fundamentoLegal String @db.VarChar(255)
+  vigenciaInicio  DateTime @db.Date
+  vigenciaFim     DateTime? @db.Date
+
+  municipio Municipio @relation(fields: [municipioId], references: [id], onDelete: Restrict)
+
+  @@map("modulos_fiscais")
+}
+
+model Gleba {
+  id          Int     @id @default(autoincrement())
+  nome        String  @db.VarChar(180)
+  codigo      String? @db.VarChar(60)
+  municipioId Int
+
+  /// PostGIS: invisível ao Prisma Client. Ler/gravar por $queryRaw.
+  perimetro Unsupported("geometry(MultiPolygon, 4674)")?
+
+  municipio Municipio @relation(fields: [municipioId], references: [id], onDelete: Restrict)
+  imoveis   Imovel[]
+
+  @@unique([nome, municipioId])
+  @@map("glebas")
+}
+
+/// Setores do fluxo do Anexo X. Tabela e não enum: a estrutura muda por
+/// decreto, e `papelRbac` nulo marca o setor que ainda não tem papel
+/// correspondente na matriz de RBAC — hoje é o caso da DSF.
+model Setor {
+  id        Int     @id @default(autoincrement())
+  sigla     String  @unique @db.VarChar(20)
+  nome      String  @db.VarChar(180)
+  papelRbac String? @db.VarChar(40)
+  ativo     Boolean @default(true)
+
+  processosAtuais    Processo[]
+  tramitacoesOrigem  Tramitacao[]             @relation("TramitacaoOrigem")
+  tramitacoesDestino Tramitacao[]             @relation("TramitacaoDestino")
+  documentos         DocumentoProcesso[]
+  relacionamentos    ProcessoRelacionamento[]
+  comunicacoes       Comunicacao[]
+
+  @@map("setores")
+}
+
+// ---------------------------------------------------------------------
+// Parâmetros normativos versionados (metade "banco" da decisão mista)
+// ---------------------------------------------------------------------
+
+/// Regras que mudam por lei ou errata. O marco temporal mora aqui
+/// justamente porque a IN o fixa em 17/11/2017 no Art. 11 §1º e em
+/// 19/11/2017 no Anexo II: quando isso for sanado, é UPDATE, não deploy.
+model ParametroNormativo {
+  id              Int            @id @default(autoincrement())
+  chave           ChaveParametro
+  valorTexto      String? @db.VarChar(255)
+  valorNumerico   Decimal? @db.Decimal(18, 6)
+  valorData       DateTime? @db.Date
+  fundamentoLegal String @db.VarChar(255)
+  observacao      String?        @db.Text
+  vigenciaInicio  DateTime @db.Date
+  vigenciaFim     DateTime? @db.Date
+
+  @@map("parametros_normativos")
+}
+
+/// Faixas de porte por módulo fiscal. A EXCLUDE constraint
+/// `ex_faixa_sem_sobreposicao` é a defesa contra a inconsistência do
+/// Art. 10 ("até 1") vs Art. 11 ("até 4"): o banco recusa faixas que se
+/// sobreponham na mesma vigência.
+model FaixaModuloFiscal {
+  id                      Int       @id @default(autoincrement())
+  codigo                  String    @db.VarChar(30)
+  descricao               String    @db.VarChar(180)
+  limiteInferiorExclusivo Decimal @db.Decimal(10, 4)
+  limiteSuperiorInclusivo Decimal? @db.Decimal(10, 4)
+  anexoReferencia         String @db.VarChar(10)
+  fundamentoLegal         String @db.VarChar(255)
+  vigenciaInicio          DateTime @db.Date
+  vigenciaFim             DateTime? @db.Date
+
+  processos  Processo[]
+  exigencias ChecklistExigencia[]
+
+  @@map("faixas_modulo_fiscal")
+}
+
+model TaxaProcessual {
+  id              Int       @id @default(autoincrement())
+  codigo          String    @db.VarChar(40)
+  descricao       String    @db.VarChar(180)
+  valor           Decimal   @db.Decimal(12, 2)
+  fundamentoLegal String @db.VarChar(255)
+  vigenciaInicio  DateTime @db.Date
+  vigenciaFim     DateTime? @db.Date
+
+  debitos DebitoTaxa[]
+
+  @@map("taxas_processuais")
+}
+
+// ---------------------------------------------------------------------
+// Pessoas (Art. 6º, I a VI e §4º · Anexo I)
+// ---------------------------------------------------------------------
+
+/// LGPD: `cpf` e `cnpj` nunca em log nem em resposta de API sem
+/// necessidade — mesma regra já adotada no model de autenticação.
+model Pessoa {
+  id                    Int                    @id @default(autoincrement())
+  tipoPessoa            TipoPessoa             @default(FISICA)
+  nome                  String                 @db.VarChar(180)
+  cpf                   String?                @unique @db.Char(11)
+  cnpj                  String?                @unique @db.Char(14)
+  rg                    String?                @db.VarChar(30)
+  orgaoEmissorRg        String? @db.VarChar(30)
+  dataNascimento        DateTime? @db.Date
+  condicaoNacionalidade CondicaoNacionalidade?
+  nacionalidade         String?                @db.VarChar(60)
+  naturalidade          String?                @db.VarChar(120)
+  profissao             String?                @db.VarChar(120)
+  estadoCivil           EstadoCivil?
+  email                 String?                @db.VarChar(180)
+  telefone              String?                @db.VarChar(20)
+  celular               String?                @db.VarChar(20)
+  portariaNaturalizacao String? @db.VarChar(120)
+  criadoEm              DateTime               @default(now()) @db.Timestamptz(6)
+  atualizadoEm          DateTime               @updatedAt @db.Timestamptz(6)
+
+  enderecos                   Endereco[]
+  processosComoInteressado    Processo[]               @relation("ProcessoInteressado")
+  processosComoConjuge        Processo[]               @relation("ProcessoConjuge")
+  requerimentosProtocolados   Requerimento[]
+  partes                      ParteProcesso[]
+  declaracoesComoTransmitente DeclaracaoQualificacao[] @relation("DeclaracaoTransmitente")
+  confrontacoes               Confrontacao[]
+  termosAnuencia              TermoAnuencia[]
+  acessos                     PessoaAcesso[]
+
+  @@map("pessoas")
+}
+
+/// Acesso do cidadão ao Portal Iteraima Cidadão (Art. 5º). É um principal
+/// SEPARADO do servidor: o cidadão não tem conta no AD, então a tabela de
+/// autenticação existente (AD + break-glass) não muda. No AuthModule isso
+/// entra como um segundo `CredentialValidator`, atrás da mesma interface
+/// que já existe — o guard passa a distinguir servidor de cidadão pela
+/// origem do principal, e o cidadão só enxerga os próprios processos.
+/// ATENÇÃO: o PermissionGuard NÃO aplica escopo de linha. O filtro por
+/// "processos em que sou parte" é obrigatório no ProcessoService.
+model PessoaAcesso {
+  id           Int       @id @default(autoincrement())
+  pessoaId     Int
+  /// `sub` do OIDC do gov.br. Não há senha local para cidadão: gerenciar
+  /// senha de requerente significaria fluxo de reset, bloqueio e exposição
+  /// em vazamento — que é exatamente o que o gov.br existe para evitar.
+  govbrSubject String    @unique @db.VarChar(255)
+  emailAcesso  String @db.VarChar(180)
+  ativo        Boolean   @default(true)
+  criadoEm     DateTime  @default(now()) @db.Timestamptz(6)
+  ultimoAcesso DateTime? @db.Timestamptz(6)
+
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@map("pessoas_acesso")
+}
+
+model Endereco {
+  id          Int          @id @default(autoincrement())
+  pessoaId    Int
+  tipo        TipoEndereco @default(RESIDENCIAL)
+  logradouro  String       @db.VarChar(180)
+  numero      String?      @db.VarChar(20)
+  complemento String?      @db.VarChar(120)
+  bairro      String?      @db.VarChar(120)
+  municipioId Int
+  cep         String?      @db.Char(8)
+
+  pessoa    Pessoa    @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+  municipio Municipio @relation(fields: [municipioId], references: [id], onDelete: Restrict)
+
+  @@index([pessoaId])
+  @@map("enderecos")
+}
+
+// ---------------------------------------------------------------------
+// Imóvel (Art. 6º, II e III · Art. 23)
+// ---------------------------------------------------------------------
+
+model Imovel {
+  id                 Int     @id @default(autoincrement())
+  denominacao        String  @db.VarChar(180)
+  municipioId        Int
+  glebaId            Int?
+  enderecoDescritivo String? @db.Text
+
+  /// Área informada pelo requerente no Anexo I.
+  areaDeclaradaHa Decimal @db.Decimal(14, 4)
+
+  /// Área da peça técnica certificada. É a AUTORITATIVA (Art. 23 remete às
+  /// normas do INCRA, cálculo em Sistema Geodésico Local).
+  areaCertificadaHa Decimal? @db.Decimal(14, 4)
+
+  codigoSncr         String? @db.VarChar(30)
+  codigoCcir         String? @db.VarChar(30)
+  codigoParcelaSigef String? @db.VarChar(60)
+  matricula          String? @db.VarChar(60)
+  cartorio           String? @db.VarChar(180)
+
+  /// PostGIS: invisível ao Prisma Client. Ler/gravar por $queryRaw.
+  perimetro Unsupported("geometry(MultiPolygon, 4674)")?
+
+  /// A área de triagem NÃO é coluna — o GeoService a calcula sob demanda
+  /// com ST_Area sobre geography. Coluna GENERATED numa tabela que o
+  /// Prisma escreve é armadilha (erro 428C9 se alguém a passar em create).
+
+  criadoEm DateTime @default(now()) @db.Timestamptz(6)
+
+  municipio Municipio  @relation(fields: [municipioId], references: [id], onDelete: Restrict)
+  gleba     Gleba?     @relation(fields: [glebaId], references: [id], onDelete: SetNull)
+  processos Processo[]
+
+  @@index([municipioId])
+  @@map("imoveis")
+}
+
+// ---------------------------------------------------------------------
+// Processo e requerimento (Art. 5º, 7º, 78)
+// ---------------------------------------------------------------------
+
+model Processo {
+  id              Int     @id @default(autoincrement())
+  numeroSei       String  @unique @db.VarChar(40)
+  numeroProtocolo String? @unique @db.VarChar(40)
+
+  interessadoId Int
+  conjugeId     Int?
+  imovelId      Int
+
+  situacao     SituacaoProcesso @default(EM_TRAMITE)
+  faseAtual    FaseProcesso     @default(PROTOCOLO)
+  setorAtualId Int?
+
+  /// Snapshots deliberados (ver nota de denormalização no documento):
+  /// registram QUAL regra foi aplicada a este processo, porque módulo
+  /// fiscal, faixa e marco temporal mudam — e o Art. 51 exige saber
+  /// qual valia à época.
+  faixaModuloFiscalId    Int?
+  moduloFiscalAplicadoHa Decimal? @db.Decimal(10, 4)
+  numeroModulosFiscais   Decimal? @db.Decimal(12, 4)
+  marcoTemporalAplicado  DateTime? @db.Date
+
+  dataAbertura     DateTime  @default(now()) @db.Timestamptz(6)
+  dataEncerramento DateTime? @db.Timestamptz(6)
+
+  interessado       Pessoa             @relation("ProcessoInteressado", fields: [interessadoId], references: [id], onDelete: Restrict)
+  conjuge           Pessoa?            @relation("ProcessoConjuge", fields: [conjugeId], references: [id], onDelete: Restrict)
+  imovel            Imovel             @relation(fields: [imovelId], references: [id], onDelete: Restrict)
+  setorAtual        Setor?             @relation(fields: [setorAtualId], references: [id], onDelete: SetNull)
+  faixaModuloFiscal FaixaModuloFiscal? @relation(fields: [faixaModuloFiscalId], references: [id], onDelete: Restrict)
+
+  requerimentos       Requerimento[]
+  partes              ParteProcesso[]
+  declaracao          DeclaracaoQualificacao?
+  documentos          DocumentoProcesso[]
+  tramitacoes         Tramitacao[]
+  comunicacoes        Comunicacao[]
+  arquivamentos       Arquivamento[]
+  debitos             DebitoTaxa[]
+  eventos             ProcessoEvento[]
+  relacionamentosComoMenor ProcessoRelacionamento[] @relation("RelacionamentoMenor")
+  relacionamentosComoMaior ProcessoRelacionamento[] @relation("RelacionamentoMaior")
+
+  @@index([interessadoId])
+  @@index([imovelId])
+  @@index([situacao, faseAtual])
+  @@index([setorAtualId, situacao])
+  @@map("processos")
+}
+
+/// Art. 5º pu: novo pedido sobre processo em curso é ANEXADO aos autos
+/// existentes — por isso 1:N, e não um campo do Processo.
+model Requerimento {
+  id               Int              @id @default(autoincrement())
+  processoId       Int
+  tipo             TipoRequerimento @default(INICIAL)
+  canal            CanalProtocolo
+  dataProtocolo    DateTime         @default(now()) @db.Timestamptz(6)
+  protocoladoPorId Int?
+  observacao       String?          @db.Text
+
+  processo       Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  protocoladoPor Pessoa?  @relation(fields: [protocoladoPorId], references: [id], onDelete: SetNull)
+
+  @@index([processoId])
+  @@map("requerimentos")
+}
+
+/// Partes com multiplicidade e vigência (Art. 6º §4º a §8º). Interessado
+/// e cônjuge NÃO entram aqui: são identidade do requerimento, congelada no
+/// protocolo, e ambos assinam os Anexos II e III.
+model ParteProcesso {
+  id               Int        @id @default(autoincrement())
+  processoId       Int
+  pessoaId         Int
+  papel            PapelParte
+  dataInicio       DateTime   @default(now()) @db.Date
+  dataFim          DateTime? @db.Date
+  mandatoValidoAte DateTime? @db.Date
+
+  processo Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  pessoa   Pessoa   @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
+
+  @@index([processoId, papel])
+  @@map("partes_processo")
+}
+
+// ---------------------------------------------------------------------
+// Declaração de qualificação (Anexos II e III)
+// ---------------------------------------------------------------------
+
+/// Fatos DECLARADOS pelo requerente sob o Art. 299 do CP. Ficam aqui e não
+/// no Imovel: são afirmação datada e congelada, não atributo do bem.
+model DeclaracaoQualificacao {
+  id         Int @id @default(autoincrement())
+  processoId Int @unique
+
+  ocupantePrimitivo          Boolean
+  transmitenteId             Int?
+  dataOcupacaoPrimitiva      DateTime? @db.Date
+  dataOcupacaoAtual          DateTime? @db.Date
+  haContestacaoTerceiros     Boolean   @default(false)
+  jaBeneficiadoProgFundiario Boolean   @default(false)
+  ocupacaoAnteriorMarco      Boolean
+
+  /// Qual marco foi efetivamente apresentado ao declarante. Existe porque a
+  /// IN traz 17/11/2017 (Art. 11 §1º) e 19/11/2017 (Anexo II): sem este
+  /// campo não há como auditar qual critério cada processo respondeu.
+  marcoTemporalReferencia DateTime @db.Date
+
+  atividadeRecreativaFamiliar    Boolean               @default(false)
+  exerceMoradiaHabitual          Boolean?
+  declaraAusenciaTrabalhoEscravo Boolean
+  eletrificacao                  TipoEletrificacao?
+  haAcessoRodoviario             Boolean?
+  tipoAcesso                     TipoAcessoRodoviario?
+  acessoPavimentado              Boolean?
+  edificacoesExistentes          String? @db.Text
+  criacoesExistentes             String? @db.Text
+  interesseEcologico             Boolean               @default(false)
+  projetoRecuperacaoDegradada    Boolean               @default(false)
+  efetivaRecuperacaoDegradada    Boolean               @default(false)
+  culturaEfetiva                 Boolean               @default(false)
+  /// RL total NÃO fica aqui: é a soma de `coberturasVegetais`, e dois
+  /// lugares para o mesmo número divergem.
+  assinadaEm                     DateTime @db.Date
+
+  processo     Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  transmitente Pessoa?  @relation("DeclaracaoTransmitente", fields: [transmitenteId], references: [id], onDelete: SetNull)
+
+  coberturasVegetais CoberturaVegetalDeclarada[]
+  confrontacoes      Confrontacao[]
+
+  @@map("declaracoes_qualificacao")
+}
+
+/// 1FN: "Cerrado" e "Floresta" eram colunas repetidas no formulário.
+model CoberturaVegetalDeclarada {
+  id                 Int                  @id @default(autoincrement())
+  declaracaoId       Int
+  tipo               TipoCoberturaVegetal
+  areaHa             Decimal @db.Decimal(14, 4)
+  areaReservaLegalHa Decimal? @db.Decimal(14, 4)
+  percentual         Decimal?             @db.Decimal(6, 3)
+
+  declaracao DeclaracaoQualificacao @relation(fields: [declaracaoId], references: [id], onDelete: Cascade)
+
+  @@unique([declaracaoId, tipo])
+  @@map("coberturas_vegetais")
+}
+
+/// 1FN: norte/sul/leste/oeste eram quatro linhas fixas do Anexo III.
+/// `ordem` permite mais de um confrontante no mesmo rumo.
+model Confrontacao {
+  id             Int              @id @default(autoincrement())
+  declaracaoId   Int
+  rumo           RumoConfrontacao
+  descricao      String           @db.Text
+  confrontanteId Int?
+  ordem          Int              @default(1) @db.SmallInt
+
+  declaracao   DeclaracaoQualificacao @relation(fields: [declaracaoId], references: [id], onDelete: Cascade)
+  confrontante Pessoa?                @relation(fields: [confrontanteId], references: [id], onDelete: SetNull)
+
+  @@unique([declaracaoId, rumo, ordem])
+  @@map("confrontacoes")
+}
+
+// ---------------------------------------------------------------------
+// Documentos e checklist (Art. 6º · Anexos VII, VIII, IX)
+// ---------------------------------------------------------------------
+
+model TipoDocumento {
+  id                Int     @id @default(autoincrement())
+  codigo            String  @unique @db.VarChar(60)
+  nome              String  @db.VarChar(180)
+  descricao         String? @db.Text
+  exigeAutenticacao Boolean @default(true)
+  aceitaDigital     Boolean @default(true)
+
+  exigencias ChecklistExigencia[]
+  documentos DocumentoProcesso[]
+
+  @@map("tipos_documento")
+}
+
+/// UNIÃO de Art. 6º com o anexo da faixa — resolve a divergência entre as
+/// listas: declaração de nacionalidade só existe no Art. 6º, comprovação
+/// de renda só no Anexo VII, certidão negativa só no Anexo IX.
+model ChecklistExigencia {
+  id                  Int                @id @default(autoincrement())
+  tipoDocumentoId     Int
+  faixaModuloFiscalId Int
+  obrigatoriedade     ObrigatoriedadeDoc
+  condicao            String?            @db.Text
+  fundamentoLegal     String @db.VarChar(255)
+  vigenciaInicio      DateTime @db.Date
+  vigenciaFim         DateTime? @db.Date
+
+  tipoDocumento     TipoDocumento     @relation(fields: [tipoDocumentoId], references: [id], onDelete: Cascade)
+  faixaModuloFiscal FaixaModuloFiscal @relation(fields: [faixaModuloFiscalId], references: [id], onDelete: Cascade)
+
+  @@map("checklist_exigencias")
+}
+
+/// O binário NÃO fica no Postgres: `storageKey` aponta para o object
+/// storage e `hashSha256` garante integridade e detecta reenvio.
+model DocumentoProcesso {
+  id                Int               @id @default(autoincrement())
+  processoId        Int
+  tipoDocumentoId   Int
+  nomeOriginal      String @db.VarChar(255)
+  storageKey        String            @unique @db.VarChar(512)
+  mimeType          String @db.VarChar(120)
+  tamanhoBytes      BigInt
+  hashSha256        String @db.Char(64)
+
+  formaAutenticacao FormaAutenticacao
+  dataJuntada       DateTime          @default(now()) @db.Timestamptz(6)
+
+  /// TODO: trocar por FK para Usuario quando confirmado o tipo do id na
+  /// sua tabela de autenticação (a migração deixa a coluna como TEXT).
+  juntadoPorId String?
+
+  setorJuntadaId Int?
+  observacao     String? @db.Text
+
+  processo      Processo      @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  tipoDocumento TipoDocumento @relation(fields: [tipoDocumentoId], references: [id], onDelete: Restrict)
+  setorJuntada  Setor?        @relation(fields: [setorJuntadaId], references: [id], onDelete: SetNull)
+
+  certidoesRelacionamento ProcessoRelacionamento[] @relation("CertidaoRelacionamento")
+  decisoesComunicacao     Comunicacao[]            @relation("DecisaoComunicacao")
+  comprovantesEntrega     TentativaEntrega[]       @relation("ComprovanteEntrega")
+  despachosArquivamento   Arquivamento[]           @relation("DespachoArquivamento")
+  comprovantesDebito      DebitoTaxa[]             @relation("ComprovanteDebito")
+
+  /// Mesmo arquivo, mesmo tipo, mesmo processo = reenvio, não nova juntada.
+  /// No banco o índice se chama `ux_documento_dedup`.
+  @@unique([processoId, tipoDocumentoId, hashSha256], map: "ux_documento_dedup")
+  @@index([processoId, tipoDocumentoId])
+  @@index([hashSha256])
+  @@map("documentos_processo")
+}
+
+// ---------------------------------------------------------------------
+// Tramitação (Anexo X · Art. 78 · Art. 80)
+// ---------------------------------------------------------------------
+
+/// Índice parcial `ux_tramitacao_aberta_por_processo` na migração garante
+/// o Art. 78: no máximo uma tramitação aberta por processo.
+model Tramitacao {
+  id              Int       @id @default(autoincrement())
+  processoId      Int
+  etapaAnexoX     Int? @db.SmallInt
+  setorOrigemId   Int?
+  setorDestinoId  Int
+  enviadoEm       DateTime  @default(now()) @db.Timestamptz(6)
+  recebidoEm      DateTime? @db.Timestamptz(6)
+  concluidoEm     DateTime? @db.Timestamptz(6)
+  servidorRecebId String?
+  despacho        String?   @db.Text
+
+  processo     Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  setorOrigem  Setor?   @relation("TramitacaoOrigem", fields: [setorOrigemId], references: [id], onDelete: SetNull)
+  setorDestino Setor    @relation("TramitacaoDestino", fields: [setorDestinoId], references: [id], onDelete: Restrict)
+
+  @@index([processoId, enviadoEm(sort: Desc)])
+  @@map("tramitacoes")
+}
+
+// ---------------------------------------------------------------------
+// Relacionamento de processos (Cap. III, Art. 13-15)
+// ---------------------------------------------------------------------
+
+/// Par NÃO ordenado. O CHECK `ck_rel_ordem` (menor < maior) canoniza o par
+/// e impede que (A,B) e (B,A) coexistam como registros distintos.
+model ProcessoRelacionamento {
+  id                  Int                  @id @default(autoincrement())
+  processoMenorId     Int
+  processoMaiorId     Int
+  motivo              MotivoRelacionamento
+  setorResponsavelId  Int?
+  certidaoDocumentoId Int?
+  criadoEm            DateTime             @default(now()) @db.Timestamptz(6)
+  criadoPorId         String?
+
+  processoMenor     Processo           @relation("RelacionamentoMenor", fields: [processoMenorId], references: [id], onDelete: Restrict)
+  processoMaior     Processo           @relation("RelacionamentoMaior", fields: [processoMaiorId], references: [id], onDelete: Restrict)
+  setorResponsavel  Setor?             @relation(fields: [setorResponsavelId], references: [id], onDelete: SetNull)
+  certidaoDocumento DocumentoProcesso? @relation("CertidaoRelacionamento", fields: [certidaoDocumentoId], references: [id], onDelete: SetNull)
+
+  @@unique([processoMenorId, processoMaiorId, motivo])
+  @@index([processoMaiorId])
+  @@map("processos_relacionamentos")
+}
+
+// ---------------------------------------------------------------------
+// Notificação e intimação (Cap. X · Arts. 69-74 · Anexo XIII)
+// ---------------------------------------------------------------------
+
+/// Art. 69 §5º: o termo pode ser alterado a qualquer tempo. Historiza-se
+/// (índice parcial `ux_termo_anuencia_vigente` garante um só ativo por
+/// pessoa) porque a validade de uma intimação depende do termo que estava
+/// em vigor na data em que ela foi expedida.
+model TermoAnuencia {
+  id                 Int       @id @default(autoincrement())
+  pessoaId           Int
+  telefoneAplicativo String @db.VarChar(20)
+  email              String    @db.VarChar(180)
+  enderecoFisico     String? @db.Text
+  assinadoEm         DateTime @db.Date
+  revogadoEm         DateTime? @db.Date
+  versao             Int       @default(1) @db.SmallInt
+
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@map("termos_anuencia")
+}
+
+model Comunicacao {
+  id                 Int             @id @default(autoincrement())
+  processoId         Int
+  tipo               TipoComunicacao
+  setorDemandanteId  Int?
+  assunto            String          @db.VarChar(255)
+  fundamentoLegal    String? @db.VarChar(255)
+  decisaoDocumentoId Int?
+  expedidaEm         DateTime        @default(now()) @db.Timestamptz(6)
+  prazoDias          Int? @db.SmallInt
+  prazoEmDiasUteis   Boolean         @default(true)
+
+  /// Art. 71, III: havendo dois meios, vale a data que ocorrer POR ÚLTIMO.
+  /// Derivada de max(TentativaEntrega.confirmadaEm), gravada aqui porque o
+  /// prazo processual precisa de uma data fixa e auditável.
+  dataCienciaEfetiva DateTime? @db.Timestamptz(6)
+
+  dataInicioPrazo DateTime? @db.Date
+  dataFimPrazo    DateTime? @db.Date
+  encerradaEm     DateTime? @db.Timestamptz(6)
+
+  processo         Processo           @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  setorDemandante  Setor?             @relation(fields: [setorDemandanteId], references: [id], onDelete: SetNull)
+  decisaoDocumento DocumentoProcesso? @relation("DecisaoComunicacao", fields: [decisaoDocumentoId], references: [id], onDelete: SetNull)
+
+  tentativas TentativaEntrega[]
+
+  @@index([processoId, expedidaEm(sort: Desc)])
+  @@map("comunicacoes")
+}
+
+/// Art. 71 §1º (5 dias úteis sem confirmação → pessoal/postal) e §2º
+/// (duas tentativas frustradas → edital) são contagens sobre esta tabela.
+model TentativaEntrega {
+  id               Int                @id @default(autoincrement())
+  comunicacaoId    Int
+  ordem            Int                @db.SmallInt
+  meio             MeioComunicacao
+  destino          String             @db.VarChar(255)
+  enviadaEm        DateTime           @default(now()) @db.Timestamptz(6)
+  confirmadaEm     DateTime? @db.Timestamptz(6)
+  resultado        ResultadoTentativa @default(ENVIADO_SEM_CONFIRMACAO)
+  comprovanteDocId Int?
+
+  comunicacao  Comunicacao        @relation(fields: [comunicacaoId], references: [id], onDelete: Cascade)
+  comprovante  DocumentoProcesso? @relation("ComprovanteEntrega", fields: [comprovanteDocId], references: [id], onDelete: SetNull)
+
+  @@unique([comunicacaoId, ordem])
+  @@map("tentativas_entrega")
+}
+
+// ---------------------------------------------------------------------
+// Arquivamento e trilha de auditoria (Art. 80 · Art. 53, V)
+// ---------------------------------------------------------------------
+
+model Arquivamento {
+  id                  Int       @id @default(autoincrement())
+  processoId          Int
+  arquivadoEm         DateTime  @default(now()) @db.Timestamptz(6)
+  motivo              String    @db.Text
+  fundamentoLegal     String? @db.VarChar(255)
+  despachoDocumentoId Int?
+
+  /// Art. 80: vedado arquivar sem decisão expressa da chefia imediata.
+  chefiaAprovouId String
+
+  desarquivadoEm DateTime? @db.Timestamptz(6)
+
+  processo          Processo           @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  despachoDocumento DocumentoProcesso? @relation("DespachoArquivamento", fields: [despachoDocumentoId], references: [id], onDelete: SetNull)
+
+  @@map("arquivamentos")
+}
+
+/// Taxas devidas pelo processo — etapa 1 do Anexo X, em que a DCI emite os
+/// boletos de taxas diretas (abertura, 2ª via, desarquivamento, pesquisa
+/// documental, atestado de cadeia possessória, transformação de alienação
+/// não onerosa em onerosa, reprodução de mapas, reanálise de peças).
+///
+/// NÃO cobre a cobrança do instrumento de regularização (Anexo XII: VTN,
+/// título, parcelas, descontos, cláusulas resolutivas) — isso é o Cap.
+/// VIII/IX e entra numa rodada própria.
+model DebitoTaxa {
+  id               Int @id @default(autoincrement())
+  processoId       Int
+  taxaProcessualId Int
+
+  /// Valor CONGELADO na emissão. A taxa muda por lei; o boleto emitido não.
+  /// Mesmo padrão dos snapshots de módulo fiscal e marco temporal.
+  valor Decimal @db.Decimal(12, 2)
+
+  numeroDocumento  String? @db.VarChar(60)
+  dataEmissao      DateTime       @default(now()) @db.Date
+  dataVencimento   DateTime @db.Date
+  dataPagamento    DateTime? @db.Date
+  situacao         SituacaoDebito @default(EMITIDO)
+  comprovanteDocId Int?
+  emitidoPorId     String?
+  confirmadoPorId  String?
+  observacao       String?        @db.Text
+
+  processo       Processo           @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  taxaProcessual TaxaProcessual     @relation(fields: [taxaProcessualId], references: [id], onDelete: Restrict)
+  comprovante    DocumentoProcesso? @relation("ComprovanteDebito", fields: [comprovanteDocId], references: [id], onDelete: SetNull)
+
+  @@index([processoId, situacao])
+  @@map("debitos_taxa")
+}
+
+/// Trilha append-only. Atende ao Art. 53, V (certificar nos autos todas as
+/// ocorrências) e sustenta a reconstrução do estado do processo.
+model ProcessoEvento {
+  id           Int                @id @default(autoincrement())
+  processoId   Int
+  tipo         TipoEventoProcesso
+  faseAnterior FaseProcesso?
+  faseNova     FaseProcesso?
+  usuarioId    String?
+  ocorridoEm   DateTime           @default(now()) @db.Timestamptz(6)
+  dados        Json               @default("{}") @db.JsonB
+
+  processo Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+
+  @@index([processoId, ocorridoEm(sort: Desc)])
+  @@map("processos_eventos")
 }
