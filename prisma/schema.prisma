@@ -116,6 +116,19 @@ model User {
 
   sessions Session[]
 
+  /// Atos praticados por este servidor no núcleo processual. Existem porque
+  /// o Prisma exige o outro lado da relação — ninguém consulta um usuário
+  /// para listar documentos. Nenhuma delas é Cascade: a saída de um servidor
+  /// desliga a autoria (SetNull), nunca apaga o que ele movimentou, e o
+  /// arquivamento é Restrict — não se apaga quem autorizou (Art. 80).
+  documentosJuntados     DocumentoProcesso[]
+  tramitacoesRecebidas   Tramitacao[]
+  relacionamentosCriados ProcessoRelacionamento[]
+  arquivamentosAprovados Arquivamento[]
+  eventosProcesso        ProcessoEvento[]
+  debitosEmitidos        DebitoTaxa[]             @relation("DebitoEmitidoPor")
+  debitosConfirmados     DebitoTaxa[]             @relation("DebitoConfirmadoPor")
+
   @@map("users")
 }
 
@@ -842,8 +855,7 @@ model DocumentoProcesso {
   formaAutenticacao FormaAutenticacao
   dataJuntada       DateTime          @default(now()) @db.Timestamptz(6)
 
-  /// TODO: trocar por FK para Usuario quando confirmado o tipo do id na
-  /// sua tabela de autenticação (a migração deixa a coluna como TEXT).
+  /// Art. 7º: quem juntou a peça aos autos.
   juntadoPorId String?
 
   setorJuntadaId Int?
@@ -852,6 +864,7 @@ model DocumentoProcesso {
   processo      Processo      @relation(fields: [processoId], references: [id], onDelete: Restrict)
   tipoDocumento TipoDocumento @relation(fields: [tipoDocumentoId], references: [id], onDelete: Restrict)
   setorJuntada  Setor?        @relation(fields: [setorJuntadaId], references: [id], onDelete: SetNull)
+  juntadoPor    User?         @relation(fields: [juntadoPorId], references: [id], onDelete: SetNull)
 
   certidoesRelacionamento ProcessoRelacionamento[] @relation("CertidaoRelacionamento")
   decisoesComunicacao     Comunicacao[]            @relation("DecisaoComunicacao")
@@ -885,9 +898,10 @@ model Tramitacao {
   servidorRecebId String?
   despacho        String?   @db.Text
 
-  processo     Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
-  setorOrigem  Setor?   @relation("TramitacaoOrigem", fields: [setorOrigemId], references: [id], onDelete: SetNull)
-  setorDestino Setor    @relation("TramitacaoDestino", fields: [setorDestinoId], references: [id], onDelete: Restrict)
+  processo      Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  setorOrigem   Setor?   @relation("TramitacaoOrigem", fields: [setorOrigemId], references: [id], onDelete: SetNull)
+  setorDestino  Setor    @relation("TramitacaoDestino", fields: [setorDestinoId], references: [id], onDelete: Restrict)
+  servidorReceb User?    @relation(fields: [servidorRecebId], references: [id], onDelete: SetNull)
 
   @@index([processoId, enviadoEm(sort: Desc)])
   @@map("tramitacoes")
@@ -913,6 +927,7 @@ model ProcessoRelacionamento {
   processoMaior     Processo           @relation("RelacionamentoMaior", fields: [processoMaiorId], references: [id], onDelete: Restrict)
   setorResponsavel  Setor?             @relation(fields: [setorResponsavelId], references: [id], onDelete: SetNull)
   certidaoDocumento DocumentoProcesso? @relation("CertidaoRelacionamento", fields: [certidaoDocumentoId], references: [id], onDelete: SetNull)
+  criadoPor         User?              @relation(fields: [criadoPorId], references: [id], onDelete: SetNull)
 
   @@unique([processoMenorId, processoMaiorId, motivo])
   @@index([processoMaiorId])
@@ -1012,6 +1027,9 @@ model Arquivamento {
 
   processo          Processo           @relation(fields: [processoId], references: [id], onDelete: Restrict)
   despachoDocumento DocumentoProcesso? @relation("DespachoArquivamento", fields: [despachoDocumentoId], references: [id], onDelete: SetNull)
+  /// Restrict, e não SetNull: a coluna é NOT NULL porque o Art. 80 não
+  /// admite arquivamento sem chefia identificada — inclusive depois.
+  chefiaAprovou     User               @relation(fields: [chefiaAprovouId], references: [id], onDelete: Restrict)
 
   @@map("arquivamentos")
 }
@@ -1046,6 +1064,8 @@ model DebitoTaxa {
   processo       Processo           @relation(fields: [processoId], references: [id], onDelete: Restrict)
   taxaProcessual TaxaProcessual     @relation(fields: [taxaProcessualId], references: [id], onDelete: Restrict)
   comprovante    DocumentoProcesso? @relation("ComprovanteDebito", fields: [comprovanteDocId], references: [id], onDelete: SetNull)
+  emitidoPor     User?              @relation("DebitoEmitidoPor", fields: [emitidoPorId], references: [id], onDelete: SetNull)
+  confirmadoPor  User?              @relation("DebitoConfirmadoPor", fields: [confirmadoPorId], references: [id], onDelete: SetNull)
 
   @@index([processoId, situacao])
   @@map("debitos_taxa")
@@ -1064,6 +1084,7 @@ model ProcessoEvento {
   dados        Json               @default("{}") @db.JsonB
 
   processo Processo @relation(fields: [processoId], references: [id], onDelete: Restrict)
+  usuario  User?    @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
 
   @@index([processoId, ocorridoEm(sort: Desc)])
   @@map("processos_eventos")
