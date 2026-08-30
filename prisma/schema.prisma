@@ -53,18 +53,40 @@ datasource db {
 // Fonte do union type `Papel` da matriz de permissões em código
 // (Record<Papel, Permissao[]> com `satisfies` — o banco sabe QUEM tem qual
 // papel; o que cada papel PODE fica no código).
-// Grupos AD "TITULA_<PAPEL>" mapeiam para estes códigos. Papéis são
-// mutuamente exclusivos por regra de negócio (1 por pessoa); o array no User
-// é folga estrutural — múltiplos grupos no AD geram warn, não bloqueio.
+//
+// O corte é o teste "papel sem ato exclusivo na IN não existe": foi ele que
+// tirou `colaborador` e `informatica` daqui (nenhum artigo lhes atribui ato)
+// e trouxe `servicos_fundiarios`, `notificacao`, `presidente` e `cidadao`.
+//
+// FORMA DO ARRAY: um papel de setor por pessoa, opcionalmente somado a
+// `gestor`. O Art. 80 exige distinguir a chefia imediata do analista DENTRO
+// do mesmo setor, e ['governanca', 'gestor'] é a única forma de descrever
+// essa pessoa — daí o array deixar de ser folga estrutural e passar a ter
+// uso real; temPermissao() faz a união. `cidadao` NUNCA combina com outro.
+//
+// PROVISIONAMENTO: grupos AD "TITULA_<PAPEL>" mapeiam para estes códigos,
+// com uma exceção — `cidadao` não tem grupo no AD, vem do PessoaAcesso
+// (gov.br) e é atribuído sem passar por gruposParaPapeis().
 enum Papel {
-  atendimento
-  financeiro
-  titulacao
-  planejamento
-  governanca
-  presidencia
-  gestor
-  administrador
+  // -- Setores do fluxo do Anexo X --------------------------------------------
+  atendimento         // DCI/Protocolo — Arts. 5º, 7º, 49 I, 56 I
+  governanca          // DIGOF (+Geoprocessamento) — Arts. 14-31
+  servicos_fundiarios // DSF/GET — Arts. 18 I, 49 III/VII/XV
+  financeiro          // DIRAD/GEORF-CER — Arts. 49 VIII/XII, 56 II
+  titulacao           // DIGEF — Art. 49 IX (ato no Cap. VIII; aqui, leitura)
+  planejamento        // DIPLAN — Art. 49 XI (ato no Cap. VIII; aqui, leitura)
+  presidencia         // DIPRE/CONSULT/SECEX — Arts. 45, 49 V/X, 56 III
+  notificacao         // Câmara de Notificação — Arts. 52-54
+
+  // -- Autoridade -------------------------------------------------------------
+  presidente          // atos privativos — Arts. 3º, 59-62, 73, 79, 81
+  gestor              // chefia imediata do Art. 80 — SOMA-SE ao papel de setor
+
+  // -- Sistema ----------------------------------------------------------------
+  administrador       // contas, sessões e parâmetros normativos
+
+  // -- Externo ----------------------------------------------------------------
+  cidadao             // Portal — Art. 5º; escopado ao próprio dossiê
 }
 
 enum OrigemConta {

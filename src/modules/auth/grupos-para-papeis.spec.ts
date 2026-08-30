@@ -38,6 +38,33 @@ describe('gruposParaPapeis', () => {
     expect(r.desconhecidos).toEqual(['TITULA_FINANCEIROO']);
   });
 
+  // O papel do Portal não se provisiona pelo AD: se alguém criar o grupo,
+  // ele vira anomalia visível, não acesso de requerente numa conta interna.
+  it('recusa TITULA_CIDADAO — cidadao não vem do AD', () => {
+    const r = gruposParaPapeis([
+      `CN=TITULA_CIDADAO,${DC}`,
+      `CN=TITULA_ATENDIMENTO,${DC}`,
+    ]);
+    expect(r.papeis).toEqual([Papel.atendimento]);
+    expect(r.desconhecidos).toEqual(['TITULA_CIDADAO']);
+  });
+
+  it('mapeia os papéis novos da IN 002/2026', () => {
+    const r = gruposParaPapeis([
+      `CN=TITULA_SERVICOS_FUNDIARIOS,${DC}`,
+      `CN=TITULA_NOTIFICACAO,${DC}`,
+      `CN=TITULA_PRESIDENTE,${DC}`,
+    ]);
+    expect(r.papeis).toEqual(
+      expect.arrayContaining([
+        Papel.servicos_fundiarios,
+        Papel.notificacao,
+        Papel.presidente,
+      ]),
+    );
+    expect(r.desconhecidos).toEqual([]);
+  });
+
   it('ignora DN malformado sem quebrar', () => {
     const r = gruposParaPapeis(['isto-nao-e-um-dn', '']);
     expect(r.papeis).toEqual([]);
