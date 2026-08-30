@@ -1,6 +1,10 @@
+# A major é a MESMA da produção (LXC 20.50.2.224: PostgreSQL 16.13), e o
+# PostGIS idem (3.4.x). Validar em 17/3.5 e implantar em 16/3.4 é apostar
+# que nada mudou entre majors — e entre PostGIS 3.4 e 3.5 mudou.
+# Se produção subir de major um dia, aqui e os dois jobs de CI sobem junto.
 services:
   db:
-    image: imresamu/postgis:17-3.5
+    image: imresamu/postgis:16-3.4
     container_name: titula-rr-db-local
     restart: unless-stopped
     environment:

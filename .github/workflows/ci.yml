@@ -54,7 +54,7 @@ jobs:
       postgres:
         # Mesma imagem do docker-compose.dev.yml: as migrações fazem
         # CREATE EXTENSION IF NOT EXISTS postgis, um Postgres comum não serve.
-        image: imresamu/postgis:17-3.5
+        image: imresamu/postgis:16-3.4
         env:
           POSTGRES_USER: cardoso
           POSTGRES_PASSWORD: iteraima
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: imresamu/postgis:17-3.5
+        image: imresamu/postgis:16-3.4
         env:
           POSTGRES_USER: cardoso
           POSTGRES_PASSWORD: iteraima
