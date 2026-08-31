@@ -14,7 +14,7 @@ e checklist de secrets: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
 ## Stack
 
 - **NestJS 11** (TypeScript, ESM) + **Prisma 7** (`@prisma/adapter-pg`) sobre
-  **PostgreSQL 17 + PostGIS**
+  **PostgreSQL 16 + PostGIS 3.4** — a mesma versão de produção, em dev e no CI
 - **nestjs-zod**: Zod como fonte única do contrato HTTP — valida entrada,
   serializa saída e gera o OpenAPI (`/api/docs`) que o front consome via
   [orval](https://orval.dev)
@@ -24,6 +24,28 @@ e checklist de secrets: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
   cookie/token/`set-cookie`
 - Sessão opaca em cookie `httpOnly` (sem JWT) — validada contra o Postgres a
   cada request; ver `SessionGuard`/`SessionService` em `CLAUDE.md`
+
+## Modelo de domínio
+
+O schema tem duas metades. A de **autenticação** (2 models) está em produção
+desde agosto. A do **núcleo processual da IN 002/2026** — 29 models, 23 enums,
+com geometria em SIRGAS 2000 (EPSG:4674) — está no banco, mas ainda sem módulo
+que a consuma: o que existe hoje é o `schema.prisma`, a migração e os testes
+das regras.
+
+Boa parte das regras da Instrução Normativa vive no **banco**, não no código,
+porque são invariantes que nenhum serviço pode contornar: 47 CHECK, 5 EXCLUDE
+de vigência, 11 índices parciais (a vedação de processo duplicado do Art. 5º pu
+e a tramitação única do Art. 78, entre eles) e 4 funções de contagem de prazo
+em dias úteis. Por isso as migrações são escritas à mão — o Prisma não expressa
+nada disso — e por isso cada uma dessas regras tem teste e2e próprio.
+
+Convenção de nomes: domínio em português, infraestrutura em inglês; tabelas em
+plural via `@@map` (`processos`, `documentos_processo`), colunas em camelCase
+sem `@map` (ficam entre aspas no Postgres), tipos enum em PascalCase.
+
+O raciocínio por trás do modelo — o recorte, o que foi cortado e o que ficou
+anotado — está em [`docs/in002/`](./docs/in002/).
 
 ## Requisitos
 
@@ -61,16 +83,16 @@ Documentação interativa (Swagger): `http://localhost:3000/api/docs`.
 
 ## Comandos
 
-| Comando                                          | O que faz                                                      |
-| ------------------------------------------------ | -------------------------------------------------------------- |
-| `npm run start:dev`                              | API em watch mode                                              |
-| `npm run start:debug`                            | watch mode + inspector                                         |
-| `npm run build`                                  | `nest build` → `dist/`                                         |
-| `npm run lint`                                   | eslint `--fix` em `src`/`apps`/`libs`/`test`                   |
-| `npm run format`                                 | prettier em `src`/`test`                                       |
-| `npm test`                                       | testes unitários (`*.spec.ts`, colocados junto do código)      |
-| `npm run test:watch` / `test:cov` / `test:debug` | variações do unitário                                          |
-| `npm run test:e2e`                               | testes e2e (`test/*.e2e-spec.ts`) contra Postgres+PostGIS real |
+| Comando                                          | O que faz                                                         |
+| ------------------------------------------------ | ----------------------------------------------------------------- |
+| `npm run start:dev`                              | API em watch mode                                                 |
+| `npm run start:debug`                            | watch mode + inspector                                            |
+| `npm run build`                                  | `nest build` → `dist/`                                            |
+| `npm run lint`                                   | eslint `--fix` em `src`/`apps`/`libs`/`test`                      |
+| `npm run format`                                 | prettier em `src`/`test`                                          |
+| `npm test`                                       | testes unitários (`*.spec.ts`, colocados junto do código)         |
+| `npm run test:watch` / `test:cov` / `test:debug` | variações do unitário                                             |
+| `npm run test:e2e`                               | e2e (`test/*.e2e-spec.ts`) contra Postgres+PostGIS real, em série |
 
 ## Banco de dados (Prisma)
 
@@ -104,7 +126,18 @@ Dockerfile quebra ali, não em produção.
 
 ## Testes e2e
 
-Contra Postgres+PostGIS real, não mocks. O script já exporta
+Cinco suítes, 53 testes, contra Postgres+PostGIS real — não mocks.
+
+`auth.e2e-spec` sobe a aplicação e exercita sessão, RBAC e versionamento. As
+quatro suítes `dominio-*` verificam as regras que vivem no banco e por isso
+falam com o `pg` **direto**, sem passar pelo Nest: o driver devolve o SQLSTATE
+e o nome da constraint, que é o que cada teste afirma. O helper comum está em
+`test/helpers/postgres.ts`.
+
+Rodam em série (`--runInBand`): compartilham o mesmo banco, e o `auth.e2e-spec`
+limpa a tabela `users` no `beforeAll`.
+
+O script já exporta
 `NODE_ENV=test`, `AUTH_VALIDATOR=fake` e um `DATABASE_URL` local apontando
 para `titularr_test` (banco diferente do de dev, `titularr`) — suba o
 `docker-compose.dev.yml` e aplique as migrations nesse banco antes:

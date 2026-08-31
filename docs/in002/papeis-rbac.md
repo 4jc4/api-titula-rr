@@ -8,6 +8,12 @@ Sem ato exclusivo, o papel sai. Não há papel "por precaução", "para consulta
 
 **Resultado: 12 papéis.** Saem dois, entram quatro.
 
+> **Implementado em 31/08/2026** (commit `2252393`): o enum, as 31 permissões
+> e a matriz das seções 6 e 7 estão em `prisma/schema.prisma` e
+> `src/modules/auth/permissions.ts`, com a migração que recria o tipo no banco
+> e testes para a união do Art. 80 e para a recusa do `TITULA_CIDADAO`.
+> Seguem por confirmar com quem opera os dois pontos da seção 8.
+
 ---
 
 ## 1. O corte

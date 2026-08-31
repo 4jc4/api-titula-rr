@@ -5,11 +5,11 @@ Modelagem para o `api-titula-rr` (NestJS + Prisma 7 + PostgreSQL 16 + PostGIS 3.
 Arquivos que acompanham este documento:
 
 - `prisma/schema.prisma` — 29 models e 23 enums
-- `prisma/migrations/20260825_in002_nucleo_processual/migration.sql` — DDL completo, incluindo o que o Prisma não expressa
+- `prisma/migrations/20260825231512_in002_nucleo_processual/migration.sql` — DDL completo, incluindo o que o Prisma não expressa
 - `prisma/seed/feriados.sql` — calendário de feriados de RR e Boa Vista, 2026-2036
-- `.../verifica_regras.sql`, `.../verifica_lacunas.sql` e `.../verifica_financeiro.sql` — scripts que provam as constraints
+- `test/dominio-*.e2e-spec.ts` — as regras acima, provadas em teste automatizado (substituíram os três scripts `verifica_*.sql` deste documento em 31/08/2026)
 
-**Estado de validação:** o DDL foi aplicado sem erro contra PostgreSQL 16 + PostGIS 3.4.2, as constraints de negócio foram testadas com dados (todas rejeitaram os casos inválidos), e cada campo do `schema.prisma` foi conferido contra as colunas realmente criadas — 29 models ↔ 29 tabelas, 23 enums ↔ 23 tipos, sem divergência. O `prisma validate` **não** pôde ser executado: o host de binários do Prisma (`binaries.prisma.sh`) responde 403 no ambiente de análise. Rode `npx prisma validate` na sua máquina antes de aplicar.
+**Estado de validação:** o DDL foi aplicado sem erro contra PostgreSQL 16 + PostGIS 3.4.2, as constraints de negócio foram testadas com dados (todas rejeitaram os casos inválidos), e cada campo do `schema.prisma` foi conferido contra as colunas realmente criadas — 29 models ↔ 29 tabelas, 23 enums ↔ 23 tipos, sem divergência. O `prisma validate` não pôde ser executado no ambiente de análise (o host de binários do Prisma responde 403 lá), mas o `prisma generate` rodou na máquina de desenvolvimento em 31/08/2026 sem erro, o que prova que o schema é válido — e as cinco migrações foram aplicadas em ordem contra PostgreSQL 16.13 + PostGIS 3.4.2, a versão de produção.
 
 ---
 
@@ -295,6 +295,14 @@ Vale confirmar antes se o repositório do LXC tem o pacote na versão que casa c
 **Setores sem papel no RBAC.** A tabela `setores` tem `papelRbac` nullable justamente para tornar a lacuna visível. Hoje a **DSF** — presente nas etapas 3, 6 e 13 do Anexo X, o setor mais recorrente do fluxo — não tem papel correspondente na matriz (`atendimento`, `financeiro`, `titulacao`, `informatica`, `planejamento`, `governanca`, `presidencia`, `colaborador`, `gestor`, `administrador`). Ouvidoria Agrária, Câmara de Notificação e Divisão de Arquivo também não. Decidir se é agregação intencional ou lacuna antes de codar o guard de tramitação.
 
 **Chaves para `Usuario`.** Cinco colunas referenciam o servidor responsável (`juntadoPorId`, `servidorRecebId`, `criadoPorId`, `chefiaAprovouId`, `usuarioId`) e estão como `TEXT` sem FK, porque o tipo do id na sua tabela de autenticação não foi confirmado. Assim que confirmar, acrescente as cinco FKs — são cinco `ALTER TABLE`.
+
+> **ATUALIZAÇÃO — 31/08/2026.** Os cinco itens desta seção foram resolvidos, e o primeiro por um motivo inesperado:
+>
+> - **PostGIS em produção** não era bloqueante — a verificação no LXC mostrou `postgresql-16-postgis-3` **3.4.2** já instalado e a extensão já criada em `titularr`, exatamente a versão contra a qual este DDL foi validado. Faltava só `btree_gist`, criado no mesmo dia. O detalhe que esta seção não previu: `CREATE EXTENSION postgis` exige superusuário, e o papel da aplicação não é — as extensões precisam existir **antes** do `migrate deploy`, e agora existem.
+> - **Divergência dev/prod** corrigida no commit `8144b03`: dev e os dois jobs de CI passaram para `imresamu/postgis:16-3.4`.
+> - **Backup** criado em 31/08, com `pg_dumpall --globals-only` junto e restauração testada — ver `docs/DEPLOY.md`, seção 6.1.
+> - **Setores sem papel no RBAC** resolvido no commit `2252393`: a DSF ganhou `servicos_fundiarios` e a Câmara de Notificação ganhou `notificacao`. A Divisão de Arquivo foi deliberadamente descartada (`processo:desarquivar` ficou com `atendimento`), e a Ouvidoria Agrária entra com o Capítulo VII.
+> - **Chaves para `Usuario`** fechadas no commit `d6e4523` — sete, não cinco: as duas do financeiro (`emitidoPorId`, `confirmadoPorId`) entraram depois que esta seção foi escrita. `SET NULL` em seis e `RESTRICT` no arquivamento, cuja coluna é `NOT NULL` por causa do Art. 80.
 
 ---
 

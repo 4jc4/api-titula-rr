@@ -4,6 +4,13 @@ Leitura do repositório real em `/Users/cardoso/Projects/titula-rr/api-titula-rr
 
 **Nada foi escrito no seu repositório.** Este documento lista o que muda no modelo para caber no projeto, e o que o projeto precisa ganhar. A convenção de nomes já foi decidida e aplicada; duas decisões no fim seguem abertas.
 
+> **Nota de 31/08/2026.** Este é o texto original de 25/08, preservado como
+> registro do raciocínio. Quase tudo o que ele pede foi feito desde então, e a
+> seção 4 — riscos de ambiente — envelheceu mal: ela afirma que produção não
+> tem PostGIS, e a verificação no próprio servidor mostrou que tem. Os blocos
+> marcados **ATUALIZAÇÃO** dizem onde cada coisa parou; o quadro completo está
+> em [`README.md`](./README.md).
+
 ---
 
 ## 1. O que já existe
@@ -137,6 +144,26 @@ Minha migração foi validada em **PG 16 + PostGIS 3.4.2**, que é o alvo de pro
 
 Terceiro item, menor: o backup do LXC continua ausente, e agora passa a precisar cobrir a extensão, não só os dados. `pg_dump` de um banco com PostGIS não restaura num destino sem a extensão instalada.
 
+> **ATUALIZAÇÃO — 31/08/2026.** Esta seção estava errada no ponto principal, e
+> a correção veio de olhar a máquina em vez do registro. O LXC `20.50.2.224`
+> **já tinha** `postgresql-16-postgis-3` na versão **3.4.2**, com a extensão
+> criada no banco `titularr` — a mesma versão contra a qual a migração foi
+> validada. Faltava apenas `btree_gist`, criado no mesmo dia.
+>
+> O que a seção acertou foi a divergência dev/CI: os três ambientes rodavam
+> `imresamu/postgis:17-3.5`, e passaram a rodar `16-3.4` no commit `8144b03`.
+>
+> O terceiro item — backup — deixou de ser pendência em 31/08: `pg_dump`
+> diário por systemd timer, com `pg_dumpall --globals-only` junto e
+> restauração testada num destino limpo (voltou com `plpgsql`, `btree_gist` e
+> `postgis`). Ver `docs/DEPLOY.md`, seção 6.1.
+>
+> Um detalhe que esta seção não previu e que só apareceu no servidor:
+> `CREATE EXTENSION postgis` **exige superusuário** — PostGIS não é uma
+> extensão _trusted_ — e o papel da aplicação, corretamente, não é. Se as
+> extensões não estivessem criadas de antemão, o `migrate deploy` do CD
+> falharia por permissão mesmo com o pacote instalado.
+
 ---
 
 ## 5. Observações de higiene
@@ -153,3 +180,21 @@ Terceiro item, menor: o backup do LXC continua ausente, e agora passa a precisar
 2. **Fuso nas colunas de tempo** — ainda aberto. O modelo está com `timestamptz` no domínio, contra o `TIMESTAMP(3)` do `users`/`sessions`. Mantive assim porque o modo de falha é uma data errada em prazo legal (documento juntado 23h30 de 09/07 em Boa Vista vira 10/07 num `::date`), mas é um find/replace se você preferir uniformidade.
 
 3. **Qual município rege a contagem de prazo** — ainda aberto. O do imóvel ou o da sede do órgão? São respostas diferentes para quem tem imóvel no Cantá e residência em Manaus.
+
+> **ATUALIZAÇÃO — 31/08/2026.**
+>
+> **(2) Fuso** segue aberto, mas com um dado a mais que muda a recomendação: o
+> cluster de produção roda em `Etc/UTC`. Isso significa que `timestamptz`
+> sozinho **não** resolve o cast para data local, e que mudar o fuso do banco
+> teria efeito colateral em `users`/`sessions` — `createdAt` é `TIMESTAMP(3)`
+> com `DEFAULT CURRENT_TIMESTAMP`, cuja conversão usa o fuso da sessão.
+> Recomendação atual: cluster em UTC, domínio em `timestamptz`, e
+> `AT TIME ZONE 'America/Boa_Vista'` explícito onde a data local importar.
+>
+> **(3) Município do prazo** segue aberto, sem novidade.
+>
+> Das quatro linhas da seção 2 e das sete da seção 3, seguem em aberto apenas
+> os 12 módulos de domínio e o `CidadaoCredentialValidator`. As FKs de
+> servidor (2.4) entraram em `d6e4523`; o `cidadao` no enum e a exceção em
+> `gruposParaPapeis` (2.5), em `2252393`; os testes das constraints, em
+> `1d9cc2f`.

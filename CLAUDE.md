@@ -30,7 +30,13 @@ production host are all on the same private network.
   e.g. `npx jest grupos-para-papeis`.
 - `npm run test:watch` / `npm run test:cov` / `npm run test:debug`
 - `npm run test:e2e` — `*.e2e-spec.ts` in `test/`, against a **real**
-  Postgres+PostGIS, not mocks. The script already exports `NODE_ENV=test`,
+  Postgres+PostGIS, not mocks. Five suites, 53 tests, run serially
+  (`--runInBand`): they share one database and `auth.e2e-spec` wipes `users`
+  in its `beforeAll`. `auth.e2e-spec` boots the Nest app; the four
+  `dominio-*` suites verify constraints that live in the database and talk to
+  `pg` **directly** — the driver hands back the SQLSTATE and the constraint
+  _name_, which is what each test asserts. Shared helper:
+  `test/helpers/postgres.ts`. The script already exports `NODE_ENV=test`,
   `AUTH_VALIDATOR=fake`, and a local `DATABASE_URL` pointing at a
   `titularr_test` database (different from the dev database below) — start
   `docker-compose.dev.yml` first and apply migrations to `titularr_test`
@@ -43,7 +49,15 @@ production host are all on the same private network.
   see the comment in the compose file; user `cardoso`/`iteraima`, db `titularr`).
 - Migrations are **manual only** in this project — never `prisma db push`.
   New migration: `npx prisma migrate dev --name <nome>`. Apply in
-  CI/CD/production: `npx prisma migrate deploy`.
+  CI/CD/production: `npx prisma migrate deploy`. Five migrations exist; the
+  domain ones are hand-written because Prisma expresses none of what they
+  contain (EXCLUDE constraints, partial indexes, composite CHECKs, PL/pgSQL
+  functions, PostGIS types).
+- **Extensions must already exist in production before `migrate deploy`.**
+  The domain migration declares `postgis` and `btree_gist` with
+  `IF NOT EXISTS`, but `CREATE EXTENSION postgis` requires superuser (PostGIS
+  is not a _trusted_ extension) and the application role is not one. Both are
+  already created on the production LXC — see `docs/DEPLOY.md`, section 6.
 - `prisma.config.ts` requires `DATABASE_URL` to be set even for commands
   that touch no database (e.g. `prisma generate`, which runs automatically
   via `postinstall`) — export a dummy value if running Prisma commands
@@ -102,6 +116,41 @@ fails to compile. `PermissionGuard` reads `@RequirePermission(...)` metadata
 and is fail-closed (no user or no match → 403). AD group membership maps to
 `Papel` via the pure, unit-tested function in `grupos-para-papeis.ts`
 (contract: AD groups are named `TITULA_<PAPEL>`).
+
+Two rules in that matrix are easy to break by accident:
+
+- **`gestor` is a level, not an identity.** Art. 80 requires telling the
+  immediate supervisor apart from the analyst _inside the same sector_, so
+  `papeis` legitimately holds two values — `['governanca', 'gestor']` — and
+  `temPermissao()` unions them. `processo:arquivar` exists only on the
+  `gestor` line: a sector role alone cannot archive.
+- **`cidadao` never comes from the AD.** There is no `TITULA_CIDADAO` group;
+  the Portal role comes from `PessoaAcesso` (gov.br). `gruposParaPapeis`
+  reports that group name as an anomaly instead of granting the role. And the
+  guard answers yes/no about a permission — it knows nothing about row scope,
+  so `processo:ler` for a citizen MUST be narrowed to their own dossier by the
+  service layer.
+
+The twelve roles and the reasoning behind each one:
+`docs/in002/papeis-rbac.md`.
+
+### Domain model (IN 002/2026)
+
+`prisma/schema.prisma` holds two halves: authentication (2 models, in
+production) and the land-titling core (29 models, 23 enums) — the latter has
+no module consuming it yet. Much of the Instrução Normativa lives in the
+**database**: 47 CHECKs, 5 EXCLUDE constraints over validity periods, 11
+partial indexes, 4 business-day functions. Every one of those rules has an
+e2e test; that is what the `dominio-*` suites are.
+
+Naming: domain in Portuguese, infrastructure in English; tables pluralized via
+`@@map`, columns in camelCase with no field-level `@map` (so they are quoted
+in Postgres), enum types in PascalCase. Raw SQL touching geometry is meant to
+stay confined to the future `GeoModule` — in `$queryRaw`, a missing pair of
+quotes around `"areaCalculadaHa"` fails at runtime, not at compile time.
+
+Design documents (scope, what was cut, what is still open):
+`docs/in002/`.
 
 ### HTTP contract
 

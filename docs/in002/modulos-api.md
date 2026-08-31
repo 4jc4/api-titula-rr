@@ -1,6 +1,6 @@
 # Módulos do `api-titula-rr` — núcleo processual da IN 002/2026
 
-Arquitetura de módulos NestJS derivada dos 29 models de `prisma/schema.prisma`. Complementa `docs/modelo-dominio-in002.md`, que descreve o modelo de dados.
+Arquitetura de módulos NestJS derivada dos 29 models de `prisma/schema.prisma`. Complementa [`modelo-dominio.md`](./modelo-dominio.md), que descreve o modelo de dados. **Nenhum destes módulos existe ainda** — ver o estado em [`README.md`](./README.md).
 
 São **12 módulos novos** e **2 existentes modificados**. A lista cresceu de 9 para 12 ao longo da modelagem: o calendário de feriados e a tabela de setores ganharam fronteira própria ao fechar as lacunas, e o `FinanceiroModule` entrou depois — `TaxaProcessual` estava no schema sem nenhum consumidor.
 
