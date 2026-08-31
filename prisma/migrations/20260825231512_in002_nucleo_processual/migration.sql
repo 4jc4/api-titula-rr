@@ -10,6 +10,14 @@
 -- SEM PostGIS. `CREATE EXTENSION postgis` abaixo FALHA lá enquanto o
 -- pacote não for instalado, e o rollback do CD restaura a imagem mas não
 -- desfaz migração parcial. Ver docs/reconciliacao-api-existente.md, §4.
+--
+-- ON UPDATE CASCADE em TODAS as FKs, embora nenhuma destas chaves mude de
+-- valor: é o default implícito do Prisma para relações — `sessions_userId_fkey`,
+-- gerada por ele a partir de um @relation que só declarava `onDelete`, saiu
+-- com `ON DELETE CASCADE ON UPDATE CASCADE`. Escrever só o lado do DELETE
+-- deixa o Postgres em NO ACTION, e o `prisma migrate dev` passa a acusar uma
+-- diferença por FK contra o schema. As ações de DELETE continuam decididas
+-- uma a uma (RESTRICT nos autos, SET NULL no acessório).
 -- =====================================================================
 
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -87,7 +95,7 @@ CREATE TABLE municipios (
 -- manda verificar "os requisitos da lei à época" — logo, precisa de vigência.
 CREATE TABLE modulos_fiscais (
   id               SERIAL PRIMARY KEY,
-  "municipioId"     INTEGER      NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT,
+  "municipioId"     INTEGER      NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   hectares         NUMERIC(10,4) NOT NULL,
   "fundamentoLegal" VARCHAR(255)  NOT NULL,
   "vigenciaInicio"  DATE          NOT NULL,
@@ -104,7 +112,7 @@ CREATE TABLE glebas (
   id           SERIAL PRIMARY KEY,
   nome         VARCHAR(180) NOT NULL,
   codigo       VARCHAR(60),
-  "municipioId" INTEGER NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT,
+  "municipioId" INTEGER NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   perimetro    geometry(MultiPolygon, 4674),
   UNIQUE (nome, "municipioId")
 );
@@ -223,13 +231,13 @@ CREATE TABLE pessoas (
 
 CREATE TABLE enderecos (
   id           SERIAL PRIMARY KEY,
-  "pessoaId"    INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE CASCADE,
+  "pessoaId"    INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE CASCADE ON UPDATE CASCADE,
   tipo         "TipoEndereco" NOT NULL DEFAULT 'RESIDENCIAL',
   logradouro   VARCHAR(180) NOT NULL,
   numero       VARCHAR(20),
   complemento  VARCHAR(120),
   bairro       VARCHAR(120),
-  "municipioId" INTEGER NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT,
+  "municipioId" INTEGER NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   cep          CHAR(8),
   CONSTRAINT ck_endereco_cep CHECK (cep IS NULL OR cep ~ '^[0-9]{8}$')
 );
@@ -241,8 +249,8 @@ CREATE INDEX ix_endereco_pessoa ON enderecos ("pessoaId");
 CREATE TABLE imoveis (
   id                    SERIAL PRIMARY KEY,
   denominacao           VARCHAR(180) NOT NULL,
-  "municipioId"          INTEGER NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT,
-  "glebaId"              INTEGER REFERENCES glebas(id) ON DELETE SET NULL,
+  "municipioId"          INTEGER NOT NULL REFERENCES municipios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "glebaId"              INTEGER REFERENCES glebas(id) ON DELETE SET NULL ON UPDATE CASCADE,
   "enderecoDescritivo"   TEXT,
   -- área declarada pelo requerente no Anexo I
   "areaDeclaradaHa"     NUMERIC(14,4) NOT NULL,
@@ -278,14 +286,14 @@ CREATE TABLE processos (
   id                        SERIAL PRIMARY KEY,
   "numeroSei"                VARCHAR(40) NOT NULL UNIQUE,
   "numeroProtocolo"          VARCHAR(40) UNIQUE,
-  "interessadoId"            INTEGER  NOT NULL REFERENCES pessoas(id) ON DELETE RESTRICT,
-  "conjugeId"                INTEGER  REFERENCES pessoas(id) ON DELETE RESTRICT,
-  "imovelId"                 INTEGER  NOT NULL REFERENCES imoveis(id) ON DELETE RESTRICT,
+  "interessadoId"            INTEGER  NOT NULL REFERENCES pessoas(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "conjugeId"                INTEGER  REFERENCES pessoas(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "imovelId"                 INTEGER  NOT NULL REFERENCES imoveis(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   situacao                  "SituacaoProcesso" NOT NULL DEFAULT 'EM_TRAMITE',
   "faseAtual"                "FaseProcesso"     NOT NULL DEFAULT 'PROTOCOLO',
-  "setorAtualId"            INTEGER REFERENCES setores(id) ON DELETE SET NULL,
+  "setorAtualId"            INTEGER REFERENCES setores(id) ON DELETE SET NULL ON UPDATE CASCADE,
   -- snapshots deliberados: registram QUAL regra foi aplicada a este processos
-  "faixaModuloFiscalId"    INTEGER REFERENCES faixas_modulo_fiscal(id) ON DELETE RESTRICT,
+  "faixaModuloFiscalId"    INTEGER REFERENCES faixas_modulo_fiscal(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   "moduloFiscalAplicadoHa" NUMERIC(10,4),
   "numeroModulosFiscais"    NUMERIC(12,4),
   "marcoTemporalAplicado"   DATE,
@@ -310,11 +318,11 @@ CREATE UNIQUE INDEX ux_processo_ativo_por_interessado_imovel
 
 CREATE TABLE requerimentos (
   id                  SERIAL PRIMARY KEY,
-  "processoId"         INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoId"         INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   tipo                "TipoRequerimento" NOT NULL DEFAULT 'INICIAL',
   canal               "CanalProtocolo"   NOT NULL,
   "dataProtocolo"      TIMESTAMPTZ NOT NULL DEFAULT now(),
-  "protocoladoPorId"  INTEGER REFERENCES pessoas(id) ON DELETE SET NULL,
+  "protocoladoPorId"  INTEGER REFERENCES pessoas(id) ON DELETE SET NULL ON UPDATE CASCADE,
   observacao          TEXT
 );
 CREATE INDEX ix_requerimento_processo ON requerimentos ("processoId");
@@ -324,8 +332,8 @@ CREATE UNIQUE INDEX ux_requerimento_inicial ON requerimentos ("processoId") WHER
 -- Partes com vínculo temporal e multiplicidade (Art. 6º §4º a §8º)
 CREATE TABLE partes_processo (
   id                       SERIAL PRIMARY KEY,
-  "processoId"              INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
-  "pessoaId"                INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE RESTRICT,
+  "processoId"              INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "pessoaId"                INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   papel                    "PapelParte" NOT NULL,
   "dataInicio"              DATE NOT NULL DEFAULT CURRENT_DATE,
   "dataFim"                 DATE,
@@ -343,9 +351,9 @@ CREATE UNIQUE INDEX ux_parte_vigente ON partes_processo ("processoId", "pessoaId
 -- ---------------------------------------------------------------------
 CREATE TABLE declaracoes_qualificacao (
   id                             SERIAL PRIMARY KEY,
-  "processoId"                    INTEGER NOT NULL UNIQUE REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoId"                    INTEGER NOT NULL UNIQUE REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   "ocupantePrimitivo"             BOOLEAN NOT NULL,
-  "transmitenteId"                INTEGER REFERENCES pessoas(id) ON DELETE SET NULL,
+  "transmitenteId"                INTEGER REFERENCES pessoas(id) ON DELETE SET NULL ON UPDATE CASCADE,
   "dataOcupacaoPrimitiva"        DATE,
   "dataOcupacaoAtual"            DATE,
   "haContestacaoTerceiros"       BOOLEAN NOT NULL DEFAULT FALSE,
@@ -382,7 +390,7 @@ CREATE TABLE declaracoes_qualificacao (
 -- 1FN: Cerrado e Floresta eram colunas repetidas no formulário
 CREATE TABLE coberturas_vegetais (
   id                      SERIAL PRIMARY KEY,
-  "declaracaoId"           INTEGER NOT NULL REFERENCES declaracoes_qualificacao(id) ON DELETE CASCADE,
+  "declaracaoId"           INTEGER NOT NULL REFERENCES declaracoes_qualificacao(id) ON DELETE CASCADE ON UPDATE CASCADE,
   tipo                    "TipoCoberturaVegetal" NOT NULL,
   "areaHa"                 NUMERIC(14,4) NOT NULL,
   "areaReservaLegalHa"   NUMERIC(14,4),
@@ -395,10 +403,10 @@ CREATE TABLE coberturas_vegetais (
 -- 1FN: norte/sul/leste/oeste eram quatro linhas fixas do Anexo III
 CREATE TABLE confrontacoes (
   id              SERIAL PRIMARY KEY,
-  "declaracaoId"   INTEGER NOT NULL REFERENCES declaracoes_qualificacao(id) ON DELETE CASCADE,
+  "declaracaoId"   INTEGER NOT NULL REFERENCES declaracoes_qualificacao(id) ON DELETE CASCADE ON UPDATE CASCADE,
   rumo            "RumoConfrontacao" NOT NULL,
   descricao       TEXT NOT NULL,
-  "confrontanteId" INTEGER REFERENCES pessoas(id) ON DELETE SET NULL,
+  "confrontanteId" INTEGER REFERENCES pessoas(id) ON DELETE SET NULL ON UPDATE CASCADE,
   ordem           SMALLINT NOT NULL DEFAULT 1,
   UNIQUE ("declaracaoId", rumo, ordem)
 );
@@ -420,8 +428,8 @@ CREATE TABLE tipos_documento (
 -- só no Anexo VII; certidão negativa só no Anexo IX).
 CREATE TABLE checklist_exigencias (
   id                    SERIAL PRIMARY KEY,
-  "tipoDocumentoId"     INTEGER NOT NULL REFERENCES tipos_documento(id) ON DELETE CASCADE,
-  "faixaModuloFiscalId" INTEGER NOT NULL REFERENCES faixas_modulo_fiscal(id) ON DELETE CASCADE,
+  "tipoDocumentoId"     INTEGER NOT NULL REFERENCES tipos_documento(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  "faixaModuloFiscalId" INTEGER NOT NULL REFERENCES faixas_modulo_fiscal(id) ON DELETE CASCADE ON UPDATE CASCADE,
   obrigatoriedade       "ObrigatoriedadeDoc" NOT NULL,
   condicao              TEXT,
   "fundamentoLegal"      VARCHAR(255) NOT NULL,
@@ -438,8 +446,8 @@ CREATE TABLE checklist_exigencias (
 
 CREATE TABLE documentos_processo (
   id                  SERIAL PRIMARY KEY,
-  "processoId"         INTEGER  NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
-  "tipoDocumentoId"   INTEGER NOT NULL REFERENCES tipos_documento(id) ON DELETE RESTRICT,
+  "processoId"         INTEGER  NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "tipoDocumentoId"   INTEGER NOT NULL REFERENCES tipos_documento(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   "nomeOriginal"       VARCHAR(255) NOT NULL,
   "storageKey"         VARCHAR(512) NOT NULL UNIQUE,
   "mimeType"           VARCHAR(120) NOT NULL,
@@ -448,7 +456,7 @@ CREATE TABLE documentos_processo (
   "formaAutenticacao"  "FormaAutenticacao" NOT NULL,
   "dataJuntada"        TIMESTAMPTZ NOT NULL DEFAULT now(),
   "juntadoPorId"      TEXT,
-  "setorJuntadaId"    INTEGER REFERENCES setores(id) ON DELETE SET NULL,
+  "setorJuntadaId"    INTEGER REFERENCES setores(id) ON DELETE SET NULL ON UPDATE CASCADE,
   observacao          TEXT,
   CONSTRAINT ck_doc_tamanho CHECK ("tamanhoBytes" > 0),
   CONSTRAINT ck_doc_hash    CHECK ("hashSha256" ~ '^[0-9a-f]{64}$')
@@ -464,10 +472,10 @@ CREATE UNIQUE INDEX ux_documento_dedup
 -- ---------------------------------------------------------------------
 CREATE TABLE tramitacoes (
   id                  SERIAL PRIMARY KEY,
-  "processoId"         INTEGER  NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoId"         INTEGER  NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   "etapaAnexoX"       SMALLINT,
-  "setorOrigemId"     INTEGER REFERENCES setores(id) ON DELETE SET NULL,
-  "setorDestinoId"    INTEGER NOT NULL REFERENCES setores(id) ON DELETE RESTRICT,
+  "setorOrigemId"     INTEGER REFERENCES setores(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  "setorDestinoId"    INTEGER NOT NULL REFERENCES setores(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   "enviadoEm"          TIMESTAMPTZ NOT NULL DEFAULT now(),
   "recebidoEm"         TIMESTAMPTZ,
   "concluidoEm"        TIMESTAMPTZ,
@@ -492,11 +500,11 @@ CREATE UNIQUE INDEX ux_tramitacao_aberta_por_processo
 -- ---------------------------------------------------------------------
 CREATE TABLE processos_relacionamentos (
   id                    SERIAL PRIMARY KEY,
-  "processoMenorId"     INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
-  "processoMaiorId"     INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoMenorId"     INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "processoMaiorId"     INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   motivo                "MotivoRelacionamento" NOT NULL,
-  "setorResponsavelId"  INTEGER REFERENCES setores(id) ON DELETE SET NULL,
-  "certidaoDocumentoId" INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL,
+  "setorResponsavelId"  INTEGER REFERENCES setores(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  "certidaoDocumentoId" INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL ON UPDATE CASCADE,
   "criadoEm"             TIMESTAMPTZ NOT NULL DEFAULT now(),
   "criadoPorId"         TEXT,
   CONSTRAINT ck_rel_ordem CHECK ("processoMenorId" < "processoMaiorId"),
@@ -509,7 +517,7 @@ CREATE INDEX ix_rel_maior ON processos_relacionamentos ("processoMaiorId");
 -- ---------------------------------------------------------------------
 CREATE TABLE termos_anuencia (
   id                  SERIAL PRIMARY KEY,
-  "pessoaId"           INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE CASCADE,
+  "pessoaId"           INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE CASCADE ON UPDATE CASCADE,
   "telefoneAplicativo" VARCHAR(20)  NOT NULL,
   email               VARCHAR(180) NOT NULL,
   "enderecoFisico"     TEXT,
@@ -524,12 +532,12 @@ CREATE UNIQUE INDEX ux_termo_anuencia_vigente
 
 CREATE TABLE comunicacoes (
   id                   SERIAL PRIMARY KEY,
-  "processoId"          INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoId"          INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   tipo                 "TipoComunicacao" NOT NULL,
-  "setorDemandanteId"  INTEGER REFERENCES setores(id) ON DELETE SET NULL,
+  "setorDemandanteId"  INTEGER REFERENCES setores(id) ON DELETE SET NULL ON UPDATE CASCADE,
   assunto              VARCHAR(255) NOT NULL,
   "fundamentoLegal"     VARCHAR(255),
-  "decisaoDocumentoId" INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL,
+  "decisaoDocumentoId" INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL ON UPDATE CASCADE,
   "expedidaEm"          TIMESTAMPTZ NOT NULL DEFAULT now(),
   "prazoDias"           SMALLINT,
   "prazoEmDiasUteis"  BOOLEAN NOT NULL DEFAULT TRUE,
@@ -546,14 +554,14 @@ CREATE INDEX ix_comunicacao_prazo    ON comunicacoes ("dataFimPrazo") WHERE "enc
 
 CREATE TABLE tentativas_entrega (
   id                     SERIAL PRIMARY KEY,
-  "comunicacaoId"         INTEGER NOT NULL REFERENCES comunicacoes(id) ON DELETE CASCADE,
+  "comunicacaoId"         INTEGER NOT NULL REFERENCES comunicacoes(id) ON DELETE CASCADE ON UPDATE CASCADE,
   ordem                  SMALLINT NOT NULL,
   meio                   "MeioComunicacao" NOT NULL,
   destino                VARCHAR(255) NOT NULL,
   "enviadaEm"             TIMESTAMPTZ NOT NULL DEFAULT now(),
   "confirmadaEm"          TIMESTAMPTZ,
   resultado              "ResultadoTentativa" NOT NULL DEFAULT 'ENVIADO_SEM_CONFIRMACAO',
-  "comprovanteDocId"     INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL,
+  "comprovanteDocId"     INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL ON UPDATE CASCADE,
   UNIQUE ("comunicacaoId", ordem),
   CONSTRAINT ck_tent_confirmacao CHECK (
     (resultado = 'ENTREGUE_CONFIRMADO') = ("confirmadaEm" IS NOT NULL)
@@ -566,11 +574,11 @@ CREATE TABLE tentativas_entrega (
 -- ---------------------------------------------------------------------
 CREATE TABLE arquivamentos (
   id                   SERIAL PRIMARY KEY,
-  "processoId"          INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoId"          INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   "arquivadoEm"         TIMESTAMPTZ NOT NULL DEFAULT now(),
   motivo               TEXT NOT NULL,
   "fundamentoLegal"     VARCHAR(255),
-  "despachoDocumentoId" INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL,
+  "despachoDocumentoId" INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL ON UPDATE CASCADE,
   -- Art. 80: vedado arquivar sem decisão expressa da chefia imediata
   "chefiaAprovouId"    TEXT NOT NULL,
   "desarquivadoEm"      TIMESTAMPTZ
@@ -580,7 +588,7 @@ CREATE UNIQUE INDEX ux_arquivamento_vigente
 
 CREATE TABLE processos_eventos (
   id            SERIAL PRIMARY KEY,
-  "processoId"   INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
+  "processoId"   INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   tipo          "TipoEventoProcesso" NOT NULL,
   "faseAnterior" "FaseProcesso",
   "faseNova"     "FaseProcesso",
@@ -601,7 +609,7 @@ CREATE TABLE feriados (
   nome              VARCHAR(180) NOT NULL,
   abrangencia       "AbrangenciaFeriado" NOT NULL,
   uf                CHAR(2),
-  "municipioId"      INTEGER REFERENCES municipios(id) ON DELETE CASCADE,
+  "municipioId"      INTEGER REFERENCES municipios(id) ON DELETE CASCADE ON UPDATE CASCADE,
   "fundamentoLegal"  VARCHAR(255),
   CONSTRAINT ck_feriado_escopo CHECK (
     (abrangencia = 'NACIONAL'  AND uf IS NULL     AND "municipioId" IS NULL) OR
@@ -707,7 +715,7 @@ END; $$;
 -- ---------------------------------------------------------------------
 CREATE TABLE pessoas_acesso (
   id             SERIAL PRIMARY KEY,
-  "pessoaId"      INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE CASCADE,
+  "pessoaId"      INTEGER NOT NULL REFERENCES pessoas(id) ON DELETE CASCADE ON UPDATE CASCADE,
   "govbrSubject"  VARCHAR(255) NOT NULL,
   "emailAcesso"   VARCHAR(180) NOT NULL,
   ativo          BOOLEAN NOT NULL DEFAULT TRUE,
@@ -730,8 +738,8 @@ CREATE UNIQUE INDEX ux_pessoa_acesso_ativo ON pessoas_acesso ("pessoaId") WHERE 
 -- ---------------------------------------------------------------------
 CREATE TABLE debitos_taxa (
   id                  SERIAL PRIMARY KEY,
-  "processoId"         INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT,
-  "taxaProcessualId"  INTEGER NOT NULL REFERENCES taxas_processuais(id) ON DELETE RESTRICT,
+  "processoId"         INTEGER NOT NULL REFERENCES processos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  "taxaProcessualId"  INTEGER NOT NULL REFERENCES taxas_processuais(id) ON DELETE RESTRICT ON UPDATE CASCADE,
 
   -- valor CONGELADO na emissão: a taxa muda por lei, o boleto emitido não.
   -- Mesmo padrão dos snapshots de modulo_fiscal e marco_temporal.
@@ -742,7 +750,7 @@ CREATE TABLE debitos_taxa (
   "dataVencimento"     DATE NOT NULL,
   "dataPagamento"      DATE,
   situacao            "SituacaoDebito" NOT NULL DEFAULT 'EMITIDO',
-  "comprovanteDocId"  INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL,
+  "comprovanteDocId"  INTEGER REFERENCES documentos_processo(id) ON DELETE SET NULL ON UPDATE CASCADE,
   "emitidoPorId"      TEXT,
   "confirmadoPorId"   TEXT,
   observacao          TEXT,
