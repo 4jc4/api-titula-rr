@@ -60,7 +60,11 @@ jobs:
           POSTGRES_PASSWORD: iteraima
           POSTGRES_DB: titularr_test
         ports:
-          - 5432:5432
+          # 5433 para casar com o docker-compose.dev.yml: o `npm run test:e2e`
+          # carrega a DATABASE_URL embutida no script, e ela precisa valer nos
+          # dois lugares. O job docker-image, que não roda esse script, segue
+          # na 5432.
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U cardoso"
           --health-interval 5s
@@ -69,7 +73,7 @@ jobs:
     # Sobrescreve o dummy do topo do arquivo: aqui o banco existe de verdade
     # (usado pelo `prisma migrate deploy` abaixo).
     env:
-      DATABASE_URL: postgresql://cardoso:iteraima@localhost:5432/titularr_test
+      DATABASE_URL: postgresql://cardoso:iteraima@localhost:5433/titularr_test
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

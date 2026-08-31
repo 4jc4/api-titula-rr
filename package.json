@@ -21,7 +21,7 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test AUTH_VALIDATOR=fake DATABASE_URL=postgresql://cardoso:iteraima@localhost:5432/titularr_test jest -c jest-e2e.config.mjs --runInBand",
+    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test AUTH_VALIDATOR=fake DATABASE_URL=postgresql://cardoso:iteraima@localhost:5433/titularr_test jest -c jest-e2e.config.mjs --runInBand",
     "prepare": "husky",
     "postinstall": "prisma generate"
   },

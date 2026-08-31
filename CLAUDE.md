@@ -39,7 +39,8 @@ production host are all on the same private network.
 ### Database (Prisma)
 
 - Local dev DB: `docker compose -f docker-compose.dev.yml up -d`
-  (Postgres+PostGIS on `:5432`, user `cardoso`/`iteraima`, db `titularr`).
+  (Postgres+PostGIS on `:5433` — the host port is per-project on this machine,
+  see the comment in the compose file; user `cardoso`/`iteraima`, db `titularr`).
 - Migrations are **manual only** in this project — never `prisma db push`.
   New migration: `npx prisma migrate dev --name <nome>`. Apply in
   CI/CD/production: `npx prisma migrate deploy`.

@@ -51,7 +51,7 @@ com autenticação falsa.
 ## Rodando localmente
 
 ```bash
-docker compose -f docker-compose.dev.yml up -d   # Postgres+PostGIS em :5432
+docker compose -f docker-compose.dev.yml up -d   # Postgres+PostGIS em :5433
 npm install
 npx prisma migrate deploy                        # aplica as migrations existentes
 npm run start:dev                                 # watch mode, http://localhost:3000/api
@@ -110,7 +110,7 @@ para `titularr_test` (banco diferente do de dev, `titularr`) — suba o
 `docker-compose.dev.yml` e aplique as migrations nesse banco antes:
 
 ```bash
-DATABASE_URL=postgresql://cardoso:iteraima@localhost:5432/titularr_test npx prisma migrate deploy
+DATABASE_URL=postgresql://cardoso:iteraima@localhost:5433/titularr_test npx prisma migrate deploy
 npm run test:e2e
 ```
 

@@ -11,8 +11,13 @@ services:
       POSTGRES_USER: cardoso
       POSTGRES_PASSWORD: iteraima
       POSTGRES_DB: titularr
+    # 5433 no HOST, 5432 dentro do container. Esta máquina roda o banco de
+    # mais de um projeto, e todos queriam a 5432 — o sintoma da colisão é
+    # cruel: o compose sobe "Healthy" mas a porta continua entregue ao outro
+    # container, e o erro que aparece é `P1000: authentication failed`, como
+    # se a senha estivesse errada. Porta por projeto elimina o revezamento.
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - titula-rr-db-data:/var/lib/postgresql/data
     healthcheck:
