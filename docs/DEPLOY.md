@@ -41,6 +41,11 @@ Confirme cada item antes do primeiro deploy. Pular um destes não quebra o
 - [ ] **`certs/ad-ldaps.pem`** é a CA corporativa correta e ainda válida (o
       commit que a introduziu registra validade até 2036 — confirmar que não
       houve renovação/rotação da CA desde então).
+- [x] **Extensões criadas no banco `titularr`** (31/08/2026): `postgis` e
+      `btree_gist` — ver seção 6. A migração do núcleo processual falha sem
+      elas, e o papel da aplicação não tem poder para criá-las.
+- [x] **Backup diário ativo no LXC do banco**, com restauração testada
+      (31/08/2026) — ver seção 6.1.
 
 ---
 
@@ -204,7 +209,67 @@ que precise ser desfeita é uma migração nova escrita à mão, não um
 
 ---
 
-## 6. Pendências conhecidas
+## 6. Banco de dados (LXC `20.50.2.224`)
+
+Levantado e ajustado em 31/08/2026:
+
+| Item         | Estado                                                                                                |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| Sistema      | Ubuntu 24.04 LTS · 2 vCPU · 2 GB RAM · 20 GB (17 GB livres)                                           |
+| Postgres     | 16.13 (`16.13-0ubuntu0.24.04.1`), cluster `16/main` em `/data/postgres/16/main`, `timezone = Etc/UTC` |
+| PostGIS      | 3.4.2 (`postgresql-16-postgis-3`), criado em `titularr`                                               |
+| `btree_gist` | criado em 31/08/2026 — vem dentro do próprio pacote `postgresql-16`, sem contrib                      |
+| Banco        | `titularr`, UTF8 com ICU `pt-BR`, dono `titularr_app` — que **não** é superusuário                    |
+| Acesso       | uma linha no `pg_hba.conf`: `host titularr titularr_app 20.50.2.223/32 scram-sha-256`                 |
+
+As duas extensões precisam existir **antes** do primeiro `migrate deploy` do
+núcleo processual. A migração as declara com `IF NOT EXISTS`, mas
+`CREATE EXTENSION postgis` exige superusuário — PostGIS não é uma extensão
+_trusted_ — e o papel da aplicação não é, nem deve ser. Com elas já criadas,
+as duas linhas viram no-op e o deploy passa com o papel comum.
+
+A versão do par (PG 16.13 + PostGIS 3.4.2) é a mesma contra a qual as cinco
+migrações foram validadas, e desde 30/08/2026 é também a que o
+`docker-compose.dev.yml` e os dois jobs de e2e do CI rodam.
+
+### 6.1 Backup
+
+`pg_dump` diário às 02:00 UTC por systemd timer — `pg-backup.timer` →
+`pg-backup.service` → `/usr/local/sbin/pg-backup.sh` —, gravando em
+`/var/backups/postgres` (`0700`, dono `postgres`).
+
+O script guarda duas coisas, e a segunda é a que costuma faltar:
+`pg_dumpall --globals-only` (papéis e senhas: sem isso o dump não restaura,
+porque `titularr_app` não existiria no destino) e o `pg_dump -Fc` do banco.
+Depois roda `pg_restore --list` no arquivo recém-escrito — backup que não abre
+não é backup. Retenção: 30 diários, e o do dia 1º de cada mês fica um ano.
+`Persistent=true` no timer cobre o LXC estar desligado às 02:00; sem isso, um
+dia parado é um dia sem backup.
+
+**Teste de restauração** — feito em 31/08/2026, refazer a cada mudança de
+versão do Postgres ou do PostGIS:
+
+```bash
+sudo -u postgres createdb titularr_restore_test
+sudo -u postgres pg_restore -d titularr_restore_test \
+  /var/backups/postgres/titularr-$(date -u +%F).dump
+sudo -u postgres psql -d titularr_restore_test -tAc \
+  "select 'extensoes: ' || string_agg(extname, ', ') from pg_extension"
+sudo -u postgres dropdb titularr_restore_test
+```
+
+Esperado, e obtido: `extensoes: plpgsql, btree_gist, postgis`. É a prova de
+que o dump carrega a extensão junto — e o lembrete de que um destino sem o
+pacote `postgresql-16-postgis-3` instalado **não** restaura este arquivo.
+
+Limite conhecido: os arquivos moram no mesmo disco do banco. Protegem contra
+erro humano e corrupção lógica, não contra perder o container. Cobertura
+contra a perda do LXC depende do backup do Proxmox (container 113) ou de uma
+cópia noturna para outro host — decidir e registrar aqui.
+
+---
+
+## 7. Pendências conhecidas
 
 Registradas aqui para não se perderem, não porque são urgentes.
 
