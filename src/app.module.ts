@@ -24,7 +24,13 @@ import { PrismaModule } from './prisma/prisma.module.js';
     LoggerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => {
-        const isProd = config.get('NODE_ENV', { infer: true }) === 'production';
+        const ambiente = config.get('NODE_ENV', { infer: true });
+        const isProd = ambiente === 'production';
+        // Em teste o e2e sobe a app de verdade, e um log por request enterra
+        // a saída do jest — quando um teste falha, a mensagem DELE é o que
+        // precisa aparecer. 'silent' ainda dispensa o pino-pretty, que é
+        // devDependency e não existe na imagem de produção.
+        const isTest = ambiente === 'test';
         return {
           // Sem isso, o default do nestjs-pino é forRoutes: ['*'] — com
           // Express 5 (path-to-regexp v8), o '*' cru não é mais suportado e
@@ -33,12 +39,13 @@ import { PrismaModule } from './prisma/prisma.module.js';
           // formato novo (wildcard nomeado) e cobre as mesmas rotas.
           forRoutes: [{ path: '*path', method: RequestMethod.ALL }],
           pinoHttp: {
-            level: isProd ? 'info' : 'debug',
+            level: isTest ? 'silent' : isProd ? 'info' : 'debug',
             // Em dev, log legível; em produção, JSON puro (para o futuro
             // agregador — Zabbix/Loki/etc. — consumir)
-            transport: isProd
-              ? undefined
-              : { target: 'pino-pretty', options: { singleLine: true } },
+            transport:
+              isProd || isTest
+                ? undefined
+                : { target: 'pino-pretty', options: { singleLine: true } },
             // Um id por request — aparece em todo log e nos Problem Details
             genReqId: () => randomUUID(),
             // SEGURANÇA: o cookie carrega o token de sessão; header de auth

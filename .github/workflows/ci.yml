@@ -118,10 +118,9 @@ jobs:
       # (dist/src/main.js) alguma hora deixar de bater com a saída real do
       # build, é AQUI que quebra, não em produção.
       #
-      # NODE_ENV fica em 'production' (o valor que já vem da imagem): com
-      # NODE_ENV=test o logger tentaria carregar pino-pretty, que é
-      # devDependency e não existe mais na imagem depois do
-      # `npm prune --omit=dev` do Dockerfile.
+      # NODE_ENV fica em 'production' (o valor que já vem da imagem): é o
+      # ambiente que este job existe para exercitar, e a app RECUSA subir em
+      # produção sem AUTH_VALIDATOR=ad — o que a config falsa abaixo satisfaz.
       #
       # AUTH_VALIDATOR=ad com config falsa (mas válida) porque a app RECUSA
       # subir em produção com o validator fake — e dc.example.invalid é um
