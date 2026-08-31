@@ -29,7 +29,9 @@ export class AdValidator implements CredentialValidator {
   private readonly url: string;
   private readonly baseDn: string;
   private readonly upnSuffix: string;
-  private readonly ca?: Buffer;
+  private readonly caPath?: string;
+  private ca?: Buffer;
+  private caLida = false;
 
   constructor(
     config: ConfigService<Env, true>,
@@ -39,8 +41,20 @@ export class AdValidator implements CredentialValidator {
     this.url = config.get('AD_URL', { infer: true })!;
     this.baseDn = config.get('AD_BASE_DN', { infer: true })!;
     this.upnSuffix = config.get('AD_UPN_SUFFIX', { infer: true })!;
-    const caPath = config.get('AD_CA_PATH', { infer: true });
-    this.ca = caPath ? readFileSync(caPath) : undefined;
+    this.caPath = config.get('AD_CA_PATH', { infer: true });
+  }
+
+  // A raiz da CA é lida sob demanda, e não no construtor: os dois
+  // providers de AD são instanciados SEMPRE — a factory recebe o fake e o
+  // real para escolher entre eles —, então um AD_CA_PATH errado derrubava o
+  // boot até em dev com AUTH_VALIDATOR=fake, onde o arquivo nunca seria
+  // usado. Memoizado: uma leitura por processo, não por conexão.
+  private lerCa(): Buffer | undefined {
+    if (!this.caLida) {
+      this.ca = this.caPath ? readFileSync(this.caPath) : undefined;
+      this.caLida = true;
+    }
+    return this.ca;
   }
 
   async validate(
@@ -51,9 +65,10 @@ export class AdValidator implements CredentialValidator {
     // "sucede" — sem esta guarda, senha em branco viraria login válido.
     if (!password) return null;
 
+    const ca = this.lerCa();
     const client = new Client({
       url: this.url,
-      tlsOptions: this.ca ? { ca: [this.ca] } : undefined,
+      tlsOptions: ca ? { ca: [ca] } : undefined,
       timeout: 5000,
       connectTimeout: 5000,
     });
