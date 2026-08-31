@@ -17,25 +17,39 @@ async function bootstrap() {
   // e2e usa (ver configure-app.ts). Precisa vir ANTES do createDocument.
   configureApp(app);
 
+  const config = app.get(ConfigService<Env, true>);
+
   // OpenAPI: fonte de verdade do contrato. O orval (no repo do Next) gera o
   // cliente a partir de /api/docs-json. cleanupOpenApiDoc é OBRIGATÓRIO com
   // nestjs-zod v5 para o documento sair correto.
   // Como o createDocument roda DEPOIS do configureApp, os paths saem
   // versionados: /api/v1/auth/login, /api/health, etc.
-  const openApiDoc = SwaggerModule.createDocument(
-    app,
-    new DocumentBuilder()
-      .setTitle('Titula RR — API')
-      .setVersion('0.1.0')
-      .addCookieAuth('session')
-      .build(),
-  );
+  //
+  // FORA DE PRODUÇÃO, e não por economia: o SwaggerModule registra as rotas
+  // direto no adapter Express, FORA do pipeline do Nest — os APP_GUARD
+  // globais não se aplicam a elas. Em produção, /api/docs e /api/docs-json
+  // responderiam sem cookie de sessão a qualquer um que alcance a API,
+  // entregando o mapa completo de endpoints, campos e regras de validação.
+  // Na intranet o risco é baixo, não nulo, e o custo de desligar é zero: o
+  // orval gera o cliente contra uma instância de desenvolvimento. Se um dia
+  // fizer falta em produção, o caminho é um basic-auth no location /api/docs
+  // do Nginx — não devolver a rota para trás dos guards, que o Swagger não
+  // atravessa.
+  if (config.get('NODE_ENV', { infer: true }) !== 'production') {
+    const openApiDoc = SwaggerModule.createDocument(
+      app,
+      new DocumentBuilder()
+        .setTitle('Titula RR — API')
+        .setVersion('0.1.0')
+        .addCookieAuth('session')
+        .build(),
+    );
 
-  // 'api/docs' e não 'docs': a documentação acompanha o prefixo da API,
-  // para o vhost do Nginx rotear tudo sob /api com um location só.
-  SwaggerModule.setup('api/docs', app, cleanupOpenApiDoc(openApiDoc));
+    // 'api/docs' e não 'docs': a documentação acompanha o prefixo da API,
+    // para o vhost do Nginx rotear tudo sob /api com um location só.
+    SwaggerModule.setup('api/docs', app, cleanupOpenApiDoc(openApiDoc));
+  }
 
-  const config = app.get(ConfigService<Env, true>);
   await app.listen(config.get('PORT', { infer: true }));
 
   // Desligamento gracioso, registrado à mão em vez de app.enableShutdownHooks():

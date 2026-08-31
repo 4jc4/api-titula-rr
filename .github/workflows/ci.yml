@@ -157,6 +157,18 @@ jobs:
 
           [ -n "$ok" ] || { echo "::error::container não respondeu em /api/health"; exit 1; }
 
+      # O Swagger monta as rotas fora do pipeline do Nest, então os guards
+      # globais não as protegem — em produção ele não é registrado. Este é o
+      # único job que roda a imagem com NODE_ENV=production, ou seja, o único
+      # lugar onde isso pode ser provado.
+      - name: Confere que o Swagger NÃO responde em produção
+        run: |
+          for rota in /api/docs /api/docs-json; do
+            codigo=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$rota")
+            echo "$rota -> $codigo"
+            [ "$codigo" = "404" ] || { echo "::error::$rota respondeu $codigo em produção; deveria ser 404"; exit 1; }
+          done
+
       - name: Limpa o container
         if: always()
         run: docker rm -f titula-rr-api-ci || true
