@@ -12,7 +12,8 @@ Sem ato exclusivo, o papel sai. Não há papel "por precaução", "para consulta
 > e a matriz das seções 6 e 7 estão em `prisma/schema.prisma` e
 > `src/modules/auth/permissions.ts`, com a migração que recria o tipo no banco
 > e testes para a união do Art. 80 e para a recusa do `TITULA_CIDADAO`.
-> Seguem por confirmar com quem opera os dois pontos da seção 8.
+> Seguem por confirmar com quem opera os dois pontos da seção 8, e os grupos
+> novos ainda precisam ser criados no AD — ver [`infrastructure.md`](../infrastructure.md).
 
 ---
 

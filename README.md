@@ -7,9 +7,16 @@ nuvem pública. A identidade dos usuários vem do Active Directory
 corporativo; runner de CI/CD, banco e host de produção estão todos na mesma
 rede privada.
 
-Guia completo de arquitetura (fluxo de autenticação, RBAC, contrato HTTP,
-convenções): [`CLAUDE.md`](./CLAUDE.md). Runbook de deploy manual, rollback
-e checklist de secrets: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
+## Documentação
+
+| Arquivo                                              | O que responde                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------------- |
+| [`docs/architecture.md`](./docs/architecture.md)     | Como a API funciona por dentro, e por que cada decisão não óbvia foi tomada |
+| [`docs/infrastructure.md`](./docs/infrastructure.md) | As máquinas: app server, LXC do banco, AD, Nginx, portas                    |
+| [`docs/deployment.md`](./docs/deployment.md)         | CI, CD, deploy manual, checklist de segredos                                |
+| [`docs/runbook.md`](./docs/runbook.md)               | Verificação pós-deploy, rollback, break-glass, backup, diagnóstico          |
+| [`docs/in002/`](./docs/in002/)                       | A modelagem do domínio — rodadas datadas; o `README.md` de lá tem o estado  |
+| [`CLAUDE.md`](./CLAUDE.md)                           | Guia para agentes de IA trabalhando neste repositório                       |
 
 ## Stack
 
@@ -157,7 +164,11 @@ npm run test:e2e
   passa em `main`, num runner self-hosted dentro da intranet (é o único que
   alcança o Postgres de produção e o AD via LDAPS). `prisma migrate deploy`
   roda antes do `up`; health check com rollback automático (2 gerações)
-  se falhar. Detalhes completos: [`docs/DEPLOY.md`](./docs/DEPLOY.md).
+  se falhar. Detalhes completos: [`docs/deployment.md`](./docs/deployment.md).
+
+> **O merge é o deploy.** É nele que as migrações pendentes entram no banco de
+> produção. Antes de um merge que mexe em schema, vale disparar o backup à mão
+> — ver [`docs/runbook.md`](./docs/runbook.md).
 
 Commit sempre em branch — nunca direto em `main`. PRs são squash-merged (o
 título do PR vira a mensagem do commit, validado por Conventional Commits

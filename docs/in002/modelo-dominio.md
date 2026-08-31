@@ -300,7 +300,7 @@ Vale confirmar antes se o repositório do LXC tem o pacote na versão que casa c
 >
 > - **PostGIS em produção** não era bloqueante — a verificação no LXC mostrou `postgresql-16-postgis-3` **3.4.2** já instalado e a extensão já criada em `titularr`, exatamente a versão contra a qual este DDL foi validado. Faltava só `btree_gist`, criado no mesmo dia. O detalhe que esta seção não previu: `CREATE EXTENSION postgis` exige superusuário, e o papel da aplicação não é — as extensões precisam existir **antes** do `migrate deploy`, e agora existem.
 > - **Divergência dev/prod** corrigida no commit `8144b03`: dev e os dois jobs de CI passaram para `imresamu/postgis:16-3.4`.
-> - **Backup** criado em 31/08, com `pg_dumpall --globals-only` junto e restauração testada — ver `docs/DEPLOY.md`, seção 6.1.
+> - **Backup** criado em 31/08, com `pg_dumpall --globals-only` junto e restauração testada — ver [`runbook.md`](../runbook.md).
 > - **Setores sem papel no RBAC** resolvido no commit `2252393`: a DSF ganhou `servicos_fundiarios` e a Câmara de Notificação ganhou `notificacao`. A Divisão de Arquivo foi deliberadamente descartada (`processo:desarquivar` ficou com `atendimento`), e a Ouvidoria Agrária entra com o Capítulo VII.
 > - **Chaves para `Usuario`** fechadas no commit `d6e4523` — sete, não cinco: as duas do financeiro (`emitidoPorId`, `confirmadoPorId`) entraram depois que esta seção foi escrita. `SET NULL` em seis e `RESTRICT` no arquivamento, cuja coluna é `NOT NULL` por causa do Art. 80.
 

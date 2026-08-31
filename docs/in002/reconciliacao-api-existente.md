@@ -156,7 +156,7 @@ Terceiro item, menor: o backup do LXC continua ausente, e agora passa a precisar
 > O terceiro item — backup — deixou de ser pendência em 31/08: `pg_dump`
 > diário por systemd timer, com `pg_dumpall --globals-only` junto e
 > restauração testada num destino limpo (voltou com `plpgsql`, `btree_gist` e
-> `postgis`). Ver `docs/DEPLOY.md`, seção 6.1.
+> `postgis`). Ver [`runbook.md`](../runbook.md).
 >
 > Um detalhe que esta seção não previu e que só apareceu no servidor:
 > `CREATE EXTENSION postgis` **exige superusuário** — PostGIS não é uma

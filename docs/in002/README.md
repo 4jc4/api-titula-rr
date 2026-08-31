@@ -23,18 +23,18 @@ atual mora aqui, no índice, e a fonte de verdade do que existe é sempre o
 
 Fechado, com o commit onde aconteceu:
 
-| Item                                                | Onde                                                  |
-| --------------------------------------------------- | ----------------------------------------------------- |
-| Convenção de nomes (camelCase, tabelas em plural)   | `f8129da`                                             |
-| Schema, migração e seed de feriados                 | `f8129da`                                             |
-| Enum `Papel` nos 12 papéis, 31 permissões, matriz   | `2252393`                                             |
-| `cidadao` fora do provisionamento por grupo do AD   | `2252393`                                             |
-| dev e CI na major de produção (PG 16 + PostGIS 3.4) | `8144b03`                                             |
-| As 7 FKs das colunas de servidor responsável        | `d6e4523`                                             |
-| `ON UPDATE CASCADE` nas 46 FKs escritas à mão       | `b81020d`                                             |
-| `verifica_*.sql` convertidos em 35 testes e2e       | `1d9cc2f`                                             |
-| PostGIS e `btree_gist` no banco de produção         | verificado e criado no LXC em 31/08; runbook, seção 6 |
-| Backup diário com restauração testada               | idem; runbook, seção 6.1                              |
+| Item                                                | Onde                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Convenção de nomes (camelCase, tabelas em plural)   | `f8129da`                                                                             |
+| Schema, migração e seed de feriados                 | `f8129da`                                                                             |
+| Enum `Papel` nos 12 papéis, 31 permissões, matriz   | `2252393`                                                                             |
+| `cidadao` fora do provisionamento por grupo do AD   | `2252393`                                                                             |
+| dev e CI na major de produção (PG 16 + PostGIS 3.4) | `8144b03`                                                                             |
+| As 7 FKs das colunas de servidor responsável        | `d6e4523`                                                                             |
+| `ON UPDATE CASCADE` nas 46 FKs escritas à mão       | `b81020d`                                                                             |
+| `verifica_*.sql` convertidos em 35 testes e2e       | `1d9cc2f`                                                                             |
+| PostGIS e `btree_gist` no banco de produção         | verificado e criado no LXC em 31/08 — ver [`infrastructure.md`](../infrastructure.md) |
+| Backup diário com restauração testada               | idem — ver [`runbook.md`](../runbook.md)                                              |
 
 Aberto:
 
