@@ -107,6 +107,21 @@ jobs:
       - run: npx prisma migrate deploy
       - run: npm run test:e2e
 
+      # A geração roda AQUI, e não no typecheck-and-build, porque este é o job
+      # que tem Postgres: montar o documento sobe a app, e subir a app toca o
+      # banco. O contrato é versionado; o passo seguinte é que dá sentido a
+      # isso — mudar a forma de uma resposta vira diff no PR em vez de virar
+      # surpresa no cliente que o orval gera para o front.
+      - name: Gera o contrato OpenAPI
+        run: npm run openapi:generate
+
+      - name: Confere que o contrato versionado está em dia
+        run: |
+          if ! git diff --exit-code -- openapi/openapi.json; then
+            echo "::error::openapi/openapi.json está defasado — rode 'npm run openapi:generate' e commite o resultado."
+            exit 1
+          fi
+
   docker-image:
     runs-on: ubuntu-latest
     timeout-minutes: 25

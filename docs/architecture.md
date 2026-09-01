@@ -165,6 +165,15 @@ do projeto: endpoint sem schema é invisível para o orval**, que gera o cliente
 do front a partir de `/api/docs-json`. O `status` precisa ser explícito no
 `@ZodResponse` — sem ele, a resposta vira `default` no documento.
 
+O contrato resultante é **versionado**: `openapi/openapi.json` é gerado por
+`npm run openapi:generate` e commitado, e o CI regenera e falha se o arquivo
+estiver defasado. O documento é montado por `criarDocumentoOpenApi()`
+([`src/openapi.ts`](../src/openapi.ts)), compartilhado entre o bootstrap e o
+script — pelo mesmo motivo do `configureApp()`. O ganho não é ter o arquivo: é
+que mudar a forma de uma resposta passa a ser um diff que se vê na revisão, em
+vez de algo que aparece no dia em que o cliente gerado pelo orval não compila
+mais.
+
 Todo erro sai como `application/problem+json` (RFC 7807) com o `reqId` do
 request. Erro não tratado loga tudo internamente e devolve só "informe o reqId
 ao suporte" — o front trata um formato só.

@@ -1,0 +1,4 @@
+# Gerado por `npm run openapi:generate` e conferido pelo CI. Se o prettier o
+# reformatar, o arquivo do repositório deixa de bater com o que o script
+# produz e o CI passa a falhar para sempre.
+openapi/openapi.json

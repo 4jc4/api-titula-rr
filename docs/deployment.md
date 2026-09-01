@@ -14,13 +14,13 @@ primeiro deploy de um servidor novo, para depuração direto na máquina, e para
 [`ci.yml`](../.github/workflows/ci.yml) roda em todo push e PR para o `main`,
 em cinco jobs:
 
-| Job                   | O que faz                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------ |
-| `lint`                | `eslint --max-warnings=0` (sem `--fix`: o lint-staged já corrigiu o que dava)        |
-| `typecheck-and-build` | `tsc --noEmit` e `nest build`                                                        |
-| `unit-tests`          | os `*.spec.ts` de `src/`                                                             |
-| `e2e-tests`           | as cinco suítes contra `imresamu/postgis:16-3.4` de serviço, na porta 5433           |
-| `docker-image`        | builda a **imagem de produção** de verdade, sobe o container e bate em `/api/health` |
+| Job                   | O que faz                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `lint`                | `eslint --max-warnings=0` (sem `--fix`: o lint-staged já corrigiu o que dava)                                              |
+| `typecheck-and-build` | `tsc --noEmit` e `nest build`                                                                                              |
+| `unit-tests`          | os `*.spec.ts` de `src/`                                                                                                   |
+| `e2e-tests`           | as cinco suítes contra `imresamu/postgis:16-3.4` de serviço, na porta 5433, e a conferência do contrato OpenAPI versionado |
+| `docker-image`        | builda a **imagem de produção** de verdade, sobe o container e bate em `/api/health`                                       |
 
 O `docker-image` é o que mais paga: um `CMD` errado no Dockerfile quebra ali, e
 não em produção. Ele sobe com `NODE_ENV=production` e uma config de AD falsa mas

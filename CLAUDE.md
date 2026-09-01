@@ -18,6 +18,9 @@ production host are all on the same private network.
 - `npm run start:dev` — watch mode
 - `npm run start:debug` — watch mode + inspector
 - `npm run build` — `nest build`, outputs to `dist/`
+- `npm run openapi:generate` — rebuilds and writes `openapi/openapi.json`,
+  which is **committed**. CI regenerates it and fails when the versioned file
+  is stale, so a change to any response shape shows up as a diff in the PR.
 - `npm run lint` — eslint `--fix` over `src`/`apps`/`libs`/`test`
 - `npm run format` — prettier over `src`/`test`
 

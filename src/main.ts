@@ -1,11 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module.js';
 import { Env } from './config/env.js';
 import { configureApp } from './configure-app.js';
+import { criarDocumentoOpenApi } from './openapi.js';
 
 async function bootstrap() {
   // bufferLogs: nada é perdido entre o create e o useLogger
@@ -36,18 +36,11 @@ async function bootstrap() {
   // do Nginx — não devolver a rota para trás dos guards, que o Swagger não
   // atravessa.
   if (config.get('NODE_ENV', { infer: true }) !== 'production') {
-    const openApiDoc = SwaggerModule.createDocument(
-      app,
-      new DocumentBuilder()
-        .setTitle('Titula RR — API')
-        .setVersion('0.1.0')
-        .addCookieAuth('session')
-        .build(),
-    );
-
     // 'api/docs' e não 'docs': a documentação acompanha o prefixo da API,
     // para o vhost do Nginx rotear tudo sob /api com um location só.
-    SwaggerModule.setup('api/docs', app, cleanupOpenApiDoc(openApiDoc));
+    // O documento é montado por criarDocumentoOpenApi() — o MESMO que gera o
+    // openapi/openapi.json versionado, para os dois não divergirem.
+    SwaggerModule.setup('api/docs', app, criarDocumentoOpenApi(app));
   }
 
   await app.listen(config.get('PORT', { infer: true }));
