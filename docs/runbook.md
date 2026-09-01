@@ -203,6 +203,30 @@ não é motivo para reiniciar o container. Só `down` (banco inacessível) devol
 Todo erro da API traz um `reqId` no corpo. Peça-o ao usuário: é a chave que
 liga o que ele viu ao que o log guardou.
 
+## Semear o calendário de prazos
+
+Ordem obrigatória, e nesta ordem: `municipios.sql` cria Boa Vista **marcada
+como sede**, e `feriados.sql` procura o IBGE `1400100` para pendurar os
+feriados municipais nele.
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/seed/municipios.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/seed/feriados.sql
+```
+
+Os dois são idempotentes. Conferir depois:
+
+```bash
+psql "$DATABASE_URL" -tAc 'SELECT municipio_sede()'
+psql "$DATABASE_URL" -tAc "SELECT adicionar_dias_uteis('2026-07-03', 5)"
+```
+
+O primeiro devolve o id da sede; o segundo, `2026-07-13`. Se o banco ainda não
+tiver sede, a resposta é erro `22000` — de propósito: prazo sem calendário
+definido não tem resposta certa, e devolver uma errada em silêncio foi
+justamente o achado C3. O calendário vai até **2036**; estender é rodar
+`gerar_feriados_moveis(ano)` e as inserções fixas para os anos seguintes.
+
 ## Headers de segurança do vhost
 
 Verificar de dentro do proxy, resolvendo o FQDN para o próprio `20.50.2.213` —

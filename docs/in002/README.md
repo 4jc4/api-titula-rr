@@ -6,7 +6,7 @@ foi cortado e por quê. Não os reescrevemos quando a realidade muda — o estad
 atual mora aqui, no índice, e a fonte de verdade do que existe é sempre o
 `prisma/schema.prisma`, as migrações e os testes.
 
-Última atualização: **31/08/2026**.
+Última atualização: **01/09/2026**.
 
 ## Os documentos
 
@@ -19,7 +19,7 @@ atual mora aqui, no índice, e a fonte de verdade do que existe é sempre o
 | [`segunda-analise-lacunas.md`](./segunda-analise-lacunas.md)         | Varredura adversarial contra o texto da IN: 20 achados, dos quais 17 seguem abertos — é o backlog do domínio |
 | [`reconciliacao-api-existente.md`](./reconciliacao-api-existente.md) | O confronto do modelo com a API que já existia, e o que cada lado teve de ceder                              |
 
-## Estado em 31/08/2026
+## Estado em 01/09/2026
 
 Fechado, com o commit onde aconteceu:
 
@@ -35,6 +35,8 @@ Fechado, com o commit onde aconteceu:
 | `verifica_*.sql` convertidos em 35 testes e2e       | `1d9cc2f`                                                                             |
 | PostGIS e `btree_gist` no banco de produção         | verificado e criado no LXC em 31/08 — ver [`infrastructure.md`](../infrastructure.md) |
 | Backup diário com restauração testada               | idem — ver [`runbook.md`](../runbook.md)                                              |
+| Prazo regido pela sede do órgão (fecha o C3)        | `20260901170000_sede_orgao_e_data_local`                                              |
+| Fuso: cluster em UTC + `data_local()` explícito     | idem                                                                                  |
 
 Aberto:
 
@@ -46,21 +48,23 @@ Aberto:
   (requerimento antes do processo, manifestação da parte, destinatário da
   comunicação, instrumento e onerosidade) mudam o formato do modelo e devem
   ser decididos antes dos módulos que os tocam.
-- **Fuso das colunas de tempo.** O domínio está em `timestamptz` e
-  `users`/`sessions` em `TIMESTAMP(3)`. A checagem do LXC em 31/08 acrescentou
-  um dado que fecha o cerco: o cluster de produção roda em `Etc/UTC`, então
-  `timestamptz` **sozinho não resolve** — `dataCienciaEfetiva::date` continua
-  devolvendo o dia seguinte para um ato das 23h30 em Boa Vista. E mudar o
-  fuso do banco tem efeito colateral: `createdAt` de `users`/`sessions` é
-  `TIMESTAMP(3)` com `DEFAULT CURRENT_TIMESTAMP`, cuja conversão usa o fuso da
-  sessão — passaria a gravar hora local numa coluna que o Prisma lê como UTC,
-  4 horas de defasagem silenciosa na auditoria. Recomendação: cluster em UTC,
-  domínio em `timestamptz`, e `AT TIME ZONE 'America/Boa_Vista'` explícito nas
-  poucas consultas que precisam de data local, confinado na camada de
-  consulta. **Decisão pendente.**
-- **Qual município rege a contagem de prazo** — o do imóvel ou o da sede do
-  órgão. São respostas diferentes para quem tem imóvel no Cantá e residência
-  em Manaus. **Decisão pendente.**
+- ~~**Fuso das colunas de tempo.**~~ **DECIDIDO (01/09/2026): cluster em UTC,
+  conversão explícita.** O cluster de produção continua em `Etc/UTC`, o domínio
+  continua em `timestamptz`, e toda derivação de data local passa por
+  `data_local(timestamptz)` — função `IMMUTABLE`, porque
+  `timezone(text, timestamptz)` não lê o fuso da sessão. `users`/`sessions`
+  ficam em `TIMESTAMP(3)` de propósito: mudar o fuso do cluster faria
+  `DEFAULT CURRENT_TIMESTAMP` gravar hora local numa coluna que o Prisma lê
+  como UTC, 4 horas de defasagem silenciosa na auditoria de acesso. A regra
+  está no `CLAUDE.md`: `::date` sobre `timestamptz` é proibido.
+- ~~**Qual município rege a contagem de prazo.**~~ **DECIDIDO (01/09/2026): o
+  da sede do órgão.** O prazo existe para a parte praticar ato perante o
+  ITERAIMA — se Boa Vista está fechada, ninguém protocola. É a lógica do
+  feriado forense: segue o juízo, não o domicílio da parte. `municipios` ganhou
+  `sedeOrgao`, com índice parcial único garantindo no máximo uma; `e_dia_util`
+  e `adicionar_dias_uteis` resolvem a omissão pela sede e **falham** se não
+  houver sede, em vez do antigo `COALESCE(uf, 'RR')` silencioso — o que fecha
+  o achado C3. O parâmetro continua disponível para o ato praticado em campo.
 - **Dois pontos operacionais** levantados no `papeis-rbac.md` §8 e nunca
   confirmados com quem opera: se de fato só a DCI junta documento (Art. 7º), e
   quem é a chefia imediata de cada setor — sem essa lista, `gestor` não tem a
