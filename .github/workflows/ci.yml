@@ -5,6 +5,25 @@ on:
     branches: [main]
   pull_request:
 
+# Push novo na mesma ref cancela o anterior: ninguém precisa do resultado de
+# um commit que já foi substituído. NÃO vale para o CD, que usa
+# cancel-in-progress: false — deploy pela metade é pior que deploy repetido.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Mínimo necessário: os jobs só fazem checkout. O default do repositório é
+# mais largo, e um token largo num workflow que roda código de terceiros
+# (as actions) é permissão dada de graça.
+permissions:
+  contents: read
+
+# TODA action é fixada por SHA de commit, com a versão no comentário ao lado.
+# Tag é ponteiro móvel: quem controla `actions/checkout` pode reapontar `v7`
+# a qualquer momento, e o CD deste projeto roda num runner DENTRO da
+# intranet, com o .env de produção ao lado e alcance até o banco e o DC.
+# Para atualizar: `git ls-remote https://github.com/actions/checkout refs/tags/v7`.
+
 # DATABASE_URL dummy: prisma.config.ts exige a variável ao carregar, mesmo
 # em comandos que não conectam em banco nenhum (ex.: `prisma generate`, que
 # roda no postinstall de todo `npm ci`). Mesmo truque do Dockerfile.
@@ -14,9 +33,10 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -27,9 +47,10 @@ jobs:
 
   typecheck-and-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -39,9 +60,10 @@ jobs:
 
   unit-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -50,17 +72,22 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         # Mesma imagem do docker-compose.dev.yml: as migrações fazem
         # CREATE EXTENSION IF NOT EXISTS postgis, um Postgres comum não serve.
-        image: imresamu/postgis:17-3.5
+        image: imresamu/postgis:16-3.4
         env:
           POSTGRES_USER: cardoso
           POSTGRES_PASSWORD: iteraima
           POSTGRES_DB: titularr_test
         ports:
-          - 5432:5432
+          # 5433 para casar com o docker-compose.dev.yml: o `npm run test:e2e`
+          # carrega a DATABASE_URL embutida no script, e ela precisa valer nos
+          # dois lugares. O job docker-image, que não roda esse script, segue
+          # na 5432.
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U cardoso"
           --health-interval 5s
@@ -69,10 +96,10 @@ jobs:
     # Sobrescreve o dummy do topo do arquivo: aqui o banco existe de verdade
     # (usado pelo `prisma migrate deploy` abaixo).
     env:
-      DATABASE_URL: postgresql://cardoso:iteraima@localhost:5432/titularr_test
+      DATABASE_URL: postgresql://cardoso:iteraima@localhost:5433/titularr_test
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -80,11 +107,27 @@ jobs:
       - run: npx prisma migrate deploy
       - run: npm run test:e2e
 
+      # A geração roda AQUI, e não no typecheck-and-build, porque este é o job
+      # que tem Postgres: montar o documento sobe a app, e subir a app toca o
+      # banco. O contrato é versionado; o passo seguinte é que dá sentido a
+      # isso — mudar a forma de uma resposta vira diff no PR em vez de virar
+      # surpresa no cliente que o orval gera para o front.
+      - name: Gera o contrato OpenAPI
+        run: npm run openapi:generate
+
+      - name: Confere que o contrato versionado está em dia
+        run: |
+          if ! git diff --exit-code -- openapi/openapi.json; then
+            echo "::error::openapi/openapi.json está defasado — rode 'npm run openapi:generate' e commite o resultado."
+            exit 1
+          fi
+
   docker-image:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     services:
       postgres:
-        image: imresamu/postgis:17-3.5
+        image: imresamu/postgis:16-3.4
         env:
           POSTGRES_USER: cardoso
           POSTGRES_PASSWORD: iteraima
@@ -99,8 +142,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://cardoso:iteraima@localhost:5432/titularr_docker
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -118,10 +161,9 @@ jobs:
       # (dist/src/main.js) alguma hora deixar de bater com a saída real do
       # build, é AQUI que quebra, não em produção.
       #
-      # NODE_ENV fica em 'production' (o valor que já vem da imagem): com
-      # NODE_ENV=test o logger tentaria carregar pino-pretty, que é
-      # devDependency e não existe mais na imagem depois do
-      # `npm prune --omit=dev` do Dockerfile.
+      # NODE_ENV fica em 'production' (o valor que já vem da imagem): é o
+      # ambiente que este job existe para exercitar, e a app RECUSA subir em
+      # produção sem AUTH_VALIDATOR=ad — o que a config falsa abaixo satisfaz.
       #
       # AUTH_VALIDATOR=ad com config falsa (mas válida) porque a app RECUSA
       # subir em produção com o validator fake — e dc.example.invalid é um
@@ -153,6 +195,18 @@ jobs:
           docker logs titula-rr-api-ci
 
           [ -n "$ok" ] || { echo "::error::container não respondeu em /api/health"; exit 1; }
+
+      # O Swagger monta as rotas fora do pipeline do Nest, então os guards
+      # globais não as protegem — em produção ele não é registrado. Este é o
+      # único job que roda a imagem com NODE_ENV=production, ou seja, o único
+      # lugar onde isso pode ser provado.
+      - name: Confere que o Swagger NÃO responde em produção
+        run: |
+          for rota in /api/docs /api/docs-json; do
+            codigo=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$rota")
+            echo "$rota -> $codigo"
+            [ "$codigo" = "404" ] || { echo "::error::$rota respondeu $codigo em produção; deveria ser 404"; exit 1; }
+          done
 
       - name: Limpa o container
         if: always()

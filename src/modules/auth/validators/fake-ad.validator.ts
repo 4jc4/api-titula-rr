@@ -12,13 +12,16 @@ const FAKE_USERS: Record<
   string,
   { password: string; identity: ValidatedIdentity }
 > = {
+  // Chefia imediata: papel de setor MAIS `gestor` (Art. 80). É a combinação
+  // que a IN exige e o único jeito de exercitar a união de papéis ponta a
+  // ponta — `gestor` sozinho não descreve ninguém real.
   'dev.gestor': {
     password: 'dev',
     identity: {
-      name: 'Gestor de Dev',
+      name: 'Chefe da DIGOF (Dev)',
       email: 'gestor@dev.local',
       cpf: '00000000191',
-      papeis: [Papel.gestor],
+      papeis: [Papel.governanca, Papel.gestor],
     },
   },
   'dev.titulacao': {

@@ -20,6 +20,9 @@ concurrency:
   group: titula-rr-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     name: Deploy production
@@ -30,11 +33,16 @@ jobs:
       - self-hosted
       - titula-rr-prod
 
+    # Um job travado aqui não desperdiça minuto de runner alheio: ele segura
+    # a NOSSA máquina, e como o concurrency acima não cancela, a fila de
+    # deploy para atrás dele. O default do GitHub é 6 horas.
+    timeout-minutes: 20
+
     environment: production
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # No gatilho workflow_run, github.sha é o HEAD do main NO MOMENTO
           # EM QUE O CD RODA — pode já ter avançado desde o commit que o CI
@@ -85,6 +93,7 @@ jobs:
             --exclude='.git/' \
             --exclude='node_modules/' \
             --exclude='dist/' \
+            --exclude='backups/' \
             ./ /opt/titula-rr/api/
 
       - name: Snapshot current image (rollback points)
@@ -98,7 +107,7 @@ jobs:
           # para :rollback-2 ANTES de gravar a imagem atual como o novo
           # :rollback. Cobre dois deploys ruins em sequência — o rollback
           # automático abaixo só usa :rollback (1º nível); :rollback-2 é o
-          # escape manual documentado em docs/DEPLOY.md (seção 5).
+          # escape manual documentado em docs/runbook.md (Rollback).
           if docker image inspect titula-rr-api:rollback >/dev/null 2>&1; then
             docker tag titula-rr-api:rollback titula-rr-api:rollback-2
             echo "Rollback anterior preservado como titula-rr-api:rollback-2."
@@ -123,8 +132,62 @@ jobs:
           echo "===== BUILD ====="
           docker compose build api
 
-      # SEMPRE antes do up (mesma regra do deploy manual, docs/DEPLOY.md
-      # seção 3.2) — o container antigo continua no ar enquanto isto roda,
+      # O rollback automático deste CD retagueia a imagem anterior e sobe de
+      # novo: desfaz o CÓDIGO, nunca o SCHEMA. Uma migração aplicada pela
+      # metade — ou aplicada e indesejada — precisa de um dump de minutos
+      # atrás, não do backup das 02:00 do LXC.
+      #
+      # Falhar aqui PARA o deploy, de propósito: sem ponto de restauração não
+      # se migra. E o modo de falha de errar este step é "não deployou", não
+      # "produção quebrada".
+      #
+      # Efeito colateral que vale: esta cópia fica no app server, uma máquina
+      # diferente do banco — cobre o que o backup do LXC não cobre.
+      - name: Backup do banco antes da migração
+        working-directory: /opt/titula-rr/api
+        run: |
+          set -euo pipefail
+
+          echo "===== BACKUP PRE-DEPLOY ====="
+
+          # O .env é lido pelo SHELL, e não por `docker run --env-file`: aquele
+          # não remove as aspas dos valores, e a DATABASE_URL chega deformada
+          # (ver docs/deployment.md, "Duas armadilhas já pagas").
+          set -a
+          . ./.env
+          set +a
+
+          mkdir -p backups
+          arquivo="pre-deploy-$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_SHA:0:7}.dump"
+
+          # Cliente da MESMA major do servidor (16). A URL não entra no argv do
+          # docker: `-e DATABASE_URL` herda do ambiente e a expansão acontece
+          # dentro do container. `--user` para o arquivo nascer do dono do
+          # diretório, não do uid do postgres da imagem.
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e DATABASE_URL \
+            -e ARQUIVO="$arquivo" \
+            -v "$PWD/backups:/backups" \
+            postgres:16-alpine \
+            sh -c 'pg_dump -Fc -d "$DATABASE_URL" -f "/backups/$ARQUIVO"'
+
+          # Backup que não abre não é backup.
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e ARQUIVO="$arquivo" \
+            -v "$PWD/backups:/backups" \
+            postgres:16-alpine \
+            sh -c 'pg_restore --list "/backups/$ARQUIVO" > /dev/null'
+
+          ls -la "backups/$arquivo"
+
+          # Os dez últimos. O diário do LXC é o de longo prazo; estes são
+          # pontos de restauração de deploy.
+          ls -1t backups/pre-deploy-*.dump | tail -n +11 | xargs -r rm -f
+
+      # SEMPRE antes do up (mesma regra do deploy manual, docs/deployment.md
+      # seção 4) — o container antigo continua no ar enquanto isto roda,
       # então uma migração que falhe aqui não derruba produção: o job só
       # para, sem acionar o rollback (health_check nem chega a rodar).
       - name: Migrate database

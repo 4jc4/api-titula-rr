@@ -164,7 +164,9 @@ describe('Auth (e2e)', () => {
     expect(res.status).toBe(200);
     expect(corpo<PublicUser>(res)).toMatchObject({
       username: 'dev.gestor',
-      papeis: ['gestor'],
+      // papel de setor + chefia: a combinação do Art. 80 sobrevive ao
+      // provisionamento espelhado, na ordem em que o AD a devolveu
+      papeis: ['governanca', 'gestor'],
     });
 
     // o schema de resposta NÃO expõe dados sensíveis
@@ -216,7 +218,9 @@ describe('Auth (e2e)', () => {
   });
 
   it('libera quem tem a permissão na matriz', async () => {
-    const cookie = cookieDe(await login('dev.gestor'));
+    // `usuario:listar` é do administrador: chefia imediata é autoridade
+    // sobre processo, não sobre contas.
+    const cookie = cookieDe(await login('dev.admin'));
     const res = await request(server)
       .get(`${API}/admin/usuarios`)
       .set('Cookie', cookie);
@@ -231,9 +235,9 @@ describe('Auth (e2e)', () => {
   });
 
   it('respeita page/pageSize na paginação de /admin/usuarios', async () => {
-    // Neste ponto da suíte já existem >=2 usuários provisionados
-    // (dev.gestor, dev.titulacao) — pageSize=1 tem que cortar mesmo assim.
-    const cookie = cookieDe(await login('dev.gestor'));
+    // Neste ponto da suíte já existem >=3 usuários provisionados
+    // (dev.gestor, dev.titulacao, dev.admin) — pageSize=1 corta mesmo assim.
+    const cookie = cookieDe(await login('dev.admin'));
     const res = await request(server)
       .get(`${API}/admin/usuarios?page=1&pageSize=1`)
       .set('Cookie', cookie);
@@ -245,7 +249,7 @@ describe('Auth (e2e)', () => {
     expect(body.total).toBeGreaterThan(1);
   });
 
-  it('separa permissões dentro do mesmo papel autenticado', async () => {
+  it('o guard barra antes do handler (403 vem antes do 404)', async () => {
     // ATENÇÃO AO PATH NESTE TESTE. Ele prova que o PermissionGuard barra
     // ANTES do handler: com um id inexistente, 403 = "o guard negou";
     // 404 = "o guard deixou passar e o service não achou".
@@ -259,7 +263,8 @@ describe('Auth (e2e)', () => {
     const admin = cookieDe(await login('dev.admin'));
     await request(server).post(alvo).set('Cookie', admin).expect(404);
 
-    // gestor tem usuario:listar, mas NÃO tem sessao:revogar
+    // a chefia da DIGOF tem os papéis do setor e o do Art. 80, e nenhum
+    // deles alcança `sessao:revogar`
     const gestor = cookieDe(await login('dev.gestor'));
     const res = await request(server).post(alvo).set('Cookie', gestor);
 

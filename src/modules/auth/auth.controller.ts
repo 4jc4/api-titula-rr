@@ -30,6 +30,19 @@ export class AuthController {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
+  // As MESMAS opções no set e no clear. O navegador casa o cookie a apagar
+  // pelos atributos, e divergência deixa o cookie morto no jar — o request
+  // seguinte carrega um token inválido à toa. Extraído para os dois não
+  // divergirem, pelo mesmo motivo do configureApp().
+  private opcoesDoCookie() {
+    return {
+      httpOnly: true,
+      secure: this.config.get('NODE_ENV', { infer: true }) === 'production',
+      sameSite: 'strict' as const,
+      path: '/',
+    };
+  }
+
   @Public()
   @Post('login')
   // Mais apertado que o teto global (30/min): cada tentativa faz um bind
@@ -52,10 +65,7 @@ export class AuthController {
       req.headers['user-agent'],
     );
     res.cookie(SESSION_COOKIE, token, {
-      httpOnly: true,
-      secure: this.config.get('NODE_ENV', { infer: true }) === 'production',
-      sameSite: 'strict',
-      path: '/',
+      ...this.opcoesDoCookie(),
       // maxAge = teto ABSOLUTO: o cookie sobrevive às renovações deslizantes;
       // quem manda na expiração real é o servidor (expiresAt/absoluteExpiresAt).
       maxAge: ABSOLUTE_TTL_MS,
@@ -81,6 +91,6 @@ export class AuthController {
     if (token) {
       await this.sessions.revokeByToken(token, MotivoRevogacao.logout);
     }
-    res.clearCookie(SESSION_COOKIE, { path: '/' });
+    res.clearCookie(SESSION_COOKIE, this.opcoesDoCookie());
   }
 }
