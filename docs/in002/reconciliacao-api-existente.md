@@ -190,6 +190,16 @@ Terceiro item, menor: o backup do LXC continua ausente, e agora passa a precisar
 > com `DEFAULT CURRENT_TIMESTAMP`, cuja conversão usa o fuso da sessão.
 > Recomendação atual: cluster em UTC, domínio em `timestamptz`, e
 > `AT TIME ZONE 'America/Boa_Vista'` explícito onde a data local importar.
+
+> **ATUALIZAÇÃO — 01/09/2026. (2) e (3) FECHADOS.**
+>
+> **(2) Fuso:** adotada a recomendação acima, com uma diferença — a conversão
+> não fica solta nas consultas, e sim numa função `data_local(timestamptz)`,
+> para que exista um nome a procurar (`grep data_local`) e um lugar só para
+> mudar. `users`/`sessions` permanecem em `TIMESTAMP(3)`.
+>
+> **(3) Município do prazo:** a sede do órgão. Ver o bloco em
+> [`segunda-analise-lacunas.md`](./segunda-analise-lacunas.md) §C3.
 >
 > **(3) Município do prazo** segue aberto, sem novidade.
 >

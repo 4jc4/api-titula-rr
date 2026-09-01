@@ -153,6 +153,17 @@ with no field-level `@map`, enum types in PascalCase.
 - The `docs/in002/*.md` files are **dated analyses, not living spec**. Don't
   rewrite them when reality changes — add an `ATUALIZAÇÃO` block and update
   `docs/in002/README.md`, which carries the present.
+- **Never `::date` on a `timestamptz`.** The production cluster runs in
+  `Etc/UTC`, so the naive cast advances by a day every act practised after 20h
+  local. Use `data_local(timestamptz)`, created in
+  `20260901170000_sede_orgao_e_data_local`. A `grep data_local` is meant to
+  list every place where the civil date in Boa Vista matters.
+- **Deadlines follow the seat of the órgão.** `adicionar_dias_uteis(inicio,
+dias)` without a município resolves to `municipios."sedeOrgao"` (Boa Vista) —
+  the prazo is to act before the ITERAIMA, so it follows the holidays of the
+  place where the process is filed. Pass a município only for an act practised
+  **in loco** (vistoria, delivery by a local agent, edital on the local
+  prefeitura's board).
 - Commit to a branch, never directly to `main`. PRs are squash-merged (the PR
   title becomes the commit message, lint-checked by `pr-title.yml` against
   Conventional Commits).

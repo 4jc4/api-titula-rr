@@ -370,6 +370,14 @@ model Municipio {
   nome       String @db.VarChar(120)
   uf         String @default("RR") @db.Char(2)
 
+  /// Sede do ITERAIMA — o calendário que rege a contagem de prazo quando
+  /// nenhum município é informado (decisão de 01/09/2026: o prazo é para
+  /// praticar ato perante o órgão, então segue o feriado da sede, não o do
+  /// imóvel). No máximo um município pode tê-la: o índice parcial único
+  /// `ux_municipio_sede_unica` não é expressável em Prisma e vive na
+  /// migração `20260901170000_sede_orgao_e_data_local`.
+  sedeOrgao  Boolean @default(false)
+
   modulosFiscais ModuloFiscalMunicipio[]
   glebas         Gleba[]
   imoveis        Imovel[]

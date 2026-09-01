@@ -16,15 +16,24 @@ const SEED_FERIADOS = resolve(process.cwd(), 'prisma/seed/feriados.sql');
 describe('Domínio — calendário e contagem de prazo', () => {
   let pool: Pool;
   let boaVistaId: number;
+  let cantaId: number;
 
   beforeAll(async () => {
     pool = abrirPool();
     await limparDominio(pool);
 
+    // Boa Vista é a SEDE — decisão de 01/09/2026, é o calendário que rege
+    // o prazo por omissão. O Cantá existe aqui só para provar a diferença.
     const municipio = await pool.query<{ id: number }>(
-      `INSERT INTO municipios ("codigoIbge", nome, uf) VALUES ('1400100','Boa Vista','RR') RETURNING id`,
+      `INSERT INTO municipios ("codigoIbge", nome, uf, "sedeOrgao")
+            VALUES ('1400100','Boa Vista','RR', true) RETURNING id`,
     );
     boaVistaId = municipio.rows[0].id;
+
+    const outro = await pool.query<{ id: number }>(
+      `INSERT INTO municipios ("codigoIbge", nome, uf) VALUES ('1400175','Cantá','RR') RETURNING id`,
+    );
+    cantaId = outro.rows[0].id;
 
     // O seed de verdade, lido do disco: quem quebrar o arquivo quebra o teste.
     await pool.query(await readFile(SEED_FERIADOS, 'utf8'));
@@ -110,35 +119,99 @@ describe('Domínio — calendário e contagem de prazo', () => {
     ]);
   });
 
-  it('sem município, o feriado municipal deixa de valer — mas o estadual de RR continua', async () => {
-    // Comportamento deliberado da função: `COALESCE(uf do município, 'RR')`.
-    // Num sistema de um estado só é o default certo, e está registrado como
-    // achado C3 na segunda análise — quem for reusar a função fora de RR
-    // precisa saber que a omissão não significa "só feriado nacional".
+  it('sem município, o calendário é o da sede do órgão', async () => {
+    // Fecha o achado C3: antes a omissão caía em COALESCE(uf, 'RR') e
+    // aplicava só os estaduais, em silêncio. Agora significa a sede.
     const { rows } = await pool.query<{
-      municipal: boolean;
-      estadual: boolean;
+      omisso: boolean;
+      sede: boolean;
+      outro: boolean;
     }>(
-      `SELECT e_dia_util('2026-07-09', NULL) AS municipal,
-              e_dia_util('2026-10-05', NULL) AS estadual`,
+      `SELECT e_dia_util('2026-07-09')      AS omisso,
+              e_dia_util('2026-07-09', $1)  AS sede,
+              e_dia_util('2026-07-09', $2)  AS outro`,
+      [boaVistaId, cantaId],
     );
 
-    expect(rows[0].municipal).toBe(true); // 09/07 vira dia útil comum
-    expect(rows[0].estadual).toBe(false); // 05/10 continua feriado
+    // 09/07 é o aniversário de Boa Vista: feriado na sede, dia útil no Cantá.
+    expect(rows[0].omisso).toBe(false);
+    expect(rows[0].sede).toBe(false);
+    expect(rows[0].outro).toBe(true);
+  });
+
+  it('sem sede cadastrada, a contagem falha em vez de improvisar', async () => {
+    await pool.query(`UPDATE municipios SET "sedeOrgao" = false`);
+    try {
+      const erro = await violacao(() =>
+        pool.query(`SELECT adicionar_dias_uteis('2026-07-03', 5)`),
+      );
+
+      // data_exception: prazo sem calendário definido não tem resposta certa,
+      // e devolver uma errada em silêncio é pior que falhar.
+      expect(erro.code).toBe('22000');
+      expect(erro.message).toContain('sede do orgao');
+    } finally {
+      await pool.query(
+        `UPDATE municipios SET "sedeOrgao" = true WHERE id = $1`,
+        [boaVistaId],
+      );
+    }
+  });
+
+  it('o banco recusa duas sedes', async () => {
+    const erro = await violacao(() =>
+      pool.query(
+        `INSERT INTO municipios ("codigoIbge", nome, uf, "sedeOrgao")
+              VALUES ('1400209','Caracaraí','RR', true)`,
+      ),
+    );
+
+    expect(erro.code).toBe('23505');
+    expect(erro.constraint).toBe('ux_municipio_sede_unica');
+  });
+
+  it('recusa município inexistente em vez de tratar como sem feriado', async () => {
+    const erro = await violacao(() =>
+      pool.query(`SELECT e_dia_util('2026-07-09', 99999)`),
+    );
+
+    expect(erro.code).toBe('22023');
+    expect(erro.message).toContain('inexistente');
   });
 
   it('Art. 71 §1º: 5 dias úteis a partir de sexta 03/07/2026', async () => {
-    const { rows } = await pool.query<{ com: string; sem: string }>(
-      `SELECT to_char(adicionar_dias_uteis('2026-07-03', 5, $1),'YYYY-MM-DD') AS com,
-              to_char(adicionar_dias_uteis('2026-07-03', 5, NULL),'YYYY-MM-DD') AS sem`,
-      [boaVistaId],
+    const { rows } = await pool.query<{
+      sede: string;
+      omisso: string;
+      outro: string;
+    }>(
+      `SELECT to_char(adicionar_dias_uteis('2026-07-03', 5, $1),'YYYY-MM-DD')   AS sede,
+              to_char(adicionar_dias_uteis('2026-07-03', 5),'YYYY-MM-DD')       AS omisso,
+              to_char(adicionar_dias_uteis('2026-07-03', 5, $2),'YYYY-MM-DD')   AS outro`,
+      [boaVistaId, cantaId],
     );
 
     // Contagem exclui o dia inicial: 06, 07, 08, (09 é feriado em Boa Vista),
     // 10 e 13 — a segunda-feira seguinte, porque 11 e 12 caem no fim de semana.
-    expect(rows[0].com).toBe('2026-07-13');
-    // Sem o feriado municipal, o quinto dia útil é 10/07: três dias antes.
-    expect(rows[0].sem).toBe('2026-07-10');
+    expect(rows[0].sede).toBe('2026-07-13');
+    // Omitir o município é o caso comum, e tem de dar o mesmo resultado.
+    expect(rows[0].omisso).toBe('2026-07-13');
+    // O tamanho da decisão, em dias: pelo calendário do imóvel seriam três
+    // dias a menos para a mesma intimação.
+    expect(rows[0].outro).toBe('2026-07-10');
+  });
+
+  it('data_local tira a data civil de Boa Vista, não a de UTC', async () => {
+    const { rows } = await pool.query<{ ingenuo: string; correto: string }>(
+      `SELECT to_char(('2026-07-09 23:30:00-04'::timestamptz)::date,'YYYY-MM-DD')   AS ingenuo,
+              to_char(data_local('2026-07-09 23:30:00-04'::timestamptz),'YYYY-MM-DD') AS correto`,
+    );
+
+    // O cluster roda em UTC: às 23h30 em Boa Vista já é o dia seguinte lá.
+    // Um documento juntado nesse instante começaria a contar prazo de um dia
+    // que não aconteceu — por isso ::date sobre timestamptz é proibido.
+    expect(rows[0].ingenuo).toBe('2026-07-10');
+    expect(rows[0].correto).toBe('2026-07-09');
   });
 
   it('recusa feriado nacional com uf preenchida', async () => {

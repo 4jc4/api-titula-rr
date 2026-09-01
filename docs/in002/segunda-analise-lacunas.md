@@ -166,6 +166,18 @@ A função faz `COALESCE((SELECT uf FROM municipio WHERE id = p_municipio_id), '
 
 Enquanto não for decidido, o `PrazoService` vai receber `municipioId` de quem chamar, e cada chamador pode escolher diferente. Precisa de decisão explícita e de um default no serviço, não na função SQL.
 
+> **ATUALIZAÇÃO — 01/09/2026. FECHADO.** Decidido: **a sede do órgão**. O prazo
+> é para praticar ato perante o ITERAIMA, então segue o calendário de onde o
+> processo tramita, não o do imóvel — a lógica do feriado forense. A migração
+> `20260901170000_sede_orgao_e_data_local` acrescentou `municipios."sedeOrgao"`
+> (índice parcial único: no máximo uma sede) e reescreveu `e_dia_util` e
+> `adicionar_dias_uteis`. O default deixou de ser `COALESCE(uf, 'RR')`: a
+> omissão agora significa a sede, município inexistente vira erro `22023`, e a
+> ausência de sede vira erro `22000` em vez de um calendário improvisado. O
+> parâmetro `p_municipio_id` continua existindo para o ato praticado em campo.
+> A diferença é medível: 5 dias úteis a partir de 03/07/2026 vencem em 13/07
+> pela sede e em 10/07 pelo Cantá — três dias de prazo legal.
+
 ---
 
 ## D. Omissões conscientes — registrar, não corrigir agora
