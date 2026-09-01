@@ -1,0 +1,188 @@
+name: Invariantes de produção
+
+# O CI prova que o CÓDIGO está certo. Este workflow prova que a MÁQUINA
+# continua certa — e são coisas que nenhum teste do repositório alcança,
+# porque não moram no git: o vhost do Nginx, o NODE_ENV do container e o
+# certificado emitido pela CA interna.
+#
+# Cada invariante aqui já quebrou (ou quase) uma vez:
+#   - os headers duplicados do R-08, que sobrescreviam a referrer-policy;
+#   - o Swagger, que monta no adaptador Express, FORA do pipeline de guards;
+#   - o wildcard *.intranet, que NÃO tem renovação automática e vence em
+#     28/05/2028 — renovação manual, em dois lugares (nginx e store do DC).
+on:
+  schedule:
+    # Minuto 17 de propósito: o agendador do GitHub atrasa os crons do minuto
+    # 0, quando o mundo inteiro agenda. Atenção: o GitHub DESATIVA workflows
+    # agendados após 60 dias sem atividade no repositório.
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  # Mesmo grupo do CD, de propósito: medir produção no meio de um deploy é
+  # ruído garantido. Como o CD usa cancel-in-progress: false, esta verificação
+  # espera o deploy terminar em vez de acusar um container que está subindo.
+  group: titula-rr-production
+  cancel-in-progress: false
+
+# Nenhum passo faz checkout nem fala com a API do GitHub. O arquivo da CA é
+# lido do diretório de deploy, que é justamente o que se quer verificar.
+permissions: {}
+
+jobs:
+  invariantes:
+    name: Invariantes de produção
+    runs-on:
+      - self-hosted
+      - titula-rr-prod
+    timeout-minutes: 5
+
+    env:
+      FQDN: titula.intranet.iteraima.rr.gov.br
+      CA: /opt/titula-rr/api/certs/ad-ldaps.pem
+      # O wildcard é renovado À MÃO. 45 dias é prazo para agendar com quem
+      # tem acesso ao AD CS, não para correr atrás no dia.
+      DIAS_MINIMOS_CERT: '45'
+
+    steps:
+      # Os passos seguintes usam `if: !cancelled()` para que UMA falha não
+      # esconda as outras: um alerta que mostra tudo que quebrou de uma vez
+      # vale mais que um que para no primeiro problema.
+      - name: TLS and reachability
+        run: |
+          set -euo pipefail
+
+          echo "===== TLS ====="
+          test -r "$CA" || { echo "FALHA: CA não legível em $CA"; exit 1; }
+
+          # ssl_verify_result 0 = cadeia validada contra a CA da intranet.
+          # Sem --cacert isto passaria com qualquer certificado.
+          leitura=$(curl -sS --cacert "$CA" -o /dev/null \
+            -w '%{http_code} %{ssl_verify_result}' \
+            "https://$FQDN/api/health")
+
+          echo "http/tls_verify: $leitura"
+          test "$leitura" = "200 0" || {
+            echo "FALHA: esperado '200 0' (HTTP 200 e cadeia válida)"
+            exit 1
+          }
+          echo "ok: HTTPS responde e o certificado valida contra a CA interna."
+
+      - name: Security headers
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+
+          problemas=0
+
+          conferir() {
+            local rota="$1" nome="$2" esperado="$3" cabecalhos="$4"
+            local n valor
+            n=$(printf '%s\n' "$cabecalhos" | grep -ci "^${nome}:" || true)
+            if [ "$n" -ne 1 ]; then
+              echo "FALHA ${rota}: ${nome} apareceu ${n}x (esperado exatamente 1)"
+              return 1
+            fi
+            valor=$(printf '%s\n' "$cabecalhos" | grep -i "^${nome}:" | cut -d' ' -f2-)
+            if [ "$valor" != "$esperado" ]; then
+              echo "FALHA ${rota}: ${nome} = '${valor}' (esperado '${esperado}')"
+              return 1
+            fi
+            echo "ok ${rota}: ${nome}: ${valor}"
+          }
+
+          echo "===== /api/ — fonte única é o helmet() da API ====="
+          api=$(curl -fsS --cacert "$CA" -D - -o /dev/null "https://$FQDN/api/health" | tr -d '\r')
+          conferir /api/ referrer-policy           'no-referrer'                          "$api" || problemas=$((problemas + 1))
+          conferir /api/ strict-transport-security 'max-age=31536000; includeSubDomains'  "$api" || problemas=$((problemas + 1))
+          conferir /api/ x-content-type-options    'nosniff'                              "$api" || problemas=$((problemas + 1))
+          conferir /api/ x-frame-options           'SAMEORIGIN'                           "$api" || problemas=$((problemas + 1))
+
+          echo
+          echo "===== / — frontend Next, coberto pelo snippet do Nginx ====="
+          web=$(curl -sS --cacert "$CA" -D - -o /dev/null "https://$FQDN/" | tr -d '\r')
+          conferir / referrer-policy           'strict-origin-when-cross-origin' "$web" || problemas=$((problemas + 1))
+          conferir / strict-transport-security 'max-age=15768000'                "$web" || problemas=$((problemas + 1))
+          conferir / x-content-type-options    'nosniff'                         "$web" || problemas=$((problemas + 1))
+          conferir / x-frame-options           'SAMEORIGIN'                      "$web" || problemas=$((problemas + 1))
+
+          echo
+          if [ "$problemas" -ne 0 ]; then
+            echo "${problemas} invariante(s) de header quebrado(s)."
+            echo "Duplicata em /api/ = o include do snippets/security-headers.conf"
+            echo "voltou ao nível server do vhost. Ausência em / = o include sumiu."
+            echo "Ver docs/infrastructure.md e docs/runbook.md."
+            exit 1
+          fi
+          echo "Headers íntegros nas duas rotas."
+
+      - name: Swagger is not exposed
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+
+          # O Swagger monta no adaptador Express, fora do pipeline de guards
+          # do Nest: se ele existir em produção, está aberto a quem alcançar
+          # o vhost. Por isso main.ts só o registra quando NODE_ENV != production.
+          problemas=0
+          for rota in /api/docs-json /api/docs /api/docs/; do
+            codigo=$(curl -sS --cacert "$CA" -o /dev/null -w '%{http_code}' "https://$FQDN$rota")
+            if [ "$codigo" = "404" ]; then
+              echo "ok: $rota -> 404"
+            else
+              echo "FALHA: $rota -> $codigo (esperado 404; NODE_ENV do container não é production?)"
+              problemas=$((problemas + 1))
+            fi
+          done
+
+          test "$problemas" -eq 0 || exit 1
+
+      - name: Health payload
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+
+          # O health devolve 200 mesmo com dependência degradada — quem diz a
+          # verdade é o corpo, não o código HTTP.
+          corpo=$(curl -fsS --cacert "$CA" "https://$FQDN/api/health")
+          echo "$corpo" | jq .
+
+          problemas=0
+          for par in status=ok database=connected directory=reachable; do
+            campo=${par%%=*}
+            esperado=${par#*=}
+            valor=$(printf '%s' "$corpo" | jq -r ".${campo} // \"ausente\"")
+            if [ "$valor" = "$esperado" ]; then
+              echo "ok: ${campo} = ${valor}"
+            else
+              echo "FALHA: ${campo} = '${valor}' (esperado '${esperado}')"
+              problemas=$((problemas + 1))
+            fi
+          done
+
+          test "$problemas" -eq 0 || exit 1
+
+      - name: Certificate expiry
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+
+          fim=$(echo \
+            | openssl s_client -connect "$FQDN:443" -servername "$FQDN" 2>/dev/null \
+            | openssl x509 -noout -enddate \
+            | cut -d= -f2)
+
+          restam=$(( ( $(date -d "$fim" +%s) - $(date +%s) ) / 86400 ))
+          echo "Certificado expira em: $fim (${restam} dias)"
+
+          if [ "$restam" -lt "$DIAS_MINIMOS_CERT" ]; then
+            echo
+            echo "FALHA: menos de ${DIAS_MINIMOS_CERT} dias de validade."
+            echo "O wildcard *.intranet.iteraima.rr.gov.br NÃO renova sozinho:"
+            echo "o template WebServer do AD CS não tem auto-inscrição e o subject"
+            echo "é fornecido na requisição. Renovar À MÃO em dois lugares:"
+            echo "  1. /etc/nginx/ssl/wildcard/ no proxy 20.50.2.213;"
+            echo "  2. store LocalMachine\\My do EINSTEIN (20.50.2.253)."
+            exit 1
+          fi
+          echo "ok: validade confortável."

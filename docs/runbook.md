@@ -221,6 +221,14 @@ O correto é **uma cópia de cada**, com os valores do `helmet()`:
 duas, o include do snippet voltou ao nível `server` do vhost — ver
 [`infrastructure.md`](./infrastructure.md).
 
+Isso não depende de alguém lembrar de conferir: o workflow **Invariantes de
+produção** (`.github/workflows/invariantes.yml`) roda de hora em hora no runner
+self-hosted e verifica, além dos headers das duas rotas, que o Swagger não
+existe em produção, que o `/api/health` reporta banco e diretório, e que o
+certificado tem mais de 45 dias de validade. Quando falha, o log nomeia o
+invariante e o que ele significa. Roda também sob demanda, pelo botão
+_Run workflow_.
+
 Por que a duplicata importa, já que os valores fortes chegam primeiro: navegador
 e RFC discordam de header para header. No HSTS vale o **primeiro** (RFC 6797
 §8.1), que é o da API; na `referrer-policy` a lista é combinada e vale o

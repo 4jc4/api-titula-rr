@@ -92,6 +92,10 @@ demanda, restaurar, testar — estão no [`runbook.md`](./runbook.md).
 - `certs/ad-ldaps.pem` no repositório é a **raiz da CA**, não um certificado
   autoassinado — é ela que o pinning valida. Renovação ou rotação da CA exige
   atualizar esse arquivo.
+- O wildcard **não renova sozinho** (o template `WebServer` do AD CS não tem
+  auto-inscrição e o subject vai na requisição), e vale em dois lugares: o
+  Nginx do proxy e o store do DC. O workflow `Invariantes de produção` falha
+  quando restarem menos de 45 dias — é o único aviso que existe.
 - **Grupos `TITULA_<PAPEL>`** em `OU=Aplicacoes` (o domínio não tinha OU de
   grupos; o precedente eram as OUs `internet` e `Openfire`). Contrato registrado
   em [`grupos-para-papeis.ts`](../src/modules/auth/grupos-para-papeis.ts): mudou
