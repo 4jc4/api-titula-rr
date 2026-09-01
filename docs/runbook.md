@@ -198,28 +198,39 @@ não é motivo para reiniciar o container. Só `down` (banco inacessível) devol
 | `Can't reach database server at base`         | `docker run --env-file` com aspas na `DATABASE_URL` — use `docker compose run`                                                                   |
 | Erro 500 com `reqId`                          | `docker compose logs api \| grep <reqId>` — o erro completo está lá, e só lá                                                                     |
 | `permission denied to create extension`       | as extensões não estão criadas e o papel da app não é superusuário — ver `infrastructure.md`                                                     |
+| Mudança no Nginx não aparece no `curl`        | o `reload` é gracioso — a requisição logo em seguida ainda pode ser atendida por um worker antigo; espere um segundo e repita                    |
 
 Todo erro da API traz um `reqId` no corpo. Peça-o ao usuário: é a chave que
 liga o que ele viu ao que o log guardou.
 
+## Headers de segurança do vhost
+
+Verificar de dentro do proxy, resolvendo o FQDN para o próprio `20.50.2.213` —
+usar `127.0.0.1` faz o `allow 20.50.0.0/16; deny all;` responder 403, e aí só
+aparecem os headers do Nginx:
+
+```bash
+FQDN=titula.intranet.iteraima.rr.gov.br
+curl -sSIk --resolve "$FQDN:443:20.50.2.213" "https://$FQDN/api/health" \
+  | grep -Ei 'referrer-policy|strict-transport|x-frame|x-content-type'
+```
+
+O correto é **uma cópia de cada**, com os valores do `helmet()`:
+`referrer-policy: no-referrer` e
+`strict-transport-security: max-age=31536000; includeSubDomains`. Se vierem
+duas, o include do snippet voltou ao nível `server` do vhost — ver
+[`infrastructure.md`](./infrastructure.md).
+
+Por que a duplicata importa, já que os valores fortes chegam primeiro: navegador
+e RFC discordam de header para header. No HSTS vale o **primeiro** (RFC 6797
+§8.1), que é o da API; na `referrer-policy` a lista é combinada e vale o
+**último** válido, que era o do Nginx — ou seja, a política que a API pedia
+estava sendo silenciosamente substituída. Em `x-frame-options`, valores
+repetidos e divergentes fazem o Chrome descartar o header inteiro.
+
 ## Pendências conhecidas
 
 Registradas aqui para não se perderem, não porque são urgentes.
-
-- [ ] **O Nginx duplica headers de segurança que o `helmet()` já envia**,
-      confirmado com `curl -i` em 16/08/2026. Dois deles vêm com valores
-      diferentes, e aí qual o navegador aplica é inconsistente:
-
-  | Header                      | Helmet (API)                          | Nginx                                             |
-  | --------------------------- | ------------------------------------- | ------------------------------------------------- |
-  | `x-frame-options`           | `SAMEORIGIN`                          | `SAMEORIGIN` (redundante)                         |
-  | `x-content-type-options`    | `nosniff`                             | `nosniff` (redundante)                            |
-  | `referrer-policy`           | `no-referrer`                         | `strict-origin-when-cross-origin` (**diferente**) |
-  | `strict-transport-security` | `max-age=31536000; includeSubDomains` | `max-age=15768000` (**mais fraco**)               |
-
-  Na prática o Nginx está enfraquecendo o HSTS que a API pede. Quando houver
-  acesso a `20.50.2.213`: remover do vhost os `add_header` correspondentes e
-  deixar o `helmet()` ser a fonte única.
 
 - [ ] **Rotacionar a senha do Postgres de produção** — ver
       [`deployment.md`](./deployment.md).
