@@ -190,15 +190,16 @@ não é motivo para reiniciar o container. Só `down` (banco inacessível) devol
 
 ## Diagnóstico rápido
 
-| Sintoma                                       | Causa provável                                                                                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `P1000: authentication failed` em dev         | outro Postgres na porta. O compose pode subir "Healthy" sem publicar a porta — pare o outro container e **recrie** (`down` e `up`), não reinicie |
-| `directory: unreachable` no health            | DC fora, DNS/IPv6 do EINSTEIN, ou CA trocada                                                                                                     |
-| Login por navegador falha, mas o `curl` passa | cookie `Secure` descartado: TLS não está terminando no Nginx                                                                                     |
-| `Can't reach database server at base`         | `docker run --env-file` com aspas na `DATABASE_URL` — use `docker compose run`                                                                   |
-| Erro 500 com `reqId`                          | `docker compose logs api \| grep <reqId>` — o erro completo está lá, e só lá                                                                     |
-| `permission denied to create extension`       | as extensões não estão criadas e o papel da app não é superusuário — ver `infrastructure.md`                                                     |
-| Mudança no Nginx não aparece no `curl`        | o `reload` é gracioso — a requisição logo em seguida ainda pode ser atendida por um worker antigo; espere um segundo e repita                    |
+| Sintoma                                         | Causa provável                                                                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `P1000: authentication failed` em dev           | outro Postgres na porta. O compose pode subir "Healthy" sem publicar a porta — pare o outro container e **recrie** (`down` e `up`), não reinicie |
+| `directory: unreachable` no health              | DC fora, DNS/IPv6 do EINSTEIN, ou CA trocada                                                                                                     |
+| Login por navegador falha, mas o `curl` passa   | cookie `Secure` descartado: TLS não está terminando no Nginx                                                                                     |
+| `Can't reach database server at base`           | `docker run --env-file` com aspas na `DATABASE_URL` — use `docker compose run`                                                                   |
+| Erro 500 com `reqId`                            | `docker compose logs api \| grep <reqId>` — o erro completo está lá, e só lá                                                                     |
+| `permission denied to create extension`         | as extensões não estão criadas e o papel da app não é superusuário — ver `infrastructure.md`                                                     |
+| Deploy falha no `rsync` com `Permission denied` | o diretório em `/opt/titula-rr/*` não está no grupo `titula-deploy` com `setgid` — ver `infrastructure.md`                                       |
+| Mudança no Nginx não aparece no `curl`          | o `reload` é gracioso — a requisição logo em seguida ainda pode ser atendida por um worker antigo; espere um segundo e repita                    |
 
 Todo erro da API traz um `reqId` no corpo. Peça-o ao usuário: é a chave que
 liga o que ele viu ao que o log guardou.

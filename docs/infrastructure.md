@@ -38,6 +38,15 @@ navegador → Nginx (20.50.2.213) → :3000 do app server (20.50.2.223)
   LDAPS falharia. O FQDN é obrigatório — o certificado valida o nome, não o IP.
   **Se o IP do DC mudar, é o primeiro lugar a atualizar.**
 - Logs em `json-file` com rotação (`max-size: 10m`, `max-file: 5`).
+- **Os diretórios de deploy pertencem ao grupo `titula-deploy`, com escrita de
+  grupo e `setgid`** (`drwxrwsr-x nti titula-deploy`). O runner roda como
+  `gh-runner`, que é membro desse grupo; o `setgid` faz todo arquivo novo
+  herdar o grupo, senão o próximo deploy encontra arquivos que ele mesmo não
+  consegue substituir. `/opt/titula-rr/web` ficou fora dessa convenção até
+  01/09/2026 e o CD do frontend falhava no `rsync` com `Permission denied` —
+  se um deploy quebrar assim, é aqui que se olha primeiro.
+- `.env` em `640` (`nti:titula-deploy`), nunca legível por outros usuários da
+  máquina.
 
 ## Banco — LXC `20.50.2.224`
 

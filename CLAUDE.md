@@ -33,7 +33,7 @@ production host are all on the same private network.
   e.g. `npx jest grupos-para-papeis`.
 - `npm run test:watch` / `npm run test:cov` / `npm run test:debug`
 - `npm run test:e2e` — `*.e2e-spec.ts` in `test/`, against a **real**
-  Postgres+PostGIS, not mocks. Five suites, 53 tests, run serially
+  Postgres+PostGIS, not mocks. Five suites, 57 tests, run serially
   (`--runInBand`): they share one database and `auth.e2e-spec` wipes `users` in
   its `beforeAll`. The script already exports `NODE_ENV=test`,
   `AUTH_VALIDATOR=fake` and a local `DATABASE_URL` pointing at `titularr_test`

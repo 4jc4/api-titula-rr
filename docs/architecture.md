@@ -191,6 +191,17 @@ constraints, índices parciais, CHECKs compostos, funções PL/pgSQL e tipos
 PostGIS operáveis. O fluxo é `prisma migrate dev --create-only` e então
 substituir o SQL.
 
+**Tempo é `timestamptz`, e data local é função.** O cluster de produção roda
+em `Etc/UTC`, então `::date` sobre um `timestamptz` adianta em um dia todo ato
+praticado depois das 20h em Boa Vista — que num prazo processual é a diferença
+entre tempestivo e intempestivo. A conversão passa por `data_local()`
+(`IMMUTABLE`, porque `timezone(text, timestamptz)` não lê o fuso da sessão), e
+`::date` sobre `timestamptz` é proibido no `CLAUDE.md`. `users` e `sessions`
+seguem em `TIMESTAMP(3)` de propósito: mudar o fuso do cluster faria o
+`DEFAULT CURRENT_TIMESTAMP` dessas tabelas gravar hora local numa coluna que o
+Prisma lê como UTC — quatro horas de defasagem silenciosa na auditoria de
+acesso, que é onde o erro custa mais caro.
+
 Duas consequências operacionais que moram fora deste repositório:
 
 - as extensões `postgis` e `btree_gist` precisam existir no banco **antes** do
@@ -204,8 +215,20 @@ Duas consequências operacionais que moram fora deste repositório:
 `prisma/schema.prisma` tem duas metades: autenticação (2 models, em produção) e
 o núcleo processual da IN 002/2026 (29 models, 23 enums) — este ainda sem
 nenhum módulo que o consuma. Boa parte da Instrução Normativa está em DDL: 47
-CHECK, 5 EXCLUDE de vigência, 11 índices parciais e 4 funções de contagem de
-prazo em dias úteis. Cada uma dessas regras tem teste e2e.
+CHECK, 5 EXCLUDE de vigência, 11 índices parciais e seis funções PL/pgSQL —
+`pascoa`, `gerar_feriados_moveis`, `e_dia_util`, `adicionar_dias_uteis`,
+`municipio_sede` e `data_local`. Cada uma dessas regras tem teste e2e.
+
+**O prazo segue o calendário da sede do órgão.** `adicionar_dias_uteis` sem
+município resolve por `municipios."sedeOrgao"` — Boa Vista —, e não pelo
+município do imóvel: o prazo existe para a parte praticar ato perante o
+ITERAIMA, e se a sede está fechada ninguém protocola. É a lógica do feriado
+forense, que segue o juízo e não o domicílio da parte. Um índice parcial único
+garante no máximo uma sede, e a ausência de sede é **erro** (`22000`), não um
+default improvisado. O parâmetro continua disponível para o dia em que um ato
+praticado em campo — vistoria, entrega por agente local, edital afixado na
+prefeitura — precisar do calendário de lá. A diferença é medível: cinco dias
+úteis a partir de 03/07/2026 vencem em 13/07 pela sede e em 10/07 pelo Cantá.
 
 Convenção: domínio em português, infraestrutura em inglês; tabelas em plural
 via `@@map`, colunas em camelCase sem `@map` de campo (ficam entre aspas no
