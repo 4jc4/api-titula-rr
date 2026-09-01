@@ -158,3 +158,40 @@ o seed do break-glass não roda dentro do container (ver
 
 Estão no [`runbook.md`](./runbook.md) — são procedimentos de operação, e a hora
 de precisar deles raramente é a hora do deploy.
+
+## 6. Invariantes de produção
+
+[`invariantes.yml`](../.github/workflows/invariantes.yml) roda de hora em hora
+(cron no minuto 17, mais `workflow_dispatch`) no mesmo runner self-hosted. Ele
+não testa o código — o CI faz isso. Testa a **máquina**, e só coisas que não
+moram no git:
+
+| Passo                    | O que afirma                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `TLS and reachability`   | HTTPS responde 200 e o certificado valida contra a CA interna (`--cacert`, não `-k`) |
+| `Security headers`       | uma cópia de cada header em `/api/` e em `/`, com os valores certos de cada lado     |
+| `Swagger is not exposed` | `/api/docs`, `/api/docs/` e `/api/docs-json` devolvem 404                            |
+| `Health payload`         | `status: ok`, `database: connected`, `directory: reachable`                          |
+| `Certificate expiry`     | mais de 45 dias de validade no wildcard                                              |
+
+Três detalhes de desenho que valem saber antes de mexer:
+
+- **Sem `checkout` e com `permissions: {}`.** O arquivo da CA é lido de
+  `/opt/titula-rr/api/certs/`, o diretório de deploy — assim o workflow não
+  precisa de token nenhum e confere a CA que está _implantada_, não a que está
+  no repositório.
+- **`--cacert` em vez de `-k`.** É o que transforma o alerta no único vigia da
+  expiração do wildcard `*.intranet.iteraima.rr.gov.br`, que **não** tem
+  renovação automática e precisa ser trocado à mão em dois lugares (o Nginx do
+  proxy e o store do DC). 45 dias é prazo para agendar, não para correr atrás.
+- **Mesmo `concurrency` do CD** (`titula-rr-production`): medir produção no
+  meio de um deploy geraria alarme falso a cada restart de container.
+
+Os passos usam `if: !cancelled()` para que uma falha não esconda as outras.
+
+Duas coisas a esperar dele. O agendador do GitHub **atrasa** — um cron de
+minuto 17 pode entregar meia hora depois; isto é um vigia diário disfarçado de
+horário, não monitoração em tempo real. E o GitHub **desativa workflows
+agendados após 60 dias sem atividade no repositório**: se o projeto entrar em
+manutenção, o vigia se desliga sozinho e ninguém avisa. Um commit qualquer o
+reativa.

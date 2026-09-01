@@ -121,6 +121,18 @@ AD estiver fora do ar):
 DATABASE_URL=... BREAK_GLASS_USER=... BREAK_GLASS_PASSWORD=... npx tsx prisma/seed.ts
 ```
 
+Seed do calendário de prazos — **nesta ordem**, porque o de feriados procura
+Boa Vista pelo código IBGE para pendurar os feriados municipais nela, e é ela
+que carrega a marca de sede do órgão:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/seed/municipios.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/seed/feriados.sql
+```
+
+Sem sede cadastrada, `adicionar_dias_uteis` **falha** com SQLSTATE `22000` em
+vez de improvisar um calendário — ver [`docs/runbook.md`](./docs/runbook.md).
+
 ## Docker (imagem de produção)
 
 ```bash
@@ -133,7 +145,7 @@ Dockerfile quebra ali, não em produção.
 
 ## Testes e2e
 
-Cinco suítes, 53 testes, contra Postgres+PostGIS real — não mocks.
+Cinco suítes, 57 testes, contra Postgres+PostGIS real — não mocks.
 
 `auth.e2e-spec` sobe a aplicação e exercita sessão, RBAC e versionamento. As
 quatro suítes `dominio-*` verificam as regras que vivem no banco e por isso
@@ -165,6 +177,13 @@ npm run test:e2e
   alcança o Postgres de produção e o AD via LDAPS). `prisma migrate deploy`
   roda antes do `up`; health check com rollback automático (2 gerações)
   se falhar. Detalhes completos: [`docs/deployment.md`](./docs/deployment.md).
+
+- **Invariantes de produção** (`.github/workflows/invariantes.yml`): de hora
+  em hora no mesmo runner, confere o que nenhum teste do repositório alcança
+  porque não mora no git — headers de segurança do vhost, ausência do Swagger,
+  `/api/health` reportando banco e diretório, e a validade do certificado da CA
+  interna com 45 dias de folga. Compartilha o `concurrency` do CD: nunca mede
+  produção no meio de um deploy.
 
 > **O merge é o deploy.** É nele que as migrações pendentes entram no banco de
 > produção. Antes de um merge que mexe em schema, vale disparar o backup à mão
