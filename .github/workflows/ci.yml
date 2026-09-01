@@ -5,6 +5,25 @@ on:
     branches: [main]
   pull_request:
 
+# Push novo na mesma ref cancela o anterior: ninguém precisa do resultado de
+# um commit que já foi substituído. NÃO vale para o CD, que usa
+# cancel-in-progress: false — deploy pela metade é pior que deploy repetido.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Mínimo necessário: os jobs só fazem checkout. O default do repositório é
+# mais largo, e um token largo num workflow que roda código de terceiros
+# (as actions) é permissão dada de graça.
+permissions:
+  contents: read
+
+# TODA action é fixada por SHA de commit, com a versão no comentário ao lado.
+# Tag é ponteiro móvel: quem controla `actions/checkout` pode reapontar `v7`
+# a qualquer momento, e o CD deste projeto roda num runner DENTRO da
+# intranet, com o .env de produção ao lado e alcance até o banco e o DC.
+# Para atualizar: `git ls-remote https://github.com/actions/checkout refs/tags/v7`.
+
 # DATABASE_URL dummy: prisma.config.ts exige a variável ao carregar, mesmo
 # em comandos que não conectam em banco nenhum (ex.: `prisma generate`, que
 # roda no postinstall de todo `npm ci`). Mesmo truque do Dockerfile.
@@ -14,9 +33,10 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -27,9 +47,10 @@ jobs:
 
   typecheck-and-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -39,9 +60,10 @@ jobs:
 
   unit-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -50,6 +72,7 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         # Mesma imagem do docker-compose.dev.yml: as migrações fazem
@@ -75,8 +98,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://cardoso:iteraima@localhost:5433/titularr_test
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -86,6 +109,7 @@ jobs:
 
   docker-image:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     services:
       postgres:
         image: imresamu/postgis:16-3.4
@@ -103,8 +127,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://cardoso:iteraima@localhost:5432/titularr_docker
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm

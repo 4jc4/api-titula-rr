@@ -31,6 +31,26 @@ O título do PR é validado à parte, contra Conventional Commits
 ([`pr-title.yml`](../.github/workflows/pr-title.yml)): PRs são squash-merged, e
 o título vira a mensagem do commit no `main`.
 
+### Convenções dos workflows
+
+- **Toda action é fixada por SHA de commit**, com a versão no comentário ao
+  lado. Tag é ponteiro móvel: quem controla `actions/checkout` pode reapontar
+  `v7` a qualquer momento, e o CD roda num runner **dentro da intranet**, com o
+  `.env` de produção ao lado e alcance até o banco e o DC — o raio de alcance de
+  uma action comprometida aqui não é o de um runner descartável. Para atualizar:
+  `git ls-remote https://github.com/actions/checkout refs/tags/v7`.
+- **`permissions:` declarado em todo workflow**, com o mínimo que ele usa
+  (`contents: read`, e `{}` no `runner-test`). O default do repositório é mais
+  largo do que qualquer um deles precisa.
+- **`timeout-minutes` em todo job.** Nos jobs hospedados é higiene; no CD é
+  necessidade — um job travado segura a nossa máquina, e como o `concurrency`
+  do CD não cancela, a fila de deploy para atrás dele. O default do GitHub é
+  seis horas.
+- **`concurrency` com `cancel-in-progress`** oposto nos dois lados: o CI cancela
+  o run anterior da mesma ref (ninguém precisa do resultado de um commit já
+  substituído), o CD **não** cancela — deploy pela metade é pior que deploy
+  repetido.
+
 ## 2. Entrega contínua
 
 [`cd.yml`](../.github/workflows/cd.yml) dispara por `workflow_run` quando o CI

@@ -3,8 +3,12 @@ name: Test self-hosted runner
 on:
   workflow_dispatch:
 
+# Este workflow só imprime informação do host: não precisa de token nenhum.
+permissions: {}
+
 jobs:
   test-runner:
+    timeout-minutes: 5
     runs-on:
       - self-hosted
       - titula-rr-prod

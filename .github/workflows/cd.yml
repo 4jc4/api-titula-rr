@@ -20,6 +20,9 @@ concurrency:
   group: titula-rr-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     name: Deploy production
@@ -30,11 +33,16 @@ jobs:
       - self-hosted
       - titula-rr-prod
 
+    # Um job travado aqui não desperdiça minuto de runner alheio: ele segura
+    # a NOSSA máquina, e como o concurrency acima não cancela, a fila de
+    # deploy para atrás dele. O default do GitHub é 6 horas.
+    timeout-minutes: 20
+
     environment: production
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # No gatilho workflow_run, github.sha é o HEAD do main NO MOMENTO
           # EM QUE O CD RODA — pode já ter avançado desde o commit que o CI
