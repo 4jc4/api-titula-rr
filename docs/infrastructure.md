@@ -119,10 +119,14 @@ Dois cuidados:
 - O cookie de sessão é `Secure` em produção. Se o Nginx não estiver terminando
   TLS corretamente, o navegador descarta o cookie e o login falha
   silenciosamente.
-- **Pendência conhecida:** o vhost duplica headers que o `helmet()` já envia, e
-  em dois deles com valor diferente — o HSTS do Nginx é mais fraco (6 meses, sem
-  `includeSubDomains`) e a `referrer-policy` diverge. Ver
-  [`runbook.md`](./runbook.md).
+- **Headers de segurança:** o snippet `snippets/security-headers.conf` é
+  compartilhado com GLPI, Portainer e SSI. No vhost do titula ele fica **dentro
+  do `location /`**, não no nível `server`. Assim o frontend Next — que não
+  emite esses headers sozinho — continua coberto pelo Nginx, enquanto em
+  `/api/` o `helmet()` é a fonte única. Não mova o include de volta para o
+  `server`: o `/api/` passa a herdá-lo e os headers voltam a duplicar. Também
+  não edite o snippet para "corrigir" os valores — ele serve três sistemas que
+  não têm `helmet()` para repor nada.
 
 ## Runner de CI/CD
 
