@@ -67,14 +67,19 @@ Sequência:
 4. **Snapshot**: `:rollback` vira `:rollback-2`, e a imagem em produção vira
    `:rollback`. Duas gerações.
 5. **Build** da imagem.
-6. **Migração** — `prisma migrate deploy`, **sempre antes do `up`**. O container
+6. **Backup do banco** — `pg_dump -Fc` em
+   `backups/pre-deploy-<data>-<sha>.dump`, conferido com `pg_restore --list`.
+   Falhar aqui **para o deploy**, de propósito: sem ponto de restauração não se
+   migra. É o único passo que cobre o que o rollback não alcança — ele desfaz o
+   código, nunca o schema.
+7. **Migração** — `prisma migrate deploy`, **sempre antes do `up`**. O container
    antigo continua no ar enquanto isso roda: uma migração que falhe aqui para o
    job sem derrubar produção.
-7. **`docker compose up -d --no-deps api`**.
-8. **Health check** — até 30 tentativas em `/api/health`.
-9. **Rollback automático** se o health check falhar: retagueia `:rollback` para
-   `:local`, sobe de novo e reconfere. O job continua marcado como falho, porque
-   a versão nova não foi ao ar.
+8. **`docker compose up -d --no-deps api`**.
+9. **Health check** — até 30 tentativas em `/api/health`.
+10. **Rollback automático** se o health check falhar: retagueia `:rollback` para
+    `:local`, sobe de novo e reconfere. O job continua marcado como falho, porque
+    a versão nova não foi ao ar.
 
 > **O merge é o deploy.** É no merge que as migrações pendentes entram no banco
 > de produção, sem ninguém assistindo. Antes de um merge que mexe em schema,

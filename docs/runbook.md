@@ -139,6 +139,18 @@ Esperado: `extensoes: plpgsql, btree_gist, postgis`. O dump carrega a extensão
 junto — mas um destino **sem o pacote** `postgresql-16-postgis-3` instalado não
 restaura este arquivo.
 
+**Pontos de restauração de deploy.** Além do diário das 02:00 no LXC, o CD
+grava um `pg_dump` imediatamente antes de cada migração, no **app server**:
+
+```sh
+ls -lt /opt/titula-rr/api/backups/
+```
+
+São os dez últimos, nomeados `pre-deploy-<data>-<sha>.dump`. É o que usar
+quando a migração de um deploy específico precisar ser desfeita — o rollback
+automático do CD devolve a imagem, nunca o schema. Restauram-se pelo mesmo
+procedimento abaixo, trocando o caminho do arquivo.
+
 **Restaurar de verdade**, com a API parada:
 
 ```sh
