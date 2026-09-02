@@ -1,0 +1,1042 @@
+INSTRUÇÃO NORMATIVA Nº 002 DE 2026.
+    Altera a Instrução Normativa nº 001/2026 e estabelece o fluxograma, os procedimentos legais e processuais e os documentos necessários para a
+regularização fundiária rural e convalidação de títulos; regulamenta, no âmbito do Instituto de Terras e Colonização do Estado de Roraima (ITERAIMA),
+a autorização de georreferenciamento e o uso oficial do Sistema de Gestão Fundiária (SIGEF).
+    O PRESIDENTE DO INSTITUTO DE TERRAS E COLONIZAÇÃO DO ESTADO DE RORAIMA – ITERAIMA, no uso da atribuição que lhe confere
+o Art. 88 da Lei Estadual nº 976, de 14 de julho de 2014, e suas alterações.
+    Resolve:
+    CAPÍTULO I
+    DAS DISPOSIÇÕES GERAIS
+    Art. 1º Esta Instrução Normativa estabelece o fluxograma para a tramitação de processos de regularização fundiária rural, os documentos necessários
+para a instrução dos procedimentos, e regulamenta a autorização de georreferenciamento e o uso oficial do Sistema de Gestão Fundiária (SIGEF) pelo
+Iteraima.
+    Art. 2º É obrigatório aos servidores responsáveis pela aplicação desta Instrução Normativa o conhecimento dos seguintes atos normativos:
+    I - Lei Estadual nº 976/2014 e suas alterações, que dispõe sobre a Política Fundiária Rural e de Regularização Fundiária Rural do Estado de Roraima;
+    II - Lei Federal nº 13.726/2018, que racionaliza atos e procedimentos administrativos;
+    III - Lei Estadual nº 418/2004, que regula o processo administrativo no âmbito da Administração Pública Estadual;
+    IV - Lei Federal nº 10.267/2001, que trata do georreferenciamento de imóveis rurais;
+    V - Lei Federal nº 14.004/2020, que altera a legislação sobre a Faixa de Fronteira; e
+    VI - Lei Federal nº 10.304/2001, que transfere ao domínio dos Estados de Roraima e Amapá, terras pertencentes à União.
+    Art. 3º Havendo dúvidas sobre a aplicação desta Instrução Normativa, o setor competente deverá submeter a questão, devidamente fundamentada, à
+Presidência do Iteraima, que decidirá a respeito.
+    Art. 4º Todos os servidores do Iteraima deverão observar, em suas atuações, os princípios da legalidade, impessoalidade, moralidade, publicidade e
+eficiência.
+    CAPÍTULO II
+    DO REQUERIMENTO E DA INSTRUÇÃO PROCESSUAL
+    Art. 5º O processo de regularização fundiária rural inicia-se com o protocolo de requerimento padrão, dirigido ao Presidente do Iteraima, devidamente
+preenchido e assinado pelo interessado, podendo ser realizado de forma digital por meio do Portal Iteraima Cidadão ou, subsidiariamente, de forma
+presencial na Divisão de Cidadania (DCI), nos casos em que o requerente não dispuser de acesso ao sistema.
+    Parágrafo único. Caso já exista processo em curso, a DCI deverá anexar o novo pedido aos autos existentes, sendo vedada a duplicidade de processos.
+Se o processo original estiver arquivado, o prosseguimento dependerá do pagamento da taxa de desarquivamento, nos termos do capítulo XI.
+    Art. 6º O requerimento deverá ser instruído com os seguintes documentos do interessado e de seu cônjuge ou companheiro(a):
+    I - Qualificação completa, endereço, telefone para contato e endereço eletrônico (quando houver);
+    II - Identificação do imóvel (denominação da área, município, gleba);
+    III - Arquivo digital do imóvel em formatos vetoriais utilizados em sistemas de GIS (Geographic Information Systems) e CAD (Computer-Aided
+Design), extensão SHP, DWG, DXF, KML ou KMZ, a ser juntado aos autos do processo no ato de sua abertura;
+    IV - Cópia do RG e CPF;
+    V - Cópia da Certidão de Casamento ou Declaração de União Estável;
+    VI - Comprovante de residência atualizado;
+    VII - Declaração de Ocupação, conforme modelo do Iteraima;
+    VIII - Declaração de Qualificação, conforme modelo do Iteraima;
+    IX - Em caso de sucessão, o termo de inventariante ou escritura pública de cessão de direitos hereditários ou formal de partilha;
+    X - No caso de cadeia possessória de determinado imóvel que tenha origem em pessoa já falecida, especialmente quando a alienação tiver sido promovida
+por herdeiro, torna-se imprescindível a apresentação de formal de partilha ou que a transmissão tenha sido concretizada por inventariante devidamente
+constituído;
+    XI - Declaração de nacionalidade, sendo brasileiro naturalizado, deve apresentar Portaria de Naturalização publicada no Diário Oficial da União (DOU)
+ou o Certificado de Naturalização emitido pelo Ministério da Justiça;
+    XII - Contrato de compra e venda celebrado em data posterior à publicação desta Instrução Normativa, o qual deverá ser instruído com memorial
+descritivo contendo as coordenadas geográficas, com as delimitações do perímetro e a identificação precisa dos confrontantes;
+    XIII - Procuração ou contrato da prestação de serviços de requerimentos protocolados por técnicos.
+    § 1° Os documentos apresentados em cópia por meio do Portal Iteraima Cidadão serão recebidos em formato digital e submetidos à análise pela Divisão
+de Cidadania. Nos casos de protocolo presencial, as cópias deverão ser autenticadas em cartório ou conferidas com os originais por servidor do Iteraima. A
+
+autenticação em cartório poderá ser dispensada quando o documento possuir assinatura digital com validade jurídica.
+    § 2° Em caso de falecimento do requerente, sem que o imóvel tenha sido alienado em vida, impõe-se a obrigatoriedade da juntada do formal de partilha ou Escritura
+Pública de Cessão de Direitos Hereditários de posse para fins de identificação do beneficiário legítimo na regularização fundiária.
+
+    § 3° No caso de Título Definitivo (TD) já ter sido emitido e entregue, sem que tenha sido dada baixa nas cláusulas resolutivas, o inventariante, legalmente constituído,
+
+dará andamento ao pedido sem que altere o nome do titular do TD.
+     § 4º Caso o requerimento seja protocolado por procurador, o pedido deverá ser instruído com a respectiva procuração pública e cópia do documento de identidade,
+CPF e comprovante de residência (pessoa física), ou, tratando-se de pessoa jurídica, cópia do contrato social ou da última alteração contratual, devidamente autenticados;
+ficando vedado o substabelecimento, devendo o instrumento de mandato ter validade máxima de 2 (dois) anos.
+     § 5° Quando o requerimento for protocolado por advogado, será aceita a procuração “ad judicia” com cópia da OAB.
+     § 6° Poderá ser admitido protocolo de requerimentos e juntadas por terceiros com assinatura do titular do processo ou seu representante legal, desde que
+todas as assinaturas estejam reconhecidas em cartório ou assinatura digital com autenticação.
+     § 7° O referido Instrumento de Mandato deverá ser lavrado, obrigatoriamente, por escritura pública e com fins específicos, discriminando, de forma clara e expressa, os
+poderes conferidos ao outorgado. Os poderes específicos a serem outorgados compreendem: abertura de processo; recebimento de notificações; protocolar requerimentos;
+assinatura e recebimento de documento de regularização fundiária.
+     § 8° Na hipótese de revogação do instrumento de mandato via cartório, incumbe ao interessado a obrigatoriedade de notificar formalmente o Iteraima mediante
+comunicação escrita, para a devida atualização e regularização do trâmite processual.
+     Art. 7º A autuação e a juntada de documentos são de competência exclusiva da DCI, sendo vedadas a outros setores. Cabe à DCI apenas anexar o
+requerimento e encaminhar os autos onde este se encontra para a devida análise.
+     Parágrafo único. Excetuam-se os peticionamentos intercorrentes realizados diretamente no processo pelo SEI por advogados, partes e procuradores.
+     Art. 8º As notificações aos interessados no âmbito do Iteraima competem à Câmara de Notificação, observadas as seguintes exceções:
+     I – DIPRE/SECEX: emissão de editais e encaminhamento de Cartas com Aviso de Recebimento (AR);
+     II – DSF: notificações relativas ao CAR (Cadastro Ambiental Rural), opções de pagamento de Título Definitivo;
+     III – GEORF: notificações referentes a serviços técnicos.
+     Art. 9º As certidões de tramitação serão emitidas somente após análise de sobreposição, pela diretoria em que o processo se encontrar, salvo as
+exclusivas para licenciamento ambiental que serão emitidas pela DIPRE.
+     Art. 10. Nas áreas que possuem até 01 (um) módulo fiscal, além dos documentos constantes no Art. 6º, o requerimento de regularização fundiária deverá
+ser instruído com os documentos listados no anexo VII desta IN.
+     Art. 11. Na regularização fundiária de imóveis rurais de até 04 (quatro) módulos fiscais, a declaração de ocupação prevista no Art. 31 da Lei nº 976/2014
+deverá estar acompanhada de fotografias das benfeitorias, contendo as coordenadas geográficas nas respectivas imagens.
+     § 1º Em complementação as provas documentais da ocupação anteriores ao marco temporal de 17/11/2017, além da declaração do requerente, o processo será
+encaminhado à DIGOF para análise técnica via sensoriamento remoto, visando a constatação de área antropizada anterior a 17/11/2017.
+     § 2º O requerimento deverá ser instruído com a documentação prevista no Art. 6º desta Instrução Normativa e os documentos elencados no Anexo VIII.
+     Art. 12. Para imóveis com área superior a 04 (quatro) módulos fiscais, a instrução do processo exige a apresentação de carta imagem contendo as
+coordenadas geográficas das benfeitorias e das áreas antropizadas, elaborado por profissional técnico habilitado com anotação de responsabilidade técnica.
+     § 1º O documento técnico mencionado no caput deve vir acompanhado da respectiva Anotação de Responsabilidade Técnica (ART) e será validado pelo
+Iteraima para subsidiar a vistoria técnica.
+     § 2º Além da carta imagem, o requerimento deverá ser instruído com a documentação complementar listada no Anexo IX desta Instrução Normativa, sem prejuízo dos
+documentos exigidos no Art. 6º.
+     CAPÍTULO III
+     DO RELACIONAMENTO DOS PROCESSOS
+     Art. 13. O relacionamento de processos será realizado, obrigatoriamente, pelo Setor de Protocolo durante a instauração dos autos.
+     Art. 14. Não sendo identificado no protocolo, caberá à DIGOF, quando da análise, efetuar o relacionamento, assim que for constatada sobreposição.
+     Art. 15. O relacionamento ocorrerá, obrigatoriamente, quando:
+     I – houver duplicidade de processos em nome da mesma parte, ficarão sob responsabilidade da DCI;
+     II – forem identificadas sobreposições com outros imóveis em trâmite de regularização, sob responsabilidade da DIGOF;
+     III – os processos que integram a mesma cadeia possessória, sob responsabilidade conjunta da DCI e DSF;
+     IV – houver indícios de fracionamento irregular de área, ficarão sob a responsabilidade da DIGOF.
+     § 1° Ao Protocolo caberá realizar o relacionamento inicial.
+     § 2° Não o fazendo, caberá à DIGOF efetivar, mediante Certidão de Relacionamento de Processos.
+     § 3° Identificada a necessidade de relacionamento, o setor/servidor deverá comunicar formalmente à DIGOF, que fará o ato.
+     § 4° Processos já em tramitação, antes da publicação desta IN, deverão ser relacionados pela DIGOF, mediante certidão.
+     § 5° Outras situações que necessitem o relacionamento, desde que devidamente fundamentadas, incluem: processos contíguos com indícios de ocupação
+conjunta; ações judiciais relacionadas; ou quando o sensoriamento remoto indicar ocupação consolidada em áreas distintas.
+     CAPÍTULO IV
+     DA ANÁLISE DAS SOBREPOSIÇÕES
+     Art. 16. Constatada a sobreposição, a DIGOF deverá:
+     I – localizar todas as parcelas e processos envolvidos;
+     II – relacioná-los, mediante Certidão de Relacionamento; e
+     III – elaborar o Parecer Técnico de Sobreposição, o qual deve constar, obrigatoriamente, os seguintes elementos:
+     a) descrição das parcelas;
+     b) identificação dos processos;
+     c) extensão e natureza da sobreposição;
+     d) indícios de fracionamento irregular, quando constatado pelo servidor.
+     Parágrafo único. Os produtos de representação cartográfica que instruírem o Parecer Técnico deverão observar os requisitos mínimos estabelecidos
+
+nesta Instrução Normativa.
+     Art. 17. O Parecer Técnico de Sobreposição será parte integrante de todos os processos relacionados e será juntado por meio do Sistema Eletrônico de
+Informações (SEI).
+
+     § 1º Havendo múltiplas sobreposições correlacionadas, poderá ser elaborado mapa consolidado para fins de visualização sistêmica, sem prejuízo da juntada de análise
+
+individualizada em cada processo.
+     § 2º Em casos de processos arquivados ou sobrestados, a DIGOF solicitará formalmente o desarquivamento ou a sua reativação para inserção da análise técnica
+correspondente.
+     § 3º A Gerência de Geoprocessamento da DIGOF realizará a análise de sobreposição do imóvel e emitirá o respectivo Parecer Técnico com a maior celeridade possível.
+     § 4º Sobrevindo novas informações relevantes, atualização das bases cartográficas oficiais ou decisão administrativa ou judicial superveniente que impacte a situação
+analisada, poderá ser determinada, de forma fundamentada, a revisão da análise de sobreposição, com a emissão de novo Parecer Técnico, que substituirá o anterior para
+os fins administrativos cabíveis.
+     Art. 18. O Parecer Técnico de Sobreposição elaborado pela DIGOF subsidiará tecnicamente:
+     I – a vistoria a ser realizada pela Diretoria de Serviços Fundiários – DSF; e
+     II – a decisão administrativa da Diretoria da Presidência – DIPRE.
+     Art. 19. O parecer técnico de sobreposição terá validade de 1 (um) ano para subsidiar as demais análises do processo. Caso seja verificada qualquer
+alteração na área requerida durante esse período, poderá ser solicitada a emissão de um novo parecer.
+     a) Exceto o parecer técnico de sobreposição que avalia a sobreposição em áreas de interesse sociais decretadas pelo Estado, a ser emitido em ato único.
+     Art. 20. Antes da emissão de novo parecer, o interessado poderá ser notificado para esclarecer as alterações identificadas.
+     Seção I
+     Dos Produtos de Representação Cartográfica nas Análises de Sobreposição
+     Art. 21. Os produtos de representação cartográficas elaboradas no âmbito das análises de sobreposição constituem peças técnicas obrigatórias e deverão
+observar os critérios mínimos estabelecidos nesta Seção.
+     Art. 22. Os produtos cartográficos deverão conter, obrigatoriamente:
+     I – identificação institucional do Instituto de Terras e Colonização de Roraima – ITERAIMA e da Diretoria de Governança Fundiária – DIGOF;
+     II – título indicativo da análise realizada;
+     III – identificação processual contendo, no mínimo:
+     a) número do processo SEI principal;
+     b) identificação do interessado;
+     c) denominação do imóvel ou ocupação, quando houver;
+     d) município;
+     e) gleba ou área pública, quando aplicável;
+     f) data de elaboração;
+     g) identificação do servidor responsável;
+     IV – representação gráfica do perímetro objeto da análise;
+     V – representação gráfica das parcelas relacionadas, quando houver;
+     VI – representação da área resultante de interseção geométrica, quando constatada sobreposição;
+     VII – indicação de escala numérica e gráfica;
+     VIII – indicação do norte;
+     IX – indicação do sistema geodésico e das projeções cartográficas adotadas;
+     X – legenda contendo todas as camadas representadas.
+     Parágrafo único. Os elementos previstos neste artigo constituem requisitos mínimos obrigatórios dos produtos de representação cartográfica, podendo
+ser acrescidos de outras informações técnicas que se mostrem necessárias à adequada compreensão da análise. Nos casos de sobreposição, deverá constar no
+parecer técnico de sobreposição, obrigatoriamente, a área da interseção em hectares para cada parcela envolvida, sendo facultativa a indicação de percentual.
+     Art. 23. A quantificação das áreas deverá ser expressa em hectares, com até quatro casas decimais, adotando-se como referência o Sistema Geodésico
+Brasileiro – SGB, atualmente materializado pelo SIRGAS2000, elipsoide GRS80, observadas as normas técnicas federais aplicáveis, especialmente as do
+INCRA quanto ao cálculo de áreas em Sistema Geodésico Local.
+     Art. 24. Constatada a sobreposição, o produto cartográfico deverá:
+     I – representar graficamente a interseção resultante da operação geométrica;
+     II – identificar individualmente cada área de conflito, quando houver múltiplas interseções;
+     III – demonstrar a extensão e a natureza da sobreposição, em conformidade com o Art. 16 desta Instrução Normativa.
+     Art. 25. Quando não constatada a sobreposição, o produto cartográfico deverá consignar expressamente a inexistência de interseção geométrica na data
+da análise.
+     Art. 26. Na análise de sobreposição, o técnico deverá adotar critérios de razoabilidade e bom senso, podendo desconsiderar inconsistências sanáveis
+decorrentes de imprecisões técnicas ou cartográficas que não comprometam a delimitação do imóvel, não causem prejuízo a terceiros e não representem
+risco de conflito fundiário, devendo a decisão ser devidamente fundamentada.
+     Art. 27. Nas análises de sobreposição que envolvam parcelas cadastradas no Sistema de Gestão Fundiária – SIGEF, deverá constar:
+     I – identificação do código da parcela;
+     II – indicação de eventual origem no Convênio SICONV nº 752.449/2010, quando aplicável;
+     III – ressalva de que o aceite geométrico não implica validação fundiária ou dominial pelo Iteraima.
+     Art. 28. Os produtos cartográficos deverão ser apresentados em formato digital compatível com impressão, mantendo-se os arquivos técnicos editáveis
+arquivados internamente para fins de rastreabilidade e auditoria.
+     Art. 29. A ausência de qualquer dos elementos mínimos previstos nesta Seção implicará devolução da análise para complementação antes de sua
+utilização para decisão administrativa.
+     Seção II
+
+     Das Demais Análises Técnicas
+     Art. 30. A Gerência de Arrecadação e Destinação de Terras – GADT realizará, quando demandada no âmbito dos processos administrativos de
+regularização fundiária, a análise das peças técnicas e demais documentos constantes dos autos, para fins de verificação de sua conformidade formal,
+
+coerência documental e compatibilidade com os registros administrativos existentes.
+
+     § 1º A manifestação será formalizada por meio de Informação Técnica ou Parecer Técnico com a maior celeridade possível.
+     § 2º A análise possui caráter técnico-administrativo e subsidiará a decisão da autoridade competente, não constituindo, por si só, ato decisório.
+     Art. 31. A Gerência de Geociência – GG realizará, quando demandada, análise técnica por meio de sensoriamento remoto para fins de instrução
+processual, especialmente quanto:
+     I – ao monitoramento e à análise geoespacial multitemporal, com uso de séries históricas de sensores orbitais, para subsidiar a verificação do marco
+temporal de ocupação e a evolução do uso e ocupação do solo;
+     II – ao mapeamento, identificação e diagnóstico de áreas antropizadas, incluindo a delimitação de perímetros de supressão de vegetação nativa e outras
+intervenções antrópicas, com distinção técnica entre regeneração, degradação e conversão do uso do solo;
+     III – à identificação e inventário de benfeitorias e infraestrutura associadas à ocupação, quando tecnicamente viável, a partir de imagens de média ou
+alta resolução e outros dados de sensores remotos (ópticos e/ou radar), tais como edificações, cercamentos, estruturas hidráulicas e demais elementos físicos
+relevantes;
+     IV – à avaliação de elementos espaciais relevantes ao processo, inclusive para subsidiar análises correlatas no âmbito da regularização fundiária.
+     § 1º A análise será formalizada mediante Parecer Técnico, devendo indicar, sempre que possível:
+     I – a fonte e/ou o provedor dos dados/imagens utilizados;
+     II – a data (ou intervalo temporal) de aquisição;
+     III – a resolução espacial (quando aplicável) e o tipo de sensor (óptico, radar ou equivalente);
+     IV – a metodologia de interpretação adotada, incluindo critérios de classificação/identificação e limitações técnicas pertinentes.
+     § 2º A Gerência de Geociência – GG realizará a análise técnica do imóvel e emitirá o respectivo Parecer Técnico com a maior celeridade possível.
+     § 3º A análise por sensoriamento remoto possui natureza técnica interpretativa e caráter subsidiário à decisão administrativa, não constituindo, isoladamente, prova
+absoluta da situação fática, tampouco comprovação de autoria da ocupação.
+     CAPÍTULO V
+     DO GEORREFERENCIAMENTO
+     Art. 32. Para a regularização de qualquer área a ser destacada do patrimônio público do Estado de Roraima, mediante emissão de título definitivo, é
+obrigatório o prévio georreferenciamento do imóvel rural, em conformidade com a legislação federal aplicável, com a legislação estadual de regularização
+fundiária, especialmente a Lei nº 976/2014 e suas alterações, com as normas técnicas do INCRA e Instrução Normativa própria do ITERAIMA.
+     Art. 33. A validação técnica-administrativa das peças submetidas será realizada por servidor habilitado do ITERAIMA, autorizado pelo Presidente e
+cadastrado no SIGEF, observando-se os critérios desta Instrução Normativa e das normas técnicas do INCRA.
+     Art. 34. Os imóveis rurais relativos a ocupações em glebas públicas objeto de regularização fundiária serão certificados após a emissão do título
+definitivo.
+     Parágrafo único. A certificação não convalida eventual vício técnico, dominial ou administrativo identificado posteriormente.
+     Art. 35. Ficam dispensadas de nova autorização de georreferenciamento as peças técnicas elaboradas no âmbito do Convênio SICONV nº 752.449/2010,
+desde que não sejam identificadas inconsistências técnicas, geométricas ou dominiais.
+     Art. 36. Identificada sobreposição ou inconsistência envolvendo peças técnicas oriundas do Convênio SICONV nº 752.449/2010, poderá ser autorizada
+nova execução de georreferenciamento, com cancelamento da parcela anterior no SIGEF, observados os procedimentos desta Instrução Normativa.
+     Parágrafo único. A nova parcela deverá ser elaborada e inserida no SIGEF por profissional legalmente habilitado, nos termos do Art. 26.
+     CAPÍTULO VI
+     DA VISTORIA
+     Art. 37. O cumprimento dos requisitos legais necessários para aquisição de terras públicas será verificado através de vistoria técnica, com emissão de
+laudo, relatórios técnico e fotográfico contendo as coordenadas geográficas.
+     Parágrafo único. Nas áreas acima de 4 módulos, é obrigatória a vistoria nos termos do Art. 32, II da Lei nº 976/2014.
+     Art. 38. A equipe técnica deverá analisar se há a presença de elementos que permitam caracterizar a ocupação e seu tempo, verificando:
+     I – a existência de ocupação anterior e como ocorreu a sucessão;
+     II – o desenvolvimento de exploração agropecuária, agroindustrial, agroflorestal, extrativa, pesqueira, de turismo ou atividade similar que envolva a
+exploração do solo ou demais recursos florestais, quando for o caso;
+     III – comprovar o exercício da ocupação, pelo interessado ou por seus antecessores, pelo prazo mínimo de 02 (dois) anos anteriores à publicação da Lei
+nº 1.351, de 2019; e
+     IV – A ocupação por antecessores significa ocupação produtiva-morada habitual, infraestrutura, ocupação e exploração contínua, conforme Art. 29, §10.
+     §1° São elementos mínimos de verificação que permitam a caracterização do tempo de ocupação:
+     a) o estado de conservação de benfeitorias e residências rurais;
+     b) o desenvolvimento de culturas perenes;
+     c) a existência de exploração agropecuária (plantio, criação de animais); e
+     d) atividades que envolvam o uso produtivo e sustentável da terra, da floresta ou outros.
+     §2° A equipe de vistoria será composta por, no mínimo, 1 (um) servidor efetivo, podendo ter esse número aumentado, em caso de necessidade de
+vistorias em conjunto com outros setores.
+     § 3º O Laudo de Vistoria será assinado por todos os servidores responsáveis pela diligência, bem como pelo requerente, que deverá estar presente no momento da
+vistoria.
+     § 4º Na impossibilidade de comparecimento do requerente, será admitida a assinatura por procurador devidamente constituído, mediante apresentação de procuração
+válida com poderes específicos para representá-lo no ato, ou representante legal com identidade.
+     § 5° O laudo de vistoria terá validade de 02 (dois) anos, ressalvada decisão diversa da Administração. Compete a Presidência a decisão de prorrogação ou convalidação
+de vistorias rurais.
+
+     Seção I
+     Da coleta e registro de coordenadas em situações de conflito e sobreposição
+     Art. 39. A coleta de coordenadas geográficas durante a vistoria técnica obedecerá aos seguintes procedimentos:
+
+     I – o servidor ou técnico designado deverá comparecer à área objeto da regularização, procedendo à coleta de coordenadas geográficas em número
+
+suficiente para caracterização espacial do imóvel;
+    II – deverá ser registrada, no mínimo, uma coordenada correspondente à localização atual da equipe no momento da diligência;
+    III – as demais coordenadas deverão ser coletadas em pontos distintos ao redor da área antropizada, de modo a permitir a definição de um perímetro
+mínimo compatível com a análise técnica e cartográfica;
+    IV – no Laudo de Vistoria ou relatório técnico deverá constar o aplicativo, equipamento ou dispositivo utilizado para a coleta das coordenadas; e
+    V – todas as coordenadas coletadas no sistema de referência SIRGAS 2000 deverão ser transcritas integralmente no laudo, relatório ou anexo técnico,
+para subsidiar a análise fundiária, cartográfica e jurídica pelo Iteraima.
+    Art. 40. Para a correta identificação e validação das coordenadas geográficas coletadas, o servidor ou técnico responsável deverá:
+    I – registrar as informações obtidas por meio da funcionalidade de localização do equipamento utilizado;
+    II – repetir o procedimento em, no mínimo, 04 (quatro) pontos de referência distribuídos ao redor da área vistoriada, quando tecnicamente viável; e
+    III – organizar as coordenadas de forma clara e ordenada, acompanhadas de descrição sucinta da diligência, registros fotográficos correspondentes e
+demais informações técnicas relevantes.
+    Seção II
+    Do conteúdo do laudo de vistoria
+    Art. 41. O Laudo de Vistoria deverá conter, no mínimo:
+    I – identificação do processo administrativo, incluindo:
+    a) número do processo;
+    b) unidade administrativa competente; e
+    c) identificação do requerente;
+    II – identificação da área vistoriada, incluindo:
+    a) denominação do imóvel, ocupação, comunidade ou localidade;
+    b) identificação de responsável local ou liderança, quando houver;
+    c) imagens complementares obtidas por sensoriamento remoto ou aplicativos cartográficos, quando necessárias; e
+    d) todas as coordenadas geográficas coletadas in loco no sistema de referência SIRGAS 2000;
+    III – descrição técnica circunstanciada da ocupação, das benfeitorias, do uso do solo e das atividades desenvolvidas.
+    Art. 42. Os laudos, relatórios e demais peças técnicas de vistoria deverão ser claros, objetivos e suficientemente detalhados, de modo a permitir a
+adequada análise técnica, administrativa e jurídica no âmbito do Iteraima.
+    CAPÍTULO VII
+    DO FLUXOGRAMA PARA SOLUÇÃO DE CONFLITOS FUNDIÁRIOS
+    Art. 43. Identificado conflito agrário, o interessado deverá ser notificado para o exercício do contraditório e da ampla defesa quanto à sobreposição. Ato
+contínuo, os autos serão encaminhados à Ouvidoria Agrária, que, com os servidores da DIGOF e DIPRE (técnico em agropecuária), lotados na ouvidoria,
+poderá realizar análise de sobreposição, exclusão da base cartográfica e vistorias, subsidiando assim as decisões administrativas de resolução de conflitos
+realizadas pelo presidente, e requisitar informações aos setores competentes para fins de mediação ou composição entre as partes.
+    Art. 44. Frustrada a mediação, os processos com sobreposição de áreas serão submetidos a análise técnica em conjunto para identificação da anterioridade
+da posse e do atual detentor, observando-se o seguinte:
+    I – a análise integrará vistoria técnica in loco e/ou sensoriamento remoto;
+    II – vistoria de limites e/ou ocupação, nos termos dos Arts. 39 e 40 desta IN, a depender do caso;
+    III – o resultado será consolidado em Relatório Técnico, abrangendo o exame documental e o confronto de dados geoespaciais com as constatações de
+campo;
+    IV – Em situações de múltiplas sobreposições, com conflito permanente e consolidado, identificados pela DIGOF, o perímetro deverá ser delimitado e
+bloqueado na base cartográfica, de modo a impedir a inclusão de novos processos/sobreposições na área do conflito, e homologado pelo presidente.
+    a) Excepcionam-se da regra os casos em que houver decisão fundamentada da DIPRE/PGE, após análise documental.
+    § 1º Compete à Diretoria de Serviços Fundiários (DSF) a verificação da ocupação, exploração e sucessão, cabendo à Diretoria de Governança Fundiária (DIGOF) o
+acompanhamento para fins de ajuste cartográfico e confirmação da compatibilidade dos limites requeridos.
+    § 2º Caso haja processos arquivados, restritos ou sobrestados que impeçam a instrução, a DSF deverá solicitar formalmente o desarquivamento, a liberação de acesso
+ou a reativação do trâmite para fins da análise técnica em conjunto.
+    Art. 45. Concluída a instrução técnica e emitida análise técnica em conjunto, o processo será encaminhado à Câmara de Notificação para que as partes
+tomem ciência; após essa etapa, os autos seguirão para análise da DIPRE para decisão administrativa.
+    § 1º Proferidas as decisões, os interessados serão notificados pela Câmara de Notificação para ciência e eventual interposição de recurso.
+    § 2º Decorrido o prazo recursal ou julgados os recursos interpostos, proceder-se-á à nova análise de sobreposição, quando couber, em todos os processos incidentes.
+Superada essa etapa, o processo deverá seguir o fluxo regular de titulação.
+    Art. 46. Processos que apresentem sobreposição de área não poderão ser remetidos ao arquivo sem a devida análise e decisão acerca do conflito
+identificado. Em tais casos, o trâmite deverá obrigatoriamente seguir o fluxo procedimental estabelecido neste Capítulo, visando a resolução da controvérsia
+antes de qualquer manifestação pelo encerramento do feito.
+    CAPÍTULO VIII
+    DO FLUXOGRAMA DO PEDIDO DE REGULARIZAÇÃO FUNDIÁRIA
+    Art. 47. Os ritos dos processos de regularização fundiária rural respeitarão o disciplinado nesta IN.
+    Art. 48. O rito para cobrança de títulos definitivos rurais e/ou Contrato de Promessa de Compra e Venda - CPCV respeitará o disciplinado no ANEXO
+XI desta Instrução Normativa.
+    Art. 49. A instrução dos processos de regularização fundiária seguirá o seguinte trâmite:
+
+    I - O requerimento de regularização, que deverá estar instruído com todos os documentos obrigatórios previstos em lei, será recebido pela Divisão da
+Cidadania que, após realizar os procedimentos de admissibilidade nos termos dos anexos VII, VIII e IX desta IN, não havendo pendência documental,
+autuará o processo e encaminhará a DIGOF.
+
+    Parágrafo único. Em casos de pendências documentais, a DCI encaminhará a DIPRE para análise e decisão quanto ao procedimento, exceto em caso
+
+de protocolo de documentos por meio digital, onde constatada a pendência, deverá ser notificado o requerente para complementar a documentação, caso o
+requerente não atenda a notificação, devem os autos ser encaminhados a DIPRE.
+     II - Concluídas as pesquisas preliminares, os autos serão encaminhados à DIGOF para certificação de eventual sobreposição de áreas, com base no
+croqui, memorial descritivo ou planta apresentados pelo interessado.
+     a) Durante a análise técnica, a DIGOF deverá:
+     1. realizar a plotagem das coordenadas nas imagens das benfeitorias fornecidas pelo interessado, quando se tratar de imóveis com área de até 4 (quatro)
+Módulos Fiscais;
+     2. realizar a validação das informações apresentadas na carta-imagem (sensoriamento remoto) fornecida pelo interessado, quando se tratar de imóveis
+com área superior a 4 (quatro) Módulos Fiscais, e o sensoriamento remoto para imóveis com área inferior a 4 (quatro) Módulos Fiscais.
+     b) Identificada a existência de mais de um imóvel requerido pelo mesmo interessado, a DIGOF deverá realizar a verificação de possível fracionamento
+ilegal de área.
+     III – Posteriormente, os autos serão encaminhados à DSF para a emissão de parecer técnico conclusivo quanto ao cumprimento do Art. 29 da Lei nº
+976/2014 e suas alterações.
+     a) A Gerência Técnica - GET analisará a documentação e emitirá o Parecer Técnico com a maior celeridade possível.
+     b) caso o imóvel seja acima de 4 módulos, o interessado será notificado para o pagamento das custas da vistoria in loco, nos termos da Lei nº 2.317/2015.
+     c) Após a emissão do parecer técnico, será realizada a inclusão/alteração junto ao SNCR.
+     IV - Ato contínuo, caberá à DIGOF autorizar o serviço de georreferenciamento, receber as peças técnicas, analisá-las e, emitir parecer sobre a regularidade
+das peças técnicas de georreferenciamento e ao final validar o SIGEF.
+     a) Emitida a autorização de georreferenciamento, o interessado será notificado para a apresentação das peças técnicas, sob pena de arquivamento do
+processo. A referida autorização terá validade de 2 (dois) anos; após este prazo, qualquer manifestação do requerente ensejará nova análise para eventual
+emissão de nova autorização.
+     V - Em seguida, o processo será enviado à DIPRE/CONSULT quanto ao instrumento de regularização fundiária adequado.
+     a) A Consultoria analisará o processo na íntegra e emitirá a Nota Técnica com a maior celeridade possível.
+     b) As controvérsias jurídicas decorrentes da execução dos procedimentos administrativos e legais serão dirimidas pela PGE, via parecer final, conforme
+dispõe o Art. 80 da Lei n° 976/2014 e suas alterações.
+     VI - Definido o instrumento de regularização fundiária, o processo retornará à Presidência para conhecimento e decisão.
+     VII - A DSF fará apuração do Valor da Terra Nua – VTN e a notificação do interessado para que se manifeste acerca da forma de pagamento e a
+apresentação do Parecer Técnico da Análise do CAR com Reserva Legal Aprovada pelo órgão competente, para subsidiar a realização do cálculo quanto à
+área de Reserva Legal.
+     A apresentação do CAR é opcional ao requerente, sendo condição para a obtenção do desconto da área de Reserva Legal.
+     VIII - Caso o interessado opte pelo pagamento à vista, os autos serão encaminhados à DIRAD para emissão do boleto de quitação e da certidão de
+pagamento do Título Definitivo, obedecendo ao Anexo XII.
+     IX – Posteriormente a DSF encaminhará os autos para a DIGEF para emissão do documento de regularização.
+     a) Antes da emissão do documento, o setor deverá realizar pesquisa de outorga e constatar se o interessado está dentro do limite constitucional de 2.500
+hectares.
+     X - Após o processo, seguirá à DIPRE para assinatura, publicação, e demais providências necessárias para entrega a (ao) interessado(a).
+     XI - Entregue o título, o processo seguirá para a Diretoria de Planejamento e Ordenamento Territorial (DIPLAN) para juntada das peças técnicas
+certificadas no SIGEF e atualização cadastral no SNCR.
+     XII - Posteriormente, os autos serão encaminhados à Diretoria Administrativa-Financeira (DIRAD) para acompanhamento e controle em planilha
+própria da cláusula de pagamento, conforme o Anexo XI.
+     XIII - Em caso de ausência de pagamento no prazo constante do vencimento da parcela, a DIRAD deverá encaminhar os autos para a Procuradoria-Geral
+do Estado (PGE) para as medidas cabíveis quanto ao não cumprimento.
+     XIV- Os processos com Títulos Definitivos quitados, serão encaminhados à DIRAD, para guarda temporária em arquivo próprio até a manifestação do
+interessado quanto à solicitação da Certidão da Baixa das Cláusulas Resolutivas.
+     a) Para os títulos emitidos sob a vigência da Lei nº 2.330/2026, relativos a áreas superiores a 4 (quatro) módulos fiscais destinados à pecuária e plantios,
+deverá constar cláusula resolutiva referente ao percentual previsto no § 9º do Art. 29 da citada Lei. Referida cláusula estabelecerá o uso efetivo mínimo
+de 3% da área passiva de uso alternativo do solo, no prazo de até 5 (cinco) anos após a emissão do título, sob pena de reversão do imóvel ao patrimônio do
+Estado.
+     b) Para a baixa das Cláusulas Resolutivas previstas no parágrafo 9º do Art. 29 da Lei nº 2.330/2026, obedecerão aos critérios de vistoria previstos nesta
+IN.
+     XV – Para que a DSF emita o parecer técnico referente à baixa das cláusulas resolutivas, o interessado deverá apresentar a respectiva Licença Ambiental
+da atividade econômica, contendo as coordenadas geográficas ou coordenadas planas no sistema Universal Transverse Mercator (UTM) da área licenciada
+do imóvel rural.
+     Parágrafo único. O fluxograma de que trata este capítulo se encontra representado em quadro constante no anexo X desta Instrução Normativa;
+     CAPÍTULO IX
+     DAS CONVALIDAÇÕES E CANCELAMENTO DE TÍTULO DEFINITIVO
+     Art. 50. As convalidações seguirão o rito estabelecido no Art. 17 da Lei n° 2.330/2026.
+     Art. 51. Os Títulos Definitivos expedidos após a vigência da Lei nº 14.004, de 26 de maio de 2020, não poderão ser cancelados a pedido do respectivo
+titular ou de terceiro interessado, em observância aos princípios da legalidade, da estabilidade das relações jurídicas e da segurança jurídica do ato
+administrativo praticado.
+
+     § 1º Excepcionalmente, admitir-se-á o cancelamento do título quando restar devidamente comprovada a existência de vício insanável que comprometa sua validade
+jurídica.
+     § 2º O ônus da prova quanto à existência de vício insanável recairá exclusivamente sobre aquele que requerer o cancelamento, devendo a alegação ser instruída com
+
+documentos idôneos e elementos probatórios suficientes à demonstração inequívoca da nulidade.
+
+    § 3º A mera alegação de irregularidade, erro material sanável ou arrependimento do titular não constitui fundamento apto ao cancelamento do título.
+    § 4º Reconhecido o vício insanável após regular instrução processual, será instaurado procedimento administrativo específico, assegurados o contraditório e a ampla
+defesa, para deliberação da autoridade competente quanto à declaração de nulidade.
+    § 5º Para análise de cancelamento de Título Definitivo, devem-se verificar os requisitos da lei a época da emissão do TD.
+    CAPÍTULO X
+    DA CÂMARA DE NOTIFICAÇÃO
+    Art. 52. Fica instituída, no âmbito deste Instituto, a Câmara de Notificação, órgão técnico-administrativo responsável pela
+centralização, controle, expedição e acompanhamento de todas as notificações e seus respectivos prazos, emanadas do Instituto.
+§1º A Câmara de Notificação será diretamente subordinada à Vice-Presidência do ITERAIMA, possuindo atuação transversal perante todas as Diretorias, Coordenadorias
+e demais unidades administrativas.
+    Seção I
+    Competências da câmara
+    Art. 53. Compete à Câmara de Notificação:
+    I – formalizar a emissão de atos administrativos de notificação, intimação ou autuação, garantindo sua regularidade formal;
+    II – realizar a gestão e o controle dos prazos processuais decorrentes das notificações expedidas;
+    III – assegurar o efetivo recebimento da notificação pelo destinatário, por meio idôneo admitido em direito, promovendo o registro de prova inequívoca
+da ciência;
+    IV – manter controle sistemático das notificações expedidas, com registro da data de envio, recebimento, início e término de prazo; e
+    V – certificar nos autos todas as ocorrências relacionadas ao procedimento notificatório.
+    Parágrafo único. A Câmara de Notificação limitar-se-á à análise formal do ato notificatório, não adentrando no mérito administrativo da decisão que
+determinou a notificação.
+    Seção II
+    Fluxo da câmara
+    Art. 54. O procedimento de notificação observará as seguintes etapas:
+    I – instauração, mediante encaminhamento, pelo setor técnico competente, da solicitação de notificação à Câmara;
+    II – expedição do ato notificatório, contendo a descrição do fato, o fundamento legal e o prazo para manifestação;
+    III – Se o requerente possuir endereço urbano, o Iteraima realizará a tentativa de notificação pessoal in loco;
+    IV – comunicação ao interessado, por meio eletrônico, postal com aviso de recebimento ou por edital, conforme o caso;
+    V – certificação da ciência e controle da contagem do prazo legal;
+    VI – encaminhamento dos autos ao setor demandante, após a manifestação da parte ou o decurso do prazo sem resposta.
+    CAPÍTULO XI
+    DO DESARQUIVAMENTO DE PROCESSOS
+    Art. 55. O desarquivamento de processo administrativo de regularização fundiária observará o disposto neste Capítulo.
+    § 1° Somente poderão requerer o desarquivamento:
+    I - o titular do processo;
+    II - seu representante legal, mediante apresentação de procuração pública específica e documento de identificação;
+    III - A pedido da presidência;
+    IV - Advogado constituído, mediante apresentação de procuração ad judicia e cópia da carteira da OAB.
+    § 2° O requerimento de desarquivamento deverá ser instruído, obrigatoriamente, com os seguintes documentos:
+    I - requerimento fundamentado, indicando o número do processo, o motivo do arquivamento e as razões que justificam a reativação;
+    II - documentos que comprovem o saneamento da causa que deu origem ao arquivamento;
+    III - taxa de desarquivamento, nos termos do item 5 do Anexo III da Lei nº 1.252/2018, alterada pela Lei nº 2.317/2025; e
+    IV - documento de identificação do requerente ou de seu representante.
+    Art. 56. O procedimento de desarquivamento seguirá o seguinte trâmite:
+    I - Divisão de Cidadania (Protocolo):
+    a) recebimento do requerimento de desarquivamento com todos os documentos obrigatórios previstos no art. anterior;
+    b) verificação da legitimidade do requerente;
+    c) Emissão da taxa de desarquivamento e envio ao requerente;
+    d) localização e juntada do requerimento nos autos arquivados;
+    e) encaminhamento dos autos à GEORF/CER.
+    II- Gerência de Orçamento e Finanças/Certificação (GEORF/CER):
+    a) confirmação de pagamento da taxa de desarquivamento;
+    b) Em caso de pagamento confirmado, mediante emissão de certidão, encaminhamento dos autos à DIPRE para análise de admissibilidade;
+    c) Em caso de pagamento não confirmado, encaminhamento dos autos à Divisão de Arquivo.
+    III - DIPRE:
+    a) análise da admissibilidade do pedido, verificando:
+    1. legitimidade do requerente;
+    2. suficiência da justificativa apresentada;
+    3. efetivo saneamento da causa do arquivamento;
+    b) decisão fundamentada pelo deferimento ou indeferimento do desarquivamento;
+
+    c) em caso de indeferimento, encaminhamento dos autos à Câmara de Notificação para ciência do interessado;
+    d) em caso de deferimento, encaminhamento dos autos à Divisão de Arquivo para desarquivamento do processo, com indicação expressa do setor ou
+departamento para o qual o processo deverá ser enviado após a reativação.
+
+    IV - Divisão de Arquivo:
+
+    a) certificação nos autos da reativação, com registro de data, número do despacho autorizador e identificação do servidor responsável;
+    b) encaminhamento dos autos ao setor ou departamento indicado pela DIPRE.
+    Art. 57. O pagamento da taxa de desarquivamento não garante, por si só, o deferimento do pedido, tendo caráter meramente instrumental para a
+instauração do procedimento.
+    Parágrafo único. Em caso de indeferimento do pedido de desarquivamento, o valor pago a título de taxa não será restituído, por se tratar de ressarcimento
+pelo serviço administrativo prestado.
+    Art. 58. O desarquivamento deferido não implica reconhecimento de direito à regularização fundiária, retomando o processo sua tramitação regular
+com análise de todos os requisitos legais aplicáveis.
+    CAPÍTULO XII
+    DAS DISPOSIÇÕES FINAIS E TRANSITÓRIAS
+    Art. 59. Deverão ser indeferidos os processos administrativos de regularização fundiária que apresentem sobreposições em processos administrativos
+que já contenham análise técnica conclusiva e decisão administrativa definitiva, relativa à mesma área objeto de regularização. O novo processo de
+regularização sobreposto será identificado pela DIGOF ou Ouvidoria e encaminhado de imediato para indeferimento e exclusão da base cartográfica pelo
+Presidente, com posterior notificação do interessado, resguardado seu direito constitucional da ampla defesa e do contraditório.
+     §1° O setor técnico deverá registrar, em despacho fundamentado, a existência de decisão administrativa anterior que já tenha examinado a questão de
+sobreposição, indicando o número do processo correspondente;
+    §2° Permanecem assegurados ao interessado os meios recursais previstos na legislação aplicável, a serem encaminhados à câmara recursal.
+    Art. 60. Em casos de sobreposição, independentemente do tempo ou da fase processual, a Presidência deste Instituto poderá chamar o feito à ordem para
+dirimir o conflito, por meio de decisão administrativa.
+    Art. 61. Serão excluídos de ofício da Base Cartográfica Fundiária Institucional os imóveis que apresentarem sobreposição total com áreas inalienáveis,
+unidades de conservação, reservas indígenas ou demais áreas institucionais.
+    Parágrafo único. A exclusão será formalizada mediante decisão da Presidência, após manifestação técnica do setor competente.
+    Art. 62. Constatada a sobreposição parcial com áreas inalienáveis, unidades de conservação, reservas indígenas ou demais áreas institucionais, o
+requerente será notificado para realizar a retificação da área.
+    Parágrafo único. A retificação deverá ser protocolada no prazo legal, sob pena de indeferimento do pedido, retirada da base cartográfica e arquivamento
+do processo.
+    Art. 63. O disposto nos artigos Art. 61 e Art. 62 desta Instrução Normativa não se aplica às áreas localizadas em Unidades de Conservação de Uso
+Sustentável, desde que o ocupante comprove a detenção de justo título, autorização de ocupação ou certidão de posse.
+    Parágrafo único. Para fins de aplicação desta exceção, os documentos mencionados devem ter sido expedidos pelo órgão fundiário competente em data
+anterior à Lei nº 2.330/2026, observadas as categorias previstas no Capítulo III da Lei Federal nº 9.985/2000.
+    Art. 64. Identificada a sobreposição total com Autorização de Ocupação ou Título Definitivo, cujos processos estejam devidamente inscritos no Livro
+Fundiário, o pedido de regularização será indeferido, retirado da base cartográfica e o processo será arquivado.
+    Parágrafo único. O requerente será notificado da decisão administrativa para, querendo, manifestar-se ou interpor recurso no prazo legal.
+    Art. 65. Identificada sobreposição parcial com Autorização de Ocupação ou Título Definitivo devidamente inscritos no Livro Fundiário, o requerente
+será notificado para realizar a adequação da área.
+    Parágrafo único. O interessado deverá apresentar nova peça técnica (planta e memorial descritivo), excluindo a área sobreposta, no prazo legal, sob pena
+de indeferimento do pedido, retirada da base cartográfica e arquivamento do processo.
+    Art. 66. Imóveis que apresentarem sobreposição total com áreas tituladas pelo INCRA ou com matrículas registradas em Cartórios de Registro de
+Imóveis serão excluídos de ofício da Base Cartográfica Fundiária Institucional.
+    Parágrafo único. Verificada a sobreposição integral nessas condições, o pedido de regularização será indeferido por decisão da Presidência, com o
+consequente arquivamento do processo.
+    Art. 67. Identificada sobreposição parcial com áreas tituladas pelo INCRA ou com matrículas registradas em Cartórios de Registro de Imóveis, o
+requerente será notificado para realizar a adequação da área.
+    Parágrafo único. O interessado deverá apresentar nova peça técnica (planta e memorial descritivo), excluindo a área sobreposta, no prazo legal, sob pena
+de indeferimento do pedido, retirada da base cartográfica e arquivamento do processo.
+    Art. 68. As exclusões na Base Cartográfica Fundiária Institucional serão executadas de imediato pelo setor competente, que deverá, ato contínuo, anexar
+a certidão do ato no processo.
+    Art. 69. Serão realizados procedimentos de intimação mediante a utilização do aplicativo multiplataforma de mensagens eletrônicas e de e-mails.
+    §1° O Interessado, procurador ou representante legal assinará termo de anuência autorizando o recebimento de intimações por meio do aplicativo de
+mensagens eletrônicas, ou e-mail.
+    §2° As intimações por aplicativo de envio de mensagens eletrônicas serão encaminhadas por meio aparelho celular e as intimações por e-mail serão
+endereçadas por meio do e-mail institucional do Iteraima.
+    §3° Na hipótese de mudança do número de telefone ou de e-mail, o interessado deverá informar de imediato ao Iteraima, procedendo à assinatura de um novo Termo
+de Anuência.
+    §4° Ao aderir ao procedimento de intimação por aplicativo de envio de mensagens eletrônicas e e-mails, o interessado declarará estar de acordo com as condições
+descritas no Termo de Anuência anexo a esta Instrução Normativa.
+    §5° O Termo de Anuência poderá ser alterado a qualquer tempo.
+    Art. 70. No ato da intimação, o servidor responsável encaminhará pelo aplicativo de envio de mensagens eletrônicas ou e-mail, a decisão em PDF,
+contendo a identificação do processo e das partes, para que exerça seu direito de contraditório e ampla defesa no prazo legal.
+    Art. 71. Considerar-se-á realizada a intimação quando:
+
+    I - O aplicativo de envio de mensagens eletrônicas exibe o ícone de “mensagem entregue”, tendo o notificado informado a ciência ou o recebimento;
+    II - For recebido, via e-mail, o comprovante de entrega ao destinatário, tendo o notificado informado a ciência ou o recebimento; e
+    III - Nas hipóteses em que o interessado optar por ser intimado tanto por aplicativo de mensagens eletrônicas quanto por e-mail, será considerada como
+
+data da intimação aquela que ocorrer por último.
+
+    §1° Não havendo a confirmação de entrega da mensagem ou do e-mail pelo interessado no prazo de 5 dias (úteis), o Iteraima providenciará a intimação
+pessoal ou via postal.
+    §2° Após frustradas duas tentativas de notificação, realizar-se-á via edital.
+    Art. 72. O setor de protocolo, antes de fazer juntada de qualquer documento nos autos, deverá verificar se existem notificações a serem cumpridas,
+devendo de imediato executar a notificação.
+    Art. 73. Demonstrada a qualquer tempo fraude na comprovação de algum requisito legal para obtenção do direito à regularização fundiária, o processo
+será anulado e arquivado, sem prejuízo das demais sanções cíveis e penais aplicáveis, garantindo-se ao(à) interessado(a), em qualquer caso, o direito ao
+contraditório e à ampla defesa.
+    Art. 74. Considerando que o teor do Art. 27 da Lei n° 418/2004, nos casos de não atendimento da intimação, não importará o reconhecimento da verdade
+dos fatos, nem a renúncia a direito pelo administrado, em nenhuma hipótese serão aplicados os efeitos da revelia nos processos de regularização fundiária.
+    Parágrafo único. Quando o intimado não apresentar defesa, o Iteraima deverá enfrentar o mérito administrativo e decidir sobre o deferimento ou
+indeferimento do pedido de regularização fundiária de forma motivada, com base nos elementos dos autos.
+    Art. 75. Aos cessionários do direito de desintrusado, aplica-se a dispensa da comprovação de marco temporal e de cultura efetiva. A regularização
+ocorrerá de forma onerosa, pelo valor mínimo da Terra Nua (VTN), conforme previsto na Lei nº 2330/2026, sem a incidência de fatores de redução,
+observados os limites da cessão. Caso haja área remanescente, esta será processada sob o rito de regularização comum, devendo o requerente atender a
+todos os requisitos legais de ocupação e exploração para a regularização da área remanescente ou pleitear a venda direta, conforme previsto no Art. 29-A
+da Lei nº 2330/2026.
+    Art. 76. Após a emissão do título definitivo, imóveis com área superior a 15 módulos fiscais, a atualização no SNCR e solicitação de certificação no
+SIGEF são de responsabilidade do requerente.
+    Art. 77. Com relação aos pagamentos antecipados e integrais das obrigações financeiras relativos às autorizações de ocupação e títulos definitivos,
+seguirão o estabelecido no Anexo XI.
+    Art. 78. Os processos devem seguir um fluxo único por setor, sendo vedada a tramitação simultânea em mais de uma unidade, salvo por determinação
+da presidência.
+    Art. 79. A prerrogativa de chamar o feito à ordem cabe exclusivamente ao Presidente. O servidor que identificar a necessidade de correção deverá
+solicitá-la formalmente à Presidência, a quem compete determinar as providências cabíveis.
+    Art. 80. É vedado ao servidor o encaminhamento de processos ao arquivo sem a prévia e expressa decisão de arquivamento da chefia imediata.
+    § 1º Processos paralisados por falta de manifestação ou interesse do requerente serão encaminhados à DIPRE para decisão nos termos do Art. 40 da Lei nº 418/2004
+e, posteriormente à DIRAD para arquivamento.
+    § 2º O desarquivamento de autos, quando solicitado, observará o disposto no Capítulo XI desta Instrução Normativa, mediante o pagamento da taxa
+correspondente.
+    Art. 81. As situações não previstas nesta Instrução Normativa serão submetidas à apreciação do Presidente do Iteraima, após análise e manifestação
+conclusiva dos setores competentes.
+    Art. 82. Para alienações de áreas mediante licitação, deverão ser observados os requisitos e procedimentos da Lei n° 14.133/2021.
+    Art. 83. Esta Instrução Normativa entra em vigor na data de sua publicação.
+    Art. 84. Fica revogada a Portaria nº 386/2023, de 25 de julho de 2023.
+    Art. 85. Fica revogada a Portaria nº 186/2024, de 1° de abril de 2024.
+    Art. 86. Fica revogada a Portaria nº 503/2022, de 22 de dezembro de 2022.
+    Art. 87. Fica revogada a Portaria nº 439/2024, de 26 de agosto de 2024.
+    Art. 88. Fica revogada a Portaria nº 489/2024, de 13 de setembro de 2024.
+    Art. 89. Fica revogada a Instrução Normativa nº 001/2026, de 27 de fevereiro de 2026.
+    IONILSON SAMPAIO DE SOUZA
+    Presidente
+    Decreto nº. 553-P/2025
+
+    ANEXO I
+    REQUERIMENTO DE REGULARIZAÇÃO FUNDIÁRIA DE IMÓVEL RURAL
+
+    Ilmo. Sr. Presidente do Instituto de Terras e Colonização de Roraima, eu,_________________________________________________
+_______, profissão __________________________, nacionalidade_________________, natural de __________________________,
+CPF n°_____._____._____-____ RG nº e órgão emissor _________________, estado civil ____________________, telefone de contato
+________________________e _____________________________________________ RG nº e órgão emissor________________, CPF
+n°_____._____._____-____, Nacionalidade____________________, naturalidade de _______________________, profissão ____________
+___________________, telefone de contato do cônjuge___________________residente (s) e domiciliado (s) à _________________________
+_______________ nº________, bairro ____________________, cidade de _________________________, venho por meio deste, requerer a
+Regularização Fundiária do Imóvel Rural denominado __________________________, localizado no município de _________________________,
+gleba __________________, com área aproximada de ______________ hectares, bem como a autorização para realização dos serviços de
+georreferenciamento do imóvel citado, assumindo assim a responsabilidade e firmando o compromisso de respeitar o que determinam as Normas Técnicas
+de Georreferenciamento de Imóveis Rurais vigentes e seus Manuais Técnicos, as instruções normativas que tratam sobre o assunto, tanto federal como
+estadual, assim como os procedimentos estabelecidos pelo Iteraima, submetendo-me às orientações da Administração Pública e a todos os requisitos legais
+em vigor.
+    Boa Vista – RR, ______ de __________________de _________.
+
+    ________________________________________
+    Assinatura do(a) Requerente(a)
+
+    Informações Adicionais:
+
+Endereço para correspondência:
+
+                                        End.: ___________________________________________________ N° _______
+Bairro: _______________________ Município: ____________________________
+CEP: ____________ Telefone: (       ) - ____________ Celular: (     ) - ____________
+E-mail: ____________________________________________________________
+
+                                                       (   ) Sim – n° _______________________________
+Possui processo INCRA?
+                                                       (   ) Não
+
+  ANEXO II
+  DECLARAÇÃO DE QUALIFICAÇÃO PARA REGULARIZAÇÃO FUNDIÁRIA RURAL
+
+   Nome:___________________________________________________________________
+   Profissão______________________, nacionalidade______________________, natural                                                                          de                     _______________________,                                     CPF
+n°_____._____._____-____, RG nº _____________, estado civil __________________.
+
+É ocupante primitivo? Sim [ ] Não [ ]                               Nome do Transmitente:
+Data da ocupação primitiva: _____/_____/_____ Data da ocupação atual: _____/_____/____
+Há legítima contestação de terceiros sob a área que pretende regularizar? Sim [ ] Não [ ]
+O interessado(a) e/ou o cônjuge ou companheiro, se for o caso, já foi/foram beneficiado(s) por programa de reforma agrária e/ou de regularização fundiária
+no limite previsto em Lei?               Sim [ ]      Não [ ]
+A ocupação e exploração direta do imóvel, de forma mansa e pacífica, por si ou por seus antecessores, é anterior a 19 de novembro de 2017? Sim [ ]                                                                                           Não
+[ ]
+Exerce atividade(s) de cunho recreativo(s) familiar? Sim [ ]        Não [ ]
+Se sim, exerce moradia habitual? Sim [ ]      Não [ ]
+Há prática ou aceitação a exploração de trabalho escravo ou degradante, bem como exploração de mão de obra infantil e adolescente (salvo os casos previstos
+na Lei Federal n° 8.069/90)?
+Sim [ ]     Não [ ]
+   CARACTERÍSTICAS DO IMÓVEL
+Nome do imóvel: ______________________ Município:_________________, Gleba:_________________
+Há eletrificação rural? Sim [ ]: (Pública [ ]     Privada [ ])        Não [ ]
+
+Há acesso por rodovias?                                              Tipo: Federal [ ] Estadual [ ] Municipal [ ] Variante [ ] Caminho [ ] pavimentadas?
+Sim [ ] Não [ ]                                                      Sim [ ] Não [ ]
+Edificações existentes:                                              Criações existentes:
+Tem interesse ecológico para preservação de ecossistemas?        Sim [ ]		         Não [ ]
+Tem projeto de recuperação de área degradada?		                   Sim [ ]		                  Não [ ]
+Tem efetiva recuperação de área degradada?		                      Sim [ ]		                  Não [ ]
+Há prática de cultura efetiva no imóvel?                         Sim [ ]		         Não [ ]
+                              _____________________________________                                                                                                                                Cobertura Vegetal
+                               Assinatura do Cônjuge ou Companheiro (a)                                                                                                                    Cerrado                                   Total (ha)
+                              ____________________________________
+                                      Assinatura do (a) Requerente                                                                                    Área (ha):
+                                                Floresta
+                                                                                                                                                      Área de RL (ha):
+Área (ha):
+Área de RL (ha):                                                                                                                                      Porcentagem (%):
+Porcentagem (%):
+   ANEXO III
+   LIMITES E CONFRONTAÇÕES DO IMÓVEL
+
+Nome do imóvel
+Município
+Gleba
+
+Endereço do imóvel
+
+Confrontações
+Norte
+
+ Sul
+ Leste
+ Oeste
+   OBSERVAÇÃO: É parte desta Declaração o memorial descritivo e/ou a planta do imóvel (ambos no sistema de coordenadas UTM e/ou coordenadas
+geográficas, referenciadas ao sistema de referência SIRGAS2000).
+
+    Declaro, sob as penas da Lei, em especial ao contido no Art. 299 do Código Penal (Decreto Lei n° 2848/40), que são verdadeiras as informações acima
+prestadas.
+    Boa Vista - RR, ______ de __________________de _________.
+    ___________________________________________
+    Assinatura do (a) Requerente
+    ________________________________________
+    Assinatura do Cônjuge ou Companheiro (a)
+
+    ANEXO IV
+    DECLARAÇÃO DE HIPOSSUFICIÊNCIA
+    Eu,______________________________________________________________________, CPF n°_____._____._____-____ RG nº
+_________________, residente e domiciliado à ___________________________________nº ________, bairro ____________________,
+cidade de _______________________, detentor do imóvel rural denominado __________________________, localizado no município de
+_________________________, gleba __________________, com área aproximada de ______________ hectares; DECLARO, nos termos da Lei
+n° 7.115, de 29 de agosto de 1983 e, para os devidos fins, que sou carente de recursos, não dispondo de condições econômicas para custear as despesas de
+contratação de profissional para execução dos serviços de georreferenciamento do referido imóvel.
+
+   Por ser a expressão da verdade, assumindo inteira responsabilidade pelas declarações acima sob as penas da Lei, assino a presente declaração para que
+produza seus efeitos legais.
+   Boa Vista - RR, ______ de __________________de _________.
+   ________________________________________
+   Assinatura do(a) Interessado(a)
+
+   ANEXO V
+   DECLARAÇÃO DE RENDA FAMILIAR
+   Eu,______________________________________________________________________, CPF n°_____._____._____-____, RG
+nº _______________________, residente e domiciliado à ___________________________________________nº ________, bairro
+__________________________, cidade de ________________________, DECLARO para os devidos fins que tenho renda familiar no valor de R$
+_________________, composta pela(s) força(s) de trabalho, conforme descrito abaixo:
+   Interessado(a)
+   Nome:________________________________________________________________
+   CPF n°_____._____._____-____		          Valor da renda: R$ ___________________
+   Cônjuge ou Companheiro(a)
+   Nome:________________________________________________________________
+   CPF n°_____._____._____-____		          Valor da renda: R$ ___________________
+   Filho(a)
+   Nome:________________________________________________________________
+   CPF n°_____._____._____-____		          Valor da renda: R$ ___________________
+   Filho(a)
+   Nome:________________________________________________________________
+   CPF n°_____._____._____-____		          Valor da renda: R$ ___________________
+   Outros vínculos
+   Nome:________________________________________________________________
+   CPF n°_____._____._____-____		          Valor da renda: R$ ___________________
+
+    Por ser a expressão da verdade, sob as penas da Lei, em específico ao que consta no Art. 299 do Código Penal (Decreto Lei n° 2.848/40), assino a presente
+declaração para que produza seus efeitos legais.
+    Boa Vista - RR, ______ de __________________de _________.
+    _________________________________________________
+    Assinatura do(a) Interessado(a)
+
+   ANEXO VI
+   RELATÓRIO DE OCUPAÇÃO DE MARCOS EM SERVIÇOS DE
+
+   GEORREFERENCIAMENTO DE IMÓVEIS RURAIS
+
+         Imóvel: _________________________________________________________________
+         Gleba: __________________________________________________________________
+         Município: _______________________________________________________________
+         Detentor: ________________________________________________________________
+         Quantidade de marcos materializados: ________________________________________
+         Data da ocupação: ________/________/________
+         Responsável Técnico (RT): _________________________________________________
+         CREA ou CFT do RT: ______________________________________________________
+         Código INCRA do RT credenciado: ___________________________________________
+ AS DESCRIÇÕES DOS MARCOS E A FOTO SÃO ILUSTRATIVAS
+ Marco 01: DU7-M0460                                                         Marco 02: DU7-M0462
+                                                                             Foto:
+
+ Marco 03: DU7-M0463                                                         Marco 04: DU7-M0464
+ Foto:                                                                       Foto:
+ Marco 05: DU7-M0465                                                         Marco 06: DU7-M0466
+ Foto:                                                                       Foto:
+Boa Vista - RR, ______ de __________________de _________.
+         ___________________________________________
+         Assinatura do Responsável Técnico
+
+         ANEXO VII
+
+    DOCUMENTOS NECESSÁRIOS PARA A INSTAURAÇÃO DE PROCESSO DE REGULARIZAÇÃO FUNDIÁRIA DE ÁREA DE ATÉ 01 (UM)
+MÓDULO FISCAL
+    1. Requerimento padrão;
+    2. Qualificação completa, endereço, telefone para contato e endereço eletrônico (quando houver);
+    3. Identificação do imóvel (denominação da área, município, gleba);
+    4. Fotocópia da carteira de identidade (CI) e do cadastro nacional de pessoa física (CPF) do interessado(a) e cônjuge ou companheiro(a), se casado(a)
+ou conviver em regime de união estável;
+    5. Fotocópia da certidão de casamento ou declaração de união estável;
+    6. Fotocópia do comprovante de residência, com todas as informações necessárias para o recebimento de notificações;
+    7. Declaração de Ocupação, conforme modelo do Iteraima;
+    8. Declaração contendo a qualificação do interessado(a), a localização, características, limites e confrontações do imóvel, conforme modelo fornecido
+pelo Iteraima;
+    9. Comprovação de Renda (conforme o caso):
+    a) Autônomos: declaração de renda familiar e cópia da CTPS (se tiver).
+    b) Servidores Públicos: cópia do contracheque.
+    c) Iniciativa privada: comprovante se renda ou cópia da CTPS.
+    d) Hipossuficiência: declaração de baixa renda (se aplicável).
+    10. Procuração pública (exceto para advogado) e específica, documento de identificação do procurador e comprovante de residência;
+    11. Planta, memorial descritivo com coordenadas UTM ou geográficas (em SIRGAS2000) e arquivo digital do imóvel em formato SHP, DWG, DXF,
+KML ou KMZ, a ser juntado aos autos do processo no ato de sua abertura);
+    12. Documentação de posse do imóvel, caso ele não seja ocupante primitivo, e junte documento de transferência posterior ao marco legal.
+    13. Formal de Partilha ou Escritura Pública de Cessão de Direitos Hereditários, em caso de sucessão;
+    14. Fotos das benfeitorias e das atividades de exploração agropecuária, contendo as coordenadas geográficas nas respectivas imagens.
+    OBSERVAÇÕES:
+    * A falta da documentação disposta nesta Instrução Normativa impede a instauração do processo.
+    * Os documentos que forem cópias deverão ser autenticados em cartório, ou o(a) requerente poderá trazer os originais para que o servidor do Iteraima
+
+carimbe o “confere com o original” na cópia;
+    ANEXO VIII
+    DOCUMENTOS NECESSÁRIOS PARA A INSTAURAÇÃO DE PROCESSO DE REGULARIZAÇÃO FUNDIÁRIA NA ALIENAÇÃO SEM
+
+LICITAÇÃO DE ÁREA DE 01 (UM) ATÉ 04 (QUATRO) MÓDULOS FISCAIS
+
+   1. Requerimento padrão.
+   2. Qualificação completa, endereço, telefone para contato e endereço eletrônico (quando houver);
+   3. Identificação do imóvel (denominação da área, município, gleba);
+   4. Fotocópia da carteira de identidade (CI) e do cadastro nacional de pessoa física (CNPF) do interessado(a) e cônjuge ou companheiro(a), se casado(a)
+ou conviver em regime de união estável;
+   5. Fotocópia da certidão de casamento ou declaração de união estável;
+   6. Fotocópia do comprovante de residência, com todas as informações necessárias para o recebimento de notificações;
+   7. Declaração de Ocupação, conforme modelo do Iteraima;
+   8. Declaração contendo a qualificação do interessado(a), a localização, características, limites e confrontações do imóvel, conforme modelo fornecido
+pelo Iteraima;
+   9. Procuração pública (exceto para advogado) e específica, documento de identificação do procurador e comprovante de residência;
+   10. Planta, memorial descritivo com coordenadas UTM ou geográficas (em SIRGAS2000) e arquivo digital do imóvel em formato SHP, DWG, DXF,
+KML ou KMZ, a ser juntado aos autos do processo no ato de sua abertura);
+   11. Documentação de cadeia possessória do imóvel, caso ele não seja ocupante primitivo;
+   12. Formal de Partilha ou Escritura Pública de Cessão de Direitos Hereditários, em caso de sucessão;
+   13. Fotos das benfeitorias e das atividades de exploração agropecuária, contendo as coordenadas geográficas nas respectivas imagens;
+   OBSERVAÇÕES:
+   * A falta da documentação disposta nesta Instrução Normativa impede a instauração do processo.
+   * Os documentos que forem cópias deverão ser autenticados em cartório, ou o(a) requerente poderá trazer os originais para que o servidor do Iteraima
+carimbe o “confere com o original” na cópia;
+   ANEXO IX
+   DOCUMENTOS NECESSÁRIOS PARA A INSTAURAÇÃO DE PROCESSO DE REGULARIZAÇÃO FUNDIÁRIA NA ALIENAÇÃO SEM
+LICITAÇÃO DE ÁREA SUPERIOR A 04 (QUATRO) MÓDULOS FISCAIS
+   1. Requerimento padrão.
+   2. Qualificação completa, endereço, telefone para contato e endereço eletrônico (quando houver);
+   3. Identificação do imóvel (denominação da área, município, gleba);
+   4. Fotocópia da carteira de identidade (CI) e do cadastro nacional de pessoa física (CNPF) do interessado(a) e cônjuge ou companheiro(a), se casado(a)
+ou conviver em regime de união estável;
+   5. Fotocópia da certidão de casamento ou declaração de união estável;
+   6. Fotocópia do comprovante de residência, com todas as informações necessárias para o recebimento de notificações;
+   7. Declaração de ocupação, conforme modelo do Iteraima;
+   8. Declaração contendo a qualificação do interessado(a), a localização, características, limites e confrontações do imóvel, conforme modelo fornecido
+pelo Iteraima;
+   9. Certidão negativa de débitos ou positiva com efeito de negativa da fazenda pública estadual, do(a) interessado(a) e cônjuge ou companheiro(a), se for
+o caso;
+   10. Documentos que comprovem a forma de origem da ocupação da área e marco temporal, como:
+   a) contrato particular de compra e venda com assinatura reconhecida;
+   b) contrato de promessa de compra e venda – CPCV (INCRA);
+   c) certificado de cadastro de imóvel rural (CCIR), do Instituto Nacional de Colonização e Reforma Agrária (INCRA);
+   d) Espelho do Imóvel;
+   e) notas fiscais referentes à aquisição de insumos rurais;
+   f) notas fiscais de produtor rural de venda de produtos;
+   g) comprovação de recolhimento do Imposto Territorial Rural e/ou da contribuição sindical rural;
+   h) cadastro da Agência Estadual de Defesa Agropecuária do Estado de Roraima (ADERR) ou outros documentos que tenham o mesmo propósito;
+   i) Cadastro Ambiental Rural – CAR;
+   11. Procuração pública (exceto para advogado) e específica, documento de identificação do procurador e comprovante de residência;
+   12. Planta, memorial descritivo com coordenadas UTM ou geográficas (em SIRGAS2000) e arquivo digital do imóvel em formato SHP, DWG, DXF,
+KML ou KMZ, a ser juntado aos autos do processo no ato de sua abertura);
+   13. Carta-imagem contendo as coordenadas geográficas das benfeitorias e a identificação das áreas antropizadas, bem como registro fotográfico
+georreferenciado das benfeitorias dessas áreas, para subsidiar a realização das vistorias, elaborado por profissional técnico habilitado, com anotação de
+responsabilidade técnica;
+
+   OBSERVAÇÕES:
+   * A falta da documentação disposta nesta Instrução Normativa impede a instauração do processo.
+   * Os documentos que forem cópias deverão ser autenticados em cartório, ou o(a) requerente poderá trazer os originais para que o servidor do Iteraima
+
+carimbe o “confere com o original” na cópia;
+
+     ANEXO X
+
+     FLUXOGRAMA DO PEDIDO DE REGULARIZAÇÃO FUNDIÁRIA
+
+FLUXO              SETOR                      PROCEDIMENTO
+                                              - Recolher requerimento e documentos para instauração do processo de regularização;
+                                              - Preencher checklist;
+                                              - Pesquisar se há outro processo em nome do interessado;
+                                              - Formalizar processo;
+                                              - Pesquisa de outorga de documentos;
+                                              - Consulta ao SNCR;
+1                  Divisão de Cidadania
+                                              - Encaminhar para a DIGOF;
+                                              - Emissão de Boletos de Taxas Diretas: taxas de abertura de processos de regularização fundiária (rural e urbano);
+                                              2ª via de taxas e boletos já emitidos; taxa de desarquivamento de processo; pesquisa documental; atestado de cadeia
+                                              possessória; transformação de processo de alienação não onerosa em onerosa; confecção e reprodução de mapas e
+                                              desenhos e; reanálise de peças técnicas.
+
+                                              - Análise de sobreposição, informando se o imóvel está localizado em terra do Estado ou se possui outra pessoa o
+                                              requerendo;
+                                              - Realizar a plotagem das coordenadas fornecidas no relatório fotográfico;
+                                              - Validação da Carta Imagem (sensoriamento remoto) para áreas superiores a 4 (quatro) módulos fiscais;
+2                  DIGOF                      - Realização do sensoriamento remoto para áreas inferiores a 4 (quatro) módulos fiscais;
+                                              - Verificar a possibilidade de fracionamento ilegal de área;
+                                              - Elaborar certidão demonstrando a existência de sobreposição nos processos analisados;
+                                              - Relacionar os processos sobrepostos;
+                                              - Encaminhar à DSF para realização de parecer técnico.
+                                              - Realizar análise da manifestação/justificativa dos documentos de posse;
+                                              - Realizar vistoria, emitir laudo, relatórios fotográficos e técnicos;
+3                  DSF                        - Realizar levantamento socioeconômico quando necessário;
+                                              - Realizar análise documental e emitir o parecer técnico;
+                                              - Inclusão/alteração no SNCR ou gerar/alterar CCIR.
+                                              - Autorizar ou não o georreferenciamento;
+4                  DIGOF                      - Receber ou juntar as peças técnicas, analisá-las e aprová-las;
+                                              - Validação das peças técnicas no SIGEF.
+                                              - Analisar e encaminhar para enquadramento com elaboração de Nota Técnica;
+5                  DIPRE
+                                              - Autorizar/determinar ou não a emissão do documento solicitado.
+                                              - Notificação da parte para manifestação sob a forma de pagamento e do CAR validado;
+6                  DSF
+                                              - Cálculo do VTN.
+7                  DIRAD                      Emissão do boleto.
+                                              - Consulta de outorga;
+8                  DIGEF                      - Confeccionar o documento, prenotar no livro fundiário e encaminhar à DIPRE para assinaturas, publicação e entrega
+                                              do documento.
+9                  DIPRE                      - Colher assinaturas, publicar o ato e entregar ao interessado;
+
+10                 DIPLAN                     - Certificação, elaboração das peças técnicas e atualização cadastral no SNCR.
+                                              - Acompanhamento e controle da cláusula de pagamento;
+11                 DIRAD
+                                              Manter os processos em arquivo próprio, até a manifestação do interessado quanto à baixa de cláusulas;
+12                 PGE                        - Medidas cabíveis quanto ao não pagamento;
+
+13                 DSF                        - Emitir o Parecer Técnico de Baixa de Cláusulas Resolutivas;
+                                              - Emitir certidão de liberação das cláusulas resolutivas, determinar ao setor competente a retirada da área do estoque de
+14                 DIPRE
+                                              terras do Estado e encaminhar à DIRAD solicitando o arquivamento.
+
+     OBSERVAÇÕES:* Em qualquer tempo observada ausência de requisito não sanável, poderá ser INDEFERIDO o pedido de regularização.
+
+     ANEXO XI
+
+FLUXO RESUMIDO – DESARQUIVAMENTO
+
+FLUXO             SETOR                                PROCEDIMENTO
+                                                       - Recebimento do requerimento de desarquivamento com todos os documentos obrigatórios;
+                                                       - Verificação da legitimidade do requerente;
+1                 Divisão de Cidadania (Protocolo)     - Emissão da taxa de desarquivamento e envio ao requerente;
+                                                       - Localização e juntada do requerimento nos autos arquivados;
+                                                       - Encaminhamento dos autos à GEORF/CER.
+
+                                                       - Confirmação de pagamento da taxa de desarquivamento;
+                                                       - Em caso de pagamento confirmado, encaminhamento dos autos à DIPRE para análise de
+2                 GEORF/CER
+                                                       admissibilidade;.
+                                                       - Em caso de pagamento não confirmado, encaminhamento  dos autos à Divisão de Arquivo.
+
+                                                            - Analisar admissibilidade: legitimidade, justificativa, saneamento da causa e inexistência de
+                                                            vedação;
+ 3                DIPRE / Presidência                       - Decidir fundamentadamente pelo deferimento ou indeferimento;
+                                                            - Se indeferido: encaminhar à Câmara de Notificação para ciência;
+                                                            - Se deferido: encaminhar à Divisão de Arquivo com indicação do setor de destino.
+                                                            - Atuação somente em caso de indeferimento;
+ 4                Câmara de Notificação
+                                                            - Notificar o interessado para ciência da decisão.
+                                                            - Desarquivar processo;
+                                                            - Arquivar processo;
+ 5                Divisão de Arquivo
+                                                            - Certificar a reativação nos autos (data, despacho autorizador e servidor responsável);
+                                                            - Encaminhar os autos ao setor indicado pela DIPRE.
+
+OBSERVAÇÃO: O pagamento da taxa de desarquivamento é condição para instauração do procedimento, mas não garante o deferimento. Em caso
+
+de indeferimento, o valor não será restituído.
+
+     ANEXO XII
+
+     PROCEDIMENTO PARA COBRANÇA DO INSTRUMENTO DE REGULARIZAÇÃO
+
+ FLUXO         TÍTULO DEFINITIVO
+
+               Após receber o processo com o Título Definitivo, lançar na planilha correspondente se o pagamento será à vista ou parcelado e, se parcelado, lançar o prazo
+ 1
+               de carência e datas de vencimento para acompanhamento mensal.
+
+               Em caso de pagamento no prazo estipulado, dar baixa do pagamento na planilha; se o pagamento estiver em atraso por mais de 30 (trinta) dias, notificar a
+ 2
+               parte para pagamento com as devidas atualizações e aplicações dos juros correspondentes.
+
+               Vencidas 3 (três) prestações consecutivas e não pagas, encaminhar para notificação da parte por Aviso de Recebimento (AR) – para pagamento em 30 (trinta)
+ 3
+               dias ou, se infrutífera, fazer publicação única de edital de chamamento no Diário Oficial do Estado de Roraima.
+
+ 4             Caso não haja pagamento após notificação, encaminhar à DIPRE para providências relacionadas à execução do título.
+
+ FLUXO         AUTORIZAÇÃO DE OCUPAÇÃO
+
+ 1             Após a autorização de emissão da AO, será realizado o encaminhamento para a DSF para o cálculo do VTN.
+
+               Após o cálculo na DSF, deverá ser realizado o encaminhamento para a DIRAD para cálculo de 5% (cinco por cento) sobre o valor final do título definitivo de
+ 2             acordo com a Lei n° 2.317, de 31 de dezembro de 2025.
+
+ 3             O valor estipulado deverá ser pago à vista no prazo de até 90 (noventa) dias, a contar da emissão do boleto, como condição para recebimento da AO.
+
+ 4             Os 5% (cinco por cento) pagos serão descontados do valor apurado para emissão do título definitivo.
+
+ 5             Após a certificação do pagamento pela DIRAD, será realizado o encaminhamento para a DIGEF para dar seguimento ao fluxo de emissão de AO.
+
+ FLUXO            DESCONTOS
+                  1. Em se tratando de imóveis com área superior a 4 (quatro) módulos fiscais, cujos títulos definitivos já tenham sido emitidos com opção de pagamento na
+                  modalidade a prazo, será facultado ao requerente optar pela quitação à vista, fazendo jus ao desconto de 50% (cinquenta por cento) sobre o valor da terra
+                  nua apurado, observados os fatores de redução previstos na Lei nº 976/2014 e suas alterações.
+                   1.1 A opção pela quitação à vista com o referido desconto deverá ser formalizada no prazo de até 90 (noventa) dias, contados da data de emissão do título
+                  definitivo.
+ 1                1.2 Após o decurso do prazo estabelecido no parágrafo anterior, o requerente perderá o direito ao desconto de 50% (cinquenta por cento), permanecendo
+
+                  apenas os descontos progressivos e gradativos previstos no item 1.3.
+                  1.3 Em caso de pagamento parcelado, havendo antecipação da quitação do título, poderão ser concedidos descontos gradativos da seguinte forma:
+                  a) 20% em até 1 (um) ano;
+                  b) 15% em até 2 (dois) anos; e
+                  c) 10% em até 3 (três) anos.
+
+                    2. Em se tratando de imóveis com área de até 4 (quatro) módulos fiscais, cujos títulos definitivos já tenham sido emitidos com opção de pagamento na
+                    modalidade a prazo, será facultado ao requerente optar pela quitação à vista, fazendo jus ao desconto de 50% (cinquenta por cento) sobre o valor da terra
+                    nua apurado, observados os fatores de redução previstos na Lei nº 976/2014 e suas alterações.
+                    2.1 A opção pela quitação à vista com o referido desconto deverá ser formalizada no prazo de até 1 (um) ano, contado da data de emissão do título
+                    definitivo.
+ 2                  2.2 Após o decurso do prazo estabelecido no parágrafo anterior, o requerente perderá o direito ao desconto de 50% (cinquenta por cento), permanecendo
+                    apenas os descontos progressivos e gradativos previstos no item 2.3.
+                    2.3 Em caso de pagamento parcelado, havendo antecipação da quitação do título, poderão ser concedidos descontos gradativos da seguinte forma:
+                    a) 15% em até 2 (dois) anos; e
+                    b) 10% em até 3 (três) anos.
+
+ 3                  A concessão dos descontos fica condicionada à quitação integral do débito em parcela única.
+
+     ANEXO XIII
+
+     TERMO DE ANUÊNCIA
+
+     SISTEMA DE INTIMAÇÃO VIA APLICATIVO DE MENSAGENS ELETRÔNICAS E E-MAIL
+
+     NOS TERMOS DA INSTRUÇÃO NORMATIVA Nº 001 DE 2026.
+
+ Dados Pessoais
+ INTERESSADO (A):
+
+ e-mail:
+
+ Número de telefones que
+ receberá as intimações         (       )
+ via aplicativo:
+
+ Endereço físico para
+ notificações:
+
+ CPF:                               RG:
+
+ Telefone fixo:                     (       )
+
+     Pelas seguintes condições do presente termo, declaro ter ciência:
+
+     I - do conteúdo previsto Art. 48 da Instrução Normativa Nº 001 DE 2026, concordando integralmente com os preceitos ali estabelecidos;
+
+     II - que possui smartphone, tablet ou computador, com sistema operacional adequado, bem como possui o aplicativo “Whatsapp” instalado e e-mail
+
+ativo;
+
+     III - que as intimações serão encaminhadas via e-mail funcional de servidor com a identificação nominal do mesmo e pelo domínio Iteraima, ou via
+
+telefone de uso funcional deste Órgão Fundiário e que nele constará, na imagem do aplicativo de mensagens eletrônicas, o logotipo do Iteraima;
+
+     IV - que, na ocorrência de alterações no número do telefone utilizado do aplicativo “Whatsapp” bem como alterações no endereço de e-mail informados,
+
+o Iteraima será prontamente comunicado;
+
+     V - que este INSTITUTO, em nenhuma hipótese, solicita dados pessoais, bancários ou qualquer outro de caráter sigiloso, limitando-se o procedimento
+
+apenas para a realização de atos de intimação;e
+
+     VI - que dúvidas referentes à intimação deverão ser tratadas, exclusivamente, na sede do Iteraima.
+
+     A partir da presente data faço a anuência ao sistema de intimações do Iteraima, que ocorrerão por meio do aplicativo de “Whatsapp” e e-mail
+
+acima informados.
+
+     Boa Vista - RR, ______ de __________________de _________.
+
+     _________________________________________________
+
+     Assinatura do(a) Interessado(a)
