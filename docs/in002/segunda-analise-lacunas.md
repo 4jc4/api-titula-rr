@@ -29,6 +29,20 @@ A opção (a) é a mais econômica: mantém uma entidade só, o índice parcial 
 
 **Recomendo (a)**, com o CHECK amarrando número e fase.
 
+> **Correção — 02/09/2026.** Esta rodada foi escrita sem o texto da IN no
+> repositório; ele entrou depois, em [`NORMA.md`](./NORMA.md). Conferido, o
+> **Art. 49, I** está literal como citado acima. Mas a frase _"nesse intervalo
+> não há processo"_ contraria o **Art. 5º**: _"O processo de regularização
+> fundiária rural inicia-se com o protocolo de requerimento padrão"_. O que não
+> existe ainda não é o processo — é a **autuação**, e com ela o número SEI; o
+> Anexo VII confirma pelo outro lado, ao dizer que a falta de documentação
+> _"impede a **instauração** do processo"_.
+>
+> Isso reforça a recomendação em vez de mudá-la, e por um motivo melhor: a saída
+> (b) passa a **contrariar o Art. 5º**, porque modelaria como "ainda não é
+> processo" o que a norma chama de processo desde o protocolo. A escolha de (a)
+> deixa de ser economia e passa a ser fidelidade ao texto.
+
 ### A2. Instrumento de regularização e onerosidade não existem no processo
 
 O **Art. 49, V** manda o processo à DIPRE/CONSULT _"quanto ao instrumento de regularização fundiária adequado"_, e o **VI** registra que **"definido o instrumento, o processo retornará à Presidência para conhecimento e decisão"**. O instrumento é, portanto, um atributo do processo decidido em fase intermediária — dentro do núcleo, não na titulação.
@@ -65,6 +79,16 @@ Toda `Comunicacao` do modelo é de saída. A IN prevê pelo menos quatro entrada
 Essa última é a mais séria. O Art. 74 **veda os efeitos da revelia** — o silêncio não presume nada. Logo, a distinção entre "respondeu" e "não respondeu" não é formalidade: é o que determina se o processo segue com defesa ou sem ela, e o servidor precisa registrar a diferença.
 
 Hoje o modelo só tem `Comunicacao.encerrada_em`, que não diz _por que_ encerrou. Falta uma entidade de manifestação/petição do interessado, ligada à comunicação que a provocou (quando houver) e com a data que permite comparar com `dataFimPrazo`.
+
+> **Correção — 02/09/2026.** Conferido no texto, o **Art. 74** é mais forte do
+> que esta seção diz. O parágrafo único não se limita a afastar a revelia: _"o
+> Iteraima **deverá** enfrentar o mérito administrativo e decidir sobre o
+> deferimento ou indeferimento do pedido (…) de forma motivada, com base nos
+> elementos dos autos"_. O silêncio, vencido o prazo, não é ausência de dado —
+> é **fato gerador de dever**. A entidade de manifestação precisa, portanto, ir
+> além de distinguir "respondeu" de "não respondeu": o modelo tem de conseguir
+> listar os processos em que o prazo venceu sem manifestação e a decisão
+> motivada ainda não foi proferida.
 
 ---
 

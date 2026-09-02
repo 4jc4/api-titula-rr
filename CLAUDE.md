@@ -132,13 +132,13 @@ with no field-level `@map`, enum types in PascalCase.
 
 ## Documentation map
 
-| File                     | What it holds                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| `docs/architecture.md`   | How the API works inside, and why each non-obvious decision was made              |
-| `docs/infrastructure.md` | The machines: app server, database LXC, AD, Nginx, ports                          |
-| `docs/deployment.md`     | CI, CD, manual deploy, secrets checklist                                          |
-| `docs/runbook.md`        | Post-deploy checks, rollback, break-glass, backup, diagnostics                    |
-| `docs/in002/`            | Domain modelling rounds — dated analyses; `README.md` there has the current state |
+| File                     | What it holds                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `docs/architecture.md`   | How the API works inside, and why each non-obvious decision was made                                                         |
+| `docs/infrastructure.md` | The machines: app server, database LXC, AD, Nginx, ports                                                                     |
+| `docs/deployment.md`     | CI, CD, manual deploy, secrets checklist                                                                                     |
+| `docs/runbook.md`        | Post-deploy checks, rollback, break-glass, backup, diagnostics                                                               |
+| `docs/in002/`            | The norm itself (`NORMA.md` explains the two files) plus the dated modelling rounds; `README.md` there has the current state |
 
 ## Conventions worth knowing before editing
 
@@ -153,6 +153,13 @@ with no field-level `@map`, enum types in PascalCase.
 - The `docs/in002/*.md` files are **dated analyses, not living spec**. Don't
   rewrite them when reality changes — add an `ATUALIZAÇÃO` block and update
   `docs/in002/README.md`, which carries the present.
+- **Cite the norm from the norm.** `docs/in002/IN-002-2026.txt` is the text of
+  IN 002/2026, extracted from the official PDF beside it; check every article
+  you quote against it (`grep -A6 '^\s*Art\. 71\.'`) instead of trusting a
+  quotation in an analysis round. Until 02/09/2026 the text was not in the repo
+  and the rounds cited each other; two of those citations turned out to need a
+  correction. Regenerate the `.txt` only with `docs/in002/extrai-texto.py` —
+  it asserts 89 articles and an intact preamble, and refuses to write otherwise.
 - **Never `::date` on a `timestamptz`.** The production cluster runs in
   `Etc/UTC`, so the naive cast advances by a day every act practised after 20h
   local. Use `data_local(timestamptz)`, created in

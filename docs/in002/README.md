@@ -1,23 +1,30 @@
 # Núcleo processual da IN 002/2026 — índice e estado
 
-Estes seis documentos são **rodadas de análise datadas**, não especificação
+A norma em si está aqui, desde 02/09/2026: [`IN-002-2026.pdf`](./IN-002-2026.pdf)
+é a fonte, [`IN-002-2026.txt`](./IN-002-2026.txt) é a versão que se lê com
+`grep`, e [`NORMA.md`](./NORMA.md) explica os dois, mapeia os 89 artigos e
+registra a rodada em que as citações dos achados estruturais foram conferidas
+contra o texto. **Antes disso, toda citação neste diretório era citação de
+citação** — o texto não estava versionado e ninguém conferia sem sair do repo.
+
+Os seis documentos de análise são **rodadas datadas**, não especificação
 viva. Cada um registra o raciocínio de um momento: o que foi decidido, o que
 foi cortado e por quê. Não os reescrevemos quando a realidade muda — o estado
 atual mora aqui, no índice, e a fonte de verdade do que existe é sempre o
 `prisma/schema.prisma`, as migrações e os testes.
 
-Última atualização: **01/09/2026**.
+Última atualização: **02/09/2026**.
 
 ## Os documentos
 
-| Documento                                                            | O que é                                                                                                      |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`modelo-dominio.md`](./modelo-dominio.md)                           | O modelo: 29 models e 23 enums, entidade por entidade, com o artigo da IN que justifica cada um              |
-| [`papeis-rbac.md`](./papeis-rbac.md)                                 | Os papéis, pelo teste "papel sem ato exclusivo não existe" — e a matriz de permissões que saiu dele          |
-| [`modulos-api.md`](./modulos-api.md)                                 | Os 12 módulos NestJS derivados do modelo, e a fronteira de cada um                                           |
-| [`pente-fino.md`](./pente-fino.md)                                   | A rodada que cortou o que fora acrescentado sem consumidor, e consertou o `CASCADE` que apagaria os autos    |
-| [`segunda-analise-lacunas.md`](./segunda-analise-lacunas.md)         | Varredura adversarial contra o texto da IN: 20 achados, dos quais 17 seguem abertos — é o backlog do domínio |
-| [`reconciliacao-api-existente.md`](./reconciliacao-api-existente.md) | O confronto do modelo com a API que já existia, e o que cada lado teve de ceder                              |
+| Documento                                                            | O que é                                                                                                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`modelo-dominio.md`](./modelo-dominio.md)                           | O modelo: 29 models e 23 enums, entidade por entidade, com o artigo da IN que justifica cada um                                                                                      |
+| [`papeis-rbac.md`](./papeis-rbac.md)                                 | Os papéis, pelo teste "papel sem ato exclusivo não existe" — e a matriz de permissões que saiu dele                                                                                  |
+| [`modulos-api.md`](./modulos-api.md)                                 | Os 12 módulos NestJS derivados do modelo, e a fronteira de cada um                                                                                                                   |
+| [`pente-fino.md`](./pente-fino.md)                                   | A rodada que cortou o que fora acrescentado sem consumidor, e consertou o `CASCADE` que apagaria os autos                                                                            |
+| [`segunda-analise-lacunas.md`](./segunda-analise-lacunas.md)         | Varredura adversarial contra o texto da IN: 20 achados, dos quais 17 seguem abertos — é o backlog do domínio. Traz duas notas de correção de 02/09, de quando a norma entrou no repo |
+| [`reconciliacao-api-existente.md`](./reconciliacao-api-existente.md) | O confronto do modelo com a API que já existia, e o que cada lado teve de ceder                                                                                                      |
 
 ## Estado em 01/09/2026
 
@@ -47,7 +54,10 @@ Aberto:
 - **17 dos 20 achados** da segunda varredura — os quatro estruturais
   (requerimento antes do processo, manifestação da parte, destinatário da
   comunicação, instrumento e onerosidade) mudam o formato do modelo e devem
-  ser decididos antes dos módulos que os tocam.
+  ser decididos antes dos módulos que os tocam. Com a norma no repo, as quatro
+  citações que os sustentam foram conferidas em 02/09 e **as quatro batem**;
+  A1 fica decidido pela saída (a), agora por fidelidade ao Art. 5º e não por
+  economia — ver [`NORMA.md`](./NORMA.md).
 - ~~**Fuso das colunas de tempo.**~~ **DECIDIDO (01/09/2026): cluster em UTC,
   conversão explícita.** O cluster de produção continua em `Etc/UTC`, o domínio
   continua em `timestamptz`, e toda derivação de data local passa por
@@ -65,7 +75,9 @@ Aberto:
   e `adicionar_dias_uteis` resolvem a omissão pela sede e **falham** se não
   houver sede, em vez do antigo `COALESCE(uf, 'RR')` silencioso — o que fecha
   o achado C3. O parâmetro continua disponível para o ato praticado em campo.
-- **Dois pontos operacionais** levantados no `papeis-rbac.md` §8 e nunca
-  confirmados com quem opera: se de fato só a DCI junta documento (Art. 7º), e
-  quem é a chefia imediata de cada setor — sem essa lista, `gestor` não tem a
-  quem ser atribuído e ninguém arquiva.
+- **Um ponto operacional** levantado no `papeis-rbac.md` §8 e nunca confirmado
+  com quem opera: quem é a chefia imediata de cada setor — sem essa lista,
+  `gestor` não tem a quem ser atribuído e ninguém arquiva (Art. 80). O outro
+  ponto, se existe estado entre protocolo e autuação, a própria norma responde:
+  existe, é a admissibilidade dos Anexos VII a IX, e o Art. 49, I parágrafo
+  único separa o caminho digital do presencial quando ela falha.
